@@ -13,6 +13,7 @@
 #' @param max.cn maximum copy number to be included in the analysis. Defaults to 4.
 #' @param merge.tolerance the maximum distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp.
 #' @param ignore.XY Ignore allosomes. Default TRUE
+#' @param tumor.id Tumor ID, optional.
 #' @examples
 #' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "NBevolution")
 #' cn_data = readCNV(cnv_data)
@@ -22,7 +23,7 @@
 #' readCNV()
 #' @export
 
-readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4){
+readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL){
 
   cn.info = read.delim(cn.info)
 
@@ -224,6 +225,8 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   if(sum(cn.info$End - cn.info$Start) < 3*10^8){
     warning("Less than 10% of the genome with valid copy number information.")
   }
+
+  attr(cn.info, "ID") <- tumor.id
 
   return(cn.info)
 
