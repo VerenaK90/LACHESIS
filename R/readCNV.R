@@ -4,14 +4,14 @@
 #' @description Convert a user-specified bed-file with copy number information into a standardized format. Perform various quality checks on the file input and return the clean and standardized data-frame. If column identifiers for chromosomal positions and allele-specific copy number information are not provided, the function attempts to identify these columns based on standard nomenclature. If total copy number information is provided but allele-specific information is missing, the function assumes that the number of B alleles is the rounded off of half the total copy number.
 #'
 #' @param cn.info Path to the copy number information. Requires columns for the chromosome number, start and end of the segment, and either the total copy number or the number of A- and B-alleles
-#' @param chr.col name or number of the column containing the chromosome number
-#' @param start.col name or number of the column containing the first position of the segment
-#' @param end.col name or number of the column containing the last position of the segment
-#' @param A.col name or number of the column containing the number of A alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.
-#' @param B.col name or number of the column containing the number of B alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.
-#' @param tcn.col name or number of the column containing the total copy number. Is computed to A + B if not provided.
+#' @param chr.col column index of chromosome number
+#' @param start.col column index of first position of the segment
+#' @param end.col column index of last position of the segment
+#' @param A.col column index of the number of A alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.
+#' @param B.col column index of the number of B alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.
+#' @param tcn.col column index of the total copy number. Is computed to A + B if not provided.
 #' @param max.cn maximum copy number to be included in the analysis. Defaults to 4.
-#' @param merge.tolerance the maximal distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp
+#' @param merge.tolerance the maximum distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp.
 #' @param ignore.XY Ignore allosomes. Default TRUE
 #' @examples
 #' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "NBevolution")
@@ -28,7 +28,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
   ## Check input format
   if(is.null(cn.info)){
-    stop("Error: missing cn.info file! Please provide a data frame with copy number information")
+    stop("Error: missing cn.info file! Please provide a data frame with copy number information.")
   }
 
   if(is.null(chr.col)){
@@ -83,11 +83,11 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
         warning("A allele identifier not provided, assuming 'A'")
       }else if (!is.null(tcn.col) & !is.null(B.col)){
         cn.info$A <- cn.info[,tcn.col] - cn.info[,B.col]
-        message("A allele identifier not provided, computing A = TCN - B")
+        message("********** A allele identifier not provided, computing A = TCN - B.")
       }else{
         estimate.alleles <- T # Assume alleles as standard 1:1, 2:1 or 2:2 configuration
         A.col <- "A"
-        warning("Allele information is not provided and will be assumed as 1:1 in disomic regions, 2:1 in trisomic regions and 2:2 in tetrasomic regions.")
+        warning("Allele information is not provided and will be assumed 1:1 in disomic regions, 2:1 in trisomic regions, 2:2 in tetrasomic regions, ... .")
       }
     }else{
       A.col <- A.col[1]
@@ -111,7 +111,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
         warning("B allele identifier not provided, assuming 'B'")
       }else if (!is.null(tcn.col) & !estimate.alleles){
         cn.info$B <- cn.info[,tcn.col] - cn.info[,A.col]
-        message("B allele identifier not provided, computing B = TCN - A")
+        message("********** B allele identifier not provided, computing B = TCN - A.")
       }else{
         B.col <- "B"
       }
@@ -133,7 +133,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     if(!is.null(A.col) & !is.null(B.col)){
       cn.info$TCN <- as.numeric(cn.info[,A.col]) + as.numeric(cn.info[,B.col])
       tcn.col <- "TCN"
-      message("total copy number computed as A + B")
+      message("********** Total copy number computed as A + B.")
     }else{
       tcn.col <- colnames(cn.info)[grepl("\\btcn\\b", colnames(cn.info), ignore.case = T) | grepl("\\bcnt\\b", colnames(cn.info), ignore.case = T) |
                                      grepl("\\bcopynumber\\b", colnames(cn.info), ignore.case = T) | grepl("\\bcopy number\\b", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
@@ -163,10 +163,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: end position must be numeric.")
   }
 
-  message("Read in ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info[,chr.col])), " chromosomes.")
+  message("********** Read in ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info[,chr.col])), " chromosomes.")
 
   cn.info[,tcn.col] <- as.numeric(cn.info[,tcn.col])
-  message("Remove ", sum(is.na(cn.info[,tcn.col])), " segments without copy number information")
+  message("********** Removing ", sum(is.na(cn.info[,tcn.col])), " segments without copy number information...")
 
   cn.info <- cn.info[!is.na(cn.info[,tcn.col]),]
 
@@ -174,7 +174,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: no segments with copy number information provided.")
   }
 
-  message("Remove ", sum(cn.info[,tcn.col] > max.cn), " segments with copy number > ", max.cn)
+  message("********** Removing ", sum(cn.info[,tcn.col] > max.cn), " segments with copy number > ", max.cn, "...")
 
   cn.info <- cn.info[cn.info[,tcn.col] <= max.cn & cn.info[,tcn.col] > 0,]
 
@@ -192,18 +192,17 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
   ## check chromosome format and amend if not 'chr1', 'chr2', etc.
   if(substr(cn.info[1,chr.col], 1, 3)=="chr"){
-    message("Change chromosome names to 1, 2, 3, ...")
+    message("********** Change chromosome names to 1, 2, 3, ...")
     cn.info[,chr.col] <- gsub(pattern = "chr", replacement = "", x = cn.info[,chr.col])
   }
 
   ## subset on autosomes
   if(ignore.XY){
-    message("Removing ", sum(cn.info[,chr.col] %in% c("X", "Y")), " segments on allosomes.")
+    message("********** Removing ", sum(cn.info[,chr.col] %in% c("X", "Y")), " segments on allosomes...")
     cn.info <- cn.info[!cn.info[,chr.col] %in% c("X", "Y"),]
     if(nrow(cn.info)==0){
       stop("No copy number information on autosomes!")
     }
-    message("Retaining ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info[,chr.col])), " autosomes.")
   }
 
   ## order and re-name columns
@@ -211,45 +210,36 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   colnames(cn.info) <- c("Chr", "Start", "End", "A", "B")
 
   ## filter NA-segments
-  message("Filtering for segments with B allele information..")
+  message("********** Removing ", sum(is.na(cn.info[,"A"]) | is.na(cn.info[,"B"])) , " segments without B allele information...")
   cn.info <- cn.info[!is.na(cn.info[,"A"]) & !is.na(cn.info[,"B"]),]
-  message("Retaining ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info$Chr)), " chromosomes.")
 
   ## add total copy number
   cn.info$TCN <- cn.info$A + cn.info$B
 
   ## merge adjacent segments
-  message("Merging adjacent segments with equal copy number..")
+  message("********** Merging adjacent segments with equal copy number...")
   cn.info <- .merge_adjacent_segs(cn.info, merge.tolerance)
-  message("Retaining ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info$Chr)), " chromosomes.")
+  message("********** Retaining ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info$Chr)), " chromosomes.")
+
+  if(sum(cn.info$End - cn.info$Start) < 3*10^8){
+    warning("Less than 10% of the genome with valid copy number information.")
+  }
 
   return(cn.info)
 
 }
 
 .merge_adjacent_segs <- function(cn.info, merge.tolerance){
-  cn.info.merged <- cn.info[1,]
-  i = 1
-  for(j in 2:nrow(cn.info)){
-    if(cn.info[j,"Chr"] != cn.info.merged[i,"Chr"]){
-      cn.info.merged <- rbind(cn.info.merged, cn.info[j,])
-      i <- i + 1
-      next
-    }
-    if(cn.info[j,"Start"] - cn.info.merged[i,"End"] > merge.tolerance){
-      cn.info.merged <- rbind(cn.info.merged, cn.info[j,])
-      i <- i + 1
-      next
-    }
-    if(cn.info[j,"A"] != cn.info.merged[i,"A"] | cn.info[j,"B"] != cn.info.merged[i,"B"]){
-      cn.info.merged <- rbind(cn.info.merged, cn.info[j,])
-      i <- i + 1
-      next
-    }
-    cn.info.merged[i,"End"] <- cn.info[j,"End"]
-  }
-
-  return(cn.info.merged)
+  cn.info <- split(cn.info, cn.info$Chr) # split by chromosome
+  cn.info <- lapply(cn.info, function(x){
+    to.keep <- 1 + which(!(x$Start[-1] - x$End[-length(x$End)] < merge.tolerance & x$A[-1] == x$A[-length(x$A)] & x$B[-1] == x$B[-length(x$B)])) # merge segments if they have the same allele counts and if start and end are less than the merge.tolerance apart from each other
+    end <- c(x$End[to.keep - 1], x$End[length(x$End)])
+    x <- x[c(1, to.keep),]
+    x$End <- end
+    x
+  })
+  cn.info <- do.call(rbind.data.frame, cn.info)
+  return(cn.info)
 }
 
 .estimate_alleles <- function(cn.info, tcn.col){
