@@ -16,7 +16,7 @@
 #' @param tumor.id Tumor ID, optional.
 #' @examples
 #' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "NBevolution")
-#' cn_data = readCNV(cnv_data)
+#' cn_data = readCNV(aceseq_cn)
 #' ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "NBevolution")
 #' cn_data = readCNV(ascat_cn)
 #' @return A standardized data frame with copy number information per segment.
@@ -25,12 +25,12 @@
 
 readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL){
 
-  cn.info = read.delim(cn.info)
-
   ## Check input format
   if(is.null(cn.info)){
     stop("Error: missing cn.info file! Please provide a data frame with copy number information.")
   }
+
+  cn.info = read.delim(cn.info, sep="\t", header = TRUE)
 
   if(is.null(chr.col)){
     chr.col <- colnames(cn.info)[grepl("chr", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
@@ -47,7 +47,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   }
 
   if(is.null(start.col)){
-    start.col <- colnames(cn.info)[grepl("start", colnames(cn.info), ignore.case = T) | grepl("pos", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
+    start.col <- colnames(cn.info)[grepl("start", colnames(cn.info), ignore.case = TRUE) | grepl("pos", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     start.col <- ifelse(length(start.col) > 0, start.col[1], 2)
     warning("No start position identifier provided, assuming ", start.col)
   }else if(is.character(start.col)){
@@ -61,7 +61,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   }
 
   if(is.null(end.col)){
-    end.col <- colnames(cn.info)[grepl("end", colnames(cn.info), ignore.case = T) | grepl("pos2", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
+    end.col <- colnames(cn.info)[grepl("end", colnames(cn.info), ignore.case = TRUE) | grepl("pos2", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     end.col <- ifelse(length(end.col) > 0, end.col[1], 3)
     warning("No end position identifier provided, assuming ", end.col)
   }else if(is.character(end.col)){
@@ -74,10 +74,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: 'arg' should be string or numeric.")
   }
 
-  estimate.alleles <- F # will be set to T if allele info is not provided, see below
+  estimate.alleles <- FALSE # will be set to TRUE if allele info is not provided, see below
 
   if(is.null(A.col)){
-    A.col <- colnames(cn.info)[grepl("major", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
+    A.col <- colnames(cn.info)[grepl("major", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     if(length(A.col)==0){
       if("A" %in% colnames(cn.info)){
         A.col <- "A"  # assume standard nomenclature
@@ -86,7 +86,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
         cn.info$A <- cn.info[,tcn.col] - cn.info[,B.col]
         message("********** A allele identifier not provided, computing A = TCN - B.")
       }else{
-        estimate.alleles <- T # Assume alleles as standard 1:1, 2:1 or 2:2 configuration
+        estimate.alleles <- TRUE # Assume alleles as standard 1:1, 2:1 or 2:2 configuration
         A.col <- "A"
         warning("Allele information is not provided and will be assumed 1:1 in disomic regions, 2:1 in trisomic regions, 2:2 in tetrasomic regions, ... .")
       }
@@ -105,7 +105,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   }
 
   if(is.null(B.col)){
-    B.col <- colnames(cn.info)[grepl("minor", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
+    B.col <- colnames(cn.info)[grepl("minor", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     if(length(B.col)==0){
       if("B" %in% colnames(cn.info)){
         B.col <- "B" # assume standard nomenclature
@@ -136,8 +136,8 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
       tcn.col <- "TCN"
       message("********** Total copy number computed as A + B.")
     }else{
-      tcn.col <- colnames(cn.info)[grepl("\\btcn\\b", colnames(cn.info), ignore.case = T) | grepl("\\bcnt\\b", colnames(cn.info), ignore.case = T) |
-                                     grepl("\\bcopynumber\\b", colnames(cn.info), ignore.case = T) | grepl("\\bcopy number\\b", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
+      tcn.col <- colnames(cn.info)[grepl("\\btcn\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcnt\\b", colnames(cn.info), ignore.case = TRUE) |
+                                     grepl("\\bcopynumber\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcopy number\\b", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
       if(length(tcn.col)==0){
         stop("Error: TCN identifier is not provided and could not be inferred!")
       }
@@ -192,7 +192,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   cn.info[,B.col] <- as.numeric(as.character(cn.info[,B.col]))
 
   ## check chromosome format and amend if not 'chr1', 'chr2', etc.
-  if(substr(cn.info[1,chr.col], 1, 3)=="chr"){
+  if(grepl("chr", cn.info[1,chr.col])){
     message("********** Change chromosome names to 1, 2, 3, ...")
     cn.info[,chr.col] <- gsub(pattern = "chr", replacement = "", x = cn.info[,chr.col])
   }
