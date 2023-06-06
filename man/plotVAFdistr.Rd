@@ -4,7 +4,15 @@
 \alias{plotVAFdistr}
 \title{Plot histogram of VAF distribution}
 \usage{
-plotVAFdistr(vaf = NULL, vafbreak = 0.05, t_sample = NULL)
+plotVAFdistr(
+  vaf = NULL,
+  vafbreak = 0.05,
+  t_sample = NULL,
+  showcounts = FALSE,
+  showdensity = TRUE,
+  col = "#34495e",
+  srtcounts = 45
+)
 }
 \arguments{
 \item{vaf}{output produced by \code{\link{readVCF}}}
@@ -12,6 +20,14 @@ plotVAFdistr(vaf = NULL, vafbreak = 0.05, t_sample = NULL)
 \item{vafbreak}{Interval size. Default 0.05}
 
 \item{t_sample}{Sample name for tumor. Used for plot title. Default NULL}
+
+\item{showcounts}{Show counter per break on the histogram. Default FALSE}
+
+\item{showdensity}{Show additional inset plot of density. Default TRUE}
+
+\item{col}{Default "#34495e"}
+
+\item{srtcounts}{Text angle if \code{showcounts} is TRUE. Default 45}
 }
 \value{
 data.table of frequency table
@@ -21,6 +37,6 @@ Plot frequency distribution of variant allele frequencies
 }
 \examples{
 strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "NBevolution")
-s_data = readVCF(vcf = strelka_vcf, vcf_source = "strelka", ignore_XY = FALSE)
+s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka", ignore.XY = FALSE)
 plotVAFdistr(s_data)
 }

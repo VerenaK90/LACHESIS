@@ -6,25 +6,23 @@
 \usage{
 readVCF(
   vcf = NULL,
-  ignore_XY = TRUE,
-  vcf_source = "strelka",
-  min_vaf = 0.01,
-  min_depth = 30,
-  t_sample = NULL
+  ignore.XY = TRUE,
+  vcf.source = "strelka",
+  min.vaf = 0.01,
+  min.depth = 30,
+  t.sample = NULL
 )
 }
 \arguments{
 \item{vcf}{Input indexed VCF file.}
 
-\item{vcf_source}{Tool used for generating VCF file. Can be \code{strelka} ot \code{mutect}}
+\item{ignore.XY}{Tool used for generating VCF file. Can be \code{strelka} ot \code{mutect}}
 
-\item{min_vaf}{Remove variants with vcf below threshold. Default 0.01}
+\item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
 
-\item{min_depth}{Minimum required depth for a variant to be considered. Default 30.}
+\item{min.depth}{Minimum required depth for a variant to be considered. Default 30.}
 
-\item{t_sample}{Sample name for tumor. Must be same as in VCF. Strelka hardcodes tumor sample name to "TUMOR"}
-
-\item{ignore_xy}{Ignore allosomes. Default TRUE}
+\item{t.sample}{Sample name for tumor. Must be same as in VCF. Strelka hardcodes tumor sample name to "TUMOR"}
 }
 \value{
 a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf
@@ -34,7 +32,7 @@ Import a VCF file and extract read-count and variant allele frequencies. Current
 }
 \examples{
 mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "NBevolution")
-m_data = readVCF(vcf = mutect_vcf, vcf_source = "mutect")
+m_data = readVCF(vcf = mutect_vcf, vcf.source = "mutect")
 strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "NBevolution")
-s_data = readVCF(vcf = strelka_vcf, vcf_source = "strelka")
+s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka")
 }

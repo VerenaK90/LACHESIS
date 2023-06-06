@@ -5,36 +5,54 @@
 \title{Converts a user-specified bed-file with copy number information into a standardized format that can be used as input for downstream analysis}
 \usage{
 readCNV(
-  cn.info,
-  chr.col,
-  start.col,
-  end.col,
-  A.col,
-  B.col,
-  merge.tolerance = 10^5
+  cn.info = NULL,
+  chr.col = NULL,
+  start.col = NULL,
+  end.col = NULL,
+  A.col = NULL,
+  B.col = NULL,
+  tcn.col = NULL,
+  merge.tolerance = 10^5,
+  ignore.XY = TRUE,
+  max.cn = 4,
+  tumor.id = NULL
 )
 }
 \arguments{
-\item{cn.info}{A data frame containing the copy number information. Requires columns for the chromosome number, start and end of the segment, the number of A- and B-alleles}
+\item{cn.info}{Path to the copy number information. Requires columns for the chromosome number, start and end of the segment, and either the total copy number or the number of A- and B-alleles}
 
-\item{chr.col}{name or number of the column containing the chromosome number}
+\item{chr.col}{column index of chromosome number}
 
-\item{start.col}{name or number of the column containing the first position of the segment}
+\item{start.col}{column index of first position of the segment}
 
-\item{end.col}{name or number of the column containing the last position of the segment}
+\item{end.col}{column index of last position of the segment}
 
-\item{A.col}{name or number of the column containing the number of A alleles}
+\item{A.col}{column index of the number of A alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.}
 
-\item{B.col}{name or number of the column containing the number of B alleles}
+\item{B.col}{column index of the number of B alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.}
 
-\item{merge.tolerance}{the maximal distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp}
+\item{tcn.col}{column index of the total copy number. Is computed to A + B if not provided.}
+
+\item{merge.tolerance}{the maximum distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp.}
+
+\item{ignore.XY}{Ignore allosomes. Default TRUE}
+
+\item{max.cn}{maximum copy number to be included in the analysis. Defaults to 4.}
+
+\item{tumor.id}{Tumor ID, optional.}
 }
 \value{
 A standardized data frame with copy number information per segment.
 readCNV()
 }
 \description{
-Convert a user-specified bed-file with copy number information into a standardized format. Perform various quality checks on the file input and return the clean and standardized data-frame. Written on May 31st, 2023.
+Convert a user-specified bed-file with copy number information into a standardized format. Perform various quality checks on the file input and return the clean and standardized data-frame. If column identifiers for chromosomal positions and allele-specific copy number information are not provided, the function attempts to identify these columns based on standard nomenclature. If total copy number information is provided but allele-specific information is missing, the function assumes that the number of B alleles is the rounded off of half the total copy number.
+}
+\examples{
+aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "NBevolution")
+cn_data = readCNV(cnv_data)
+ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "NBevolution")
+cn_data = readCNV(ascat_cn)
 }
 \author{
 {Verena Körber}
