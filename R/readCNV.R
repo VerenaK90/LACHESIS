@@ -27,7 +27,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
   ## Check input format
   if(is.null(cn.info)){
-    stop("Error: missing cn.info file! Please provide a data frame with copy number information.")
+    stop("Error: missing cn.info! Please provide path to file with copy number information.")
   }
 
   cn.info = read.delim(cn.info, sep="\t", header = TRUE)
