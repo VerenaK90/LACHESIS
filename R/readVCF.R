@@ -8,6 +8,7 @@
 #' @param ignore.XY Tool used for generating VCF file. Can be `strelka` ot `mutect`
 #' @param min.vaf Remove variants with vcf below threshold. Default 0.01
 #' @param min.depth Minimum required depth for a variant to be considered. Default 30.
+#' @param vcf.source Mutation caller used to generate vcf file. Should be either "strelka" or "mutect". Default "strelka".
 #' @examples
 #' mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "NBevolution")
 #' m_data = readVCF(vcf = mutect_vcf, vcf.source = "mutect")
@@ -18,6 +19,8 @@
 #' @export
 
 readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL){
+
+  chrom <- t_vaf <- t_depth <- . <- pos <- ref <- alt <- t_ref_count <- t_alt_count <- NULL
 
   if(is.null(vcf)){
     stop("Missing input VCF file!")
@@ -81,6 +84,8 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 }
 
 .get_depth_dt <- function(d, source = "strelka"){
+
+  AU <- CU <- GU <- TU <- t_vaf <- A <- t_depth <- t_ref_count <- t_alt_count <- G <- C <- chrom <- pos <- ref <- alt <- t_depth <- t_ref_count <- t_alt_count <- t_vaf <- . <- NULL
 
   if(source == "strelka"){
     d_dp <- apply(X = d[,.(AU, CU, GU, TU)], 2, function(x){
