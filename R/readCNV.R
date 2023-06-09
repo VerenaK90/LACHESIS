@@ -21,6 +21,7 @@
 #' cn_data = readCNV(ascat_cn)
 #' @return A standardized data frame with copy number information per segment.
 #' readCNV()
+#' @importFrom utils read.delim
 #' @export
 
 readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL){
