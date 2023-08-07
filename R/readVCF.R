@@ -5,7 +5,7 @@
 #' @param vcf Input indexed VCF file.
 #' @param ignore.XY Ignore allosomes. Default TRUE
 #' @param t.sample Sample name for tumor. Must be same as in VCF. Strelka hardcodes tumor sample name to "TUMOR"
-#' @param ignore.XY Tool used for generating VCF file. Can be `strelka` ot `mutect`
+#' @param vcf.source Tool used for generating VCF file. Can be `strelka` ot `mutect`
 #' @param min.vaf Remove variants with vcf below threshold. Default 0.01
 #' @param min.depth Minimum required depth for a variant to be considered. Default 30.
 #' @param vcf.source Mutation caller used to generate vcf file. Should be either "strelka" or "mutect". Default "strelka".
