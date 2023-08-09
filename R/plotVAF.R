@@ -14,6 +14,7 @@
 #' s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka", ignore.XY = FALSE)
 #' plotVAFdistr(s_data)
 #' @return data.table of frequency table
+#' @importFrom graphics axis box grid hist mtext par text title
 #' @export
 plotVAFdistr <- function(vaf = NULL, vafbreak = 0.05, t_sample = NULL, showcounts = FALSE, showdensity = TRUE, col = "#34495e", srtcounts = 45){
 

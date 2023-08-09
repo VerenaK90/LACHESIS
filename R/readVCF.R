@@ -21,6 +21,8 @@
 
 readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL){
 
+  chrom <- t_vaf <- t_depth <- . <- pos <- ref <- alt <- t_ref_count <- t_alt_count <- NULL
+
   if(is.null(vcf)){
     stop("Missing input VCF file!")
   }
@@ -95,6 +97,8 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 
 .get_depth_dt <- function(d, source = "strelka"){
 
+  AU <- CU <- GU <- TU <- t_vaf <- A <- t_depth <- t_ref_count <- t_alt_count <- G <- C <- chrom <- pos <- ref <- alt <- t_depth <- t_ref_count <- t_alt_count <- t_vaf <- . <- NULL
+
   if(source == "strelka"){
     d_dp <- apply(X = d[,.(AU, CU, GU, TU)], 2, function(x){
       as.numeric(unlist(data.table::tstrsplit(x = x, split = ",", keep = 1)))
@@ -143,37 +147,10 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     stop("Unknown format!")
   }
 
-  d[,.(chrom, pos, ref, alt, t_depth, t_ref_count, t_alt_count, t_vaf)]
+  d <- d[,.(chrom, pos, ref, alt, t_depth, t_ref_count, t_alt_count, t_vaf)]
+  return(d[order(chrom, pos)])
 }
 
-#Parse depth information from FORMAT field (DEPRECATED)
-.get_depth <- function(FORMAT, source = "strelka"){
-
-  if(source == "strelka"){
-    #Example strelka FORMAT field
-    #"82:0:0:0:0,0:1,1:2,2:79,79"
-    #"DP:FDP:SDP:SUBDP:AU:CU:GU:TU"
-    dp <- data.table::tstrsplit(x = FORMAT, split = ":", keep = 5:8, names = c("A", "C", "G", "T"))
-    dp <- lapply(dp, function(d){
-      as.numeric(unlist(data.table::tstrsplit(x = d, split = ",", keep = 1)))
-    })
-    dp <- as.data.frame(dp)
-    dp$t_depth <- rowSums(x = dp)
-  }else{
-    #Example mutect FORMAT field.
-    #"0/1:70,4:0.058:74:21,1:37,2:68,4:17,53,4,0"
-    #"GT:AD:AF:DP:F1R2:F2R1:FAD:SB"
-    dp <- data.table::tstrsplit(FORMAT, split = ":", keep = 2)
-    dp = lapply(data.table::tstrsplit(x = dp[[1]], split = ','), as.numeric)
-    names(dp) = c("t_ref_count", "t_alt_count")
-    dp <- as.data.frame(dp)
-    dp$t_depth <- rowSums(dp)
-    dp$t_vaf <- dp$t_alt_count / dp$t_depth
-  }
-
-  data.table::setDT(x = dp)
-  dp[order(chr, pos)]
-}
 
 #retrieve tumor sample ID
 .get_t_SM = function(vcf){
