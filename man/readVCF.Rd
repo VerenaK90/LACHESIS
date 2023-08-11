@@ -35,6 +35,6 @@ mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "NBevolut
 m_data = readVCF(vcf = mutect_vcf, vcf.source = "mutect")
 strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "NBevolution")
 s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka")
-dkfz_vcf = system.file("extdata", "snvs_XI003_22405_somatic_snvs_conf_8_to_10.vcf.gz", package = "NBevolution")
+dkfz_vcf = system.file("extdata", "NBE15/NBE15.snvs.dkfz.tsv.gz", package = "NBevolution")
 d_data = readVCF(vcf = dkfz_vcf, vcf.source = "dkfz")
 }
