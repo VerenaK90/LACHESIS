@@ -5,7 +5,7 @@
 #' @param vcf Input indexed VCF file.
 #' @param ignore.XY Ignore allosomes. Default TRUE
 #' @param t.sample Sample name for tumor. Must be same as in VCF. Strelka hardcodes tumor sample name to "TUMOR"
-#' @param ignore.XY Tool used for generating VCF file. Can be `strelka` or `mutect` or `dkfz`
+#' @param vcf.source Tool used for generating VCF file. Can be `strelka` or `mutect` or `dkfz`
 #' @param min.vaf Remove variants with vcf below threshold. Default 0.01
 #' @param min.depth Minimum required depth for a variant to be considered. Default 30.
 #' @examples
@@ -34,7 +34,8 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     dt <- .parse_dkfz(FNAME = vcf)
 
     if(is.null(t.sample)){
-      t.sample <- unlist(data.table::tstrsplit(x = basename(vcf), split = "\\.", keep = 1))
+      t.sample <- unlist(data.table::tstrsplit(x = basename(vcf), split = "snvs", keep = 2))
+      t.sample <- gsub(x = t.sample, pattern = "^_|_somatic_$|_$", replacement = "")
       message("Assuming ", t.sample, " as tumor")
     }
   }else{

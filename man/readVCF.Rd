@@ -16,7 +16,9 @@ readVCF(
 \arguments{
 \item{vcf}{Input indexed VCF file.}
 
-\item{ignore.XY}{Tool used for generating VCF file. Can be \code{strelka} or \code{mutect} or \code{dkfz}}
+\item{ignore.XY}{Ignore allosomes. Default TRUE}
+
+\item{vcf.source}{Tool used for generating VCF file. Can be \code{strelka} or \code{mutect} or \code{dkfz}}
 
 \item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
 
