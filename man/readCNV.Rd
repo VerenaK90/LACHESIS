@@ -50,7 +50,7 @@ Convert a user-specified bed-file with copy number information into a standardiz
 }
 \examples{
 aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "NBevolution")
-cn_data = readCNV(cnv_data)
+cn_data = readCNV(aceseq_cn)
 ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "NBevolution")
 cn_data = readCNV(ascat_cn)
 }

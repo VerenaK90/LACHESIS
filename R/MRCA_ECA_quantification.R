@@ -1,5 +1,6 @@
 #' Estimate mutation counts at MRCA and ECA.
 #'
+#' @importFrom stats dbinom density p.adjust pnbinom quantile rnorm sd
 #' @param clonal.mutation.matrix.per.tumor Matrix with mutations sorted by copy number and allele as returned by Count.clonal.mutations; rows: CN/B state, columns: chromosomes
 #' @param segment.length.matrix.per.tumor Matrix with segment lengths sorted by copy number and allele as returned by Count.clonal.mutations; rows: CN/B state, columns: chromosomes
 #' @param chromosomes chromosomes of interest. Defaults to 1-22.

@@ -35,7 +35,6 @@ count.clonal.mutations(
 }
 \value{
 a list containing with purity and the overall ploidy of the tumor, clonal.mutation.matrix: a matrix containing the number of clonal mutations per chromosome and state. Rows correspond to copy number/B-allele state, columns correspond to chromosome. Segment.length.matrix: length of the segments as in clonal.mutation.matrix. Copy.number.indicator: the copy number per state (corresponds to rows of clonal.mutation.matrix). B.allele.indicator: the B-allele count per state (corresponds to rows of clonal.mutation.matrix)
-
 count.clonal.mutations()
 }
 \description{
