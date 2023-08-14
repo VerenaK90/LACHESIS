@@ -4,20 +4,26 @@
 \alias{plotNB}
 \title{Plot VAF distribution per copy number}
 \usage{
-plotNB(nb = NULL, ref_build = "hg19")
+plotNB(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL)
 }
 \arguments{
 \item{nb}{output generated from \code{\link{nbImport}}}
 
-\item{ref_build}{Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}}
+\item{ref_build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}}
+
+\item{min.cn}{maximum copy number to be included in the plotting. Defaults to 2.}
+
+\item{max.cn}{maximum copy number to be included in the plotting. Defaults to 4.}
+
+\item{samp.name}{Sample name. Optional. Default NULL}
 }
 \description{
-Visualize results from  \code{\link{nbImport}}
+Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number.
 }
 \examples{
-snvs <- system.file("extdata", "NBE15/NBE15.snvs.dkfz.tsv.gz", package = "NBevolution")
+snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15/NBE15.aceseq.tsv.gz", package = "NBevolution")
+aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data)
 plotNB(nb)
