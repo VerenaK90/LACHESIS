@@ -13,5 +13,8 @@ License: `use_mit_license()`, `use_gpl3_license()` or friends to
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-Depends: data.table, vcfR 
+Depends: 
+    data.table,
+    R (>= 2.10),
+    vcfR
 RoxygenNote: 7.2.3

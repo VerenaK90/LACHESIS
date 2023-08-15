@@ -164,7 +164,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 
 #Parse DKFZ weird data format
 .parse_dkfz = function(FNAME){
-  v <- data.table::fread(file = FNAME, fill = TRUE, sep = "\t", header = TRUE)
+  v <- data.table::fread(file = FNAME, fill = TRUE, sep = "\t", header = TRUE, skip = "CHROM")
   v <- v[,c(1,2,4,5,8)]
   colnames(v) <- c('Chr', 'Start', 'Ref', 'Alt', 'info_t')
 
