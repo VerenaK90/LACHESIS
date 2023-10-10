@@ -40,7 +40,7 @@ snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", packa
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
 c_data <- readCNV(aceseq_cn)
-nb <- nbImport(cnv = c_data, snv = s_data)
+nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 cl_muts <- clonalMutationCounter(nb)
 norm_muts <- normalizeCounts(cl_muts)
 mrca <- MRCA(norm_muts)

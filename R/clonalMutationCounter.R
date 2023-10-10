@@ -12,7 +12,7 @@
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' cl_muts <- clonalMutationCounter(nb)
-#' @import data.table vcfR tidyr
+#' @import data.table
 #' @importFrom stats dbinom dmultinom
 #' @export
 
@@ -29,14 +29,9 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     stop("max.cn must be larger than min.cn")
   }
 
-  countObj <- .init.counbObj(min.cn = min.cn, max.cn = max.cn, chromosomes = chromosomes, ID = attr(nbObj, "t.sample"), purity = attr(nbObj, "purity"), ploidy = attr(nbObj, "ploidy"))
-
-  # start by counting the segment lengths
-  nbObj <- data.table::setDT(x = nbObj, key = c("chrom", "TCN", "A", "B"))
-
-  # subset on keys recovered in nbObj
-  countObj <- countObj[unique(nbObj, by=data.table::key(countObj))]
-
+  # Initiate the count object for all genotypes present in the data and fulfilling TCN >= min.cn & TCN <= max.cn
+  data.table::setDT(x = nbObj, key = c("chrom", "TCN", "A", "B"))
+  countObj <- unique(nbObj[chrom %in% chromosomes & TCN >= min.cn & TCN <= max.cn], by=data.table::key(countObj))
   # merge information from both objects
   countObj <- merge(countObj, unique(nbObj, by=c(data.table::key(countObj), "cn_start", "cn_end")))
   # sum up the segment lengths for each copy number state per chromosome
@@ -130,37 +125,20 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     splt$n_mut_B = n_mut_B
     splt$n_mut_total = n_mut_total
 
+
     return(splt)
   })
 
   splt.countObj <- data.table::rbindlist(l = splt.countObj, use.names = TRUE, fill = TRUE)
 
-  attr(splt.countObj, "purity") <- attr(countObj, "purity")
-  attr(splt.countObj, "ploidy") <- attr(countObj, "ploidy")
-  attr(splt.countObj, "ID") <- attr(countObj, "ID")
+  attr(splt.countObj, "purity") <- attr(nbObj, "purity")
+  attr(splt.countObj, "ploidy") <- attr(nbObj, "ploidy")
+  attr(splt.countObj, "ID") <- attr(nbObj, "ID")
 
   return(splt.countObj)
 
 }
 
-.init.counbObj <- function(min.cn, max.cn, chromosomes, purity, ploidy, ID){
-
-  countObj <- tidyr::crossing(as.character(chromosomes), min.cn:max.cn, 0:max.cn)
-  colnames(countObj) <- c("chrom", "TCN", "B")
-  countObj <- data.table::setDT(countObj, key = c("chrom", "TCN", "B"))
-  # subset on combinations where B <= TCN
-  countObj <- countObj[countObj$B <= countObj$TCN,]
-  countObj$A <- countObj$TCN - countObj$B
-  countObj <- countObj[,c("chrom", "TCN", "A", "B")]
-  countObj <- data.table::setDT(countObj, key = c("chrom", "TCN", "A", "B"))
-  countObj <- countObj[countObj$B <= countObj$A,]
-
-  attr(countObj, "purity") <- purity
-  attr(countObj, "ploidy") <- ploidy
-  attr(countObj, "ID") <- ID
-
-  return(countObj)
-}
 
 .peak_estimate <- function(measured.muts = NULL, clonal.vafs = NULL){
 
