@@ -6,9 +6,10 @@
 #' @param max.cn maximal copy number.
 #' @param chromosomes the chromosomes to be evaluated.
 #' @return a data table reporting the length of each segment, the number of clonal mutations on all A-allele copies, the number of clonal mutations on all B-allele copies and the total number of clonal mutations (including clonal mutations on a single copy only).
-#' snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
+#' @examples
+#' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-#' aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
+#' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' cl_muts <- clonalMutationCounter(nb)
@@ -31,7 +32,7 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
 
   # Initiate the count object for all genotypes present in the data and fulfilling TCN >= min.cn & TCN <= max.cn
   data.table::setDT(x = nbObj, key = c("chrom", "TCN", "A", "B"))
-  countObj <- unique(nbObj[chrom %in% chromosomes & TCN >= min.cn & TCN <= max.cn], by=data.table::key(countObj))
+  countObj <- unique(nbObj[chrom %in% chromosomes & TCN >= min.cn & TCN <= max.cn], by=data.table::key(nbObj))
   # merge information from both objects
   countObj <- merge(countObj, unique(nbObj, by=c(data.table::key(countObj), "cn_start", "cn_end")))
   # sum up the segment lengths for each copy number state per chromosome

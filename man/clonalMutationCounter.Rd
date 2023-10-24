@@ -22,13 +22,15 @@ clonalMutationCounter(
 }
 \value{
 a data table reporting the length of each segment, the number of clonal mutations on all A-allele copies, the number of clonal mutations on all B-allele copies and the total number of clonal mutations (including clonal mutations on a single copy only).
-snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
-s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
-c_data <- readCNV(aceseq_cn)
-nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
-cl_muts <- clonalMutationCounter(nb)
 }
 \description{
 This function counts the number of clonal mutations residing on a single or multiple copies per genomic segment. Segments of equal copy number and B-allele count are merged per chromosome.
+}
+\examples{
+snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
+s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
+aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
+c_data <- readCNV(aceseq_cn)
+nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
+cl_muts <- clonalMutationCounter(nb)
 }
