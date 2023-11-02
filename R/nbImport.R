@@ -3,21 +3,26 @@
 #' Merges CNVs and SNVs into a single data.table. Each variant is assigned to its corresponding copy number segment and status.
 #' @param cnv CNV data from \code{\link{readCNV}}
 #' @param snv SNV data from \code{\link{readVCF}}
+#' @param purity tumor cell content
+#' @param ploidy average copy number in the tumor sample
 #' @examples
 #' snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
 #' c_data <- readCNV(aceseq_cn)
-#' nb <- nbImport(cnv = c_data, snv = s_data)
+#' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' @seealso \code{\link{plotNB}}
 #' @return a data.table
 #' @export
 
-nbImport <- function(cnv = NULL, snv = NULL){
+nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 
   if(any(is.null(cnv), is.null(snv))){
     stop("Missing snv and cnv inputs!")
-    }
+  }
+  if(any(is.null(purity), is.null(ploidy))){
+    stop("Missing purity and ploidy inputs!")
+  }
 
   colnames(cnv)[1:3] <- c("chrom", "start", "end")
   data.table::setDT(x = cnv, key = c("chrom", "start", "end"))
@@ -43,6 +48,8 @@ nbImport <- function(cnv = NULL, snv = NULL){
   colnames(sv)[which(colnames(sv) == "start")] <- "cn_start"
   colnames(sv)[which(colnames(sv) == "end")] <- "cn_end"
   attr(sv, "cnv") <- cnv
+  attr(sv, "purity") <- purity
+  attr(sv, "ploidy") <- ploidy
   sv
 }
 
@@ -78,7 +85,7 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
   segs <- attr(nb, "cnv")
   segs <- segs[order(chrom, start)]
   colnames(segs)[1:3] <- c("Chromosome", "Start_Position", "End_Position")
-  segs <- .transformSegments(segmentedData = segs, build = "hg19")
+  segs <- .transformSegments(segmentedData = segs, build = ref_build)
 
   contig_lens <- cumsum(.getContigLens(build = ref_build))
 

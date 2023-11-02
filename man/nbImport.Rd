@@ -4,12 +4,16 @@
 \alias{nbImport}
 \title{Combine CNVs and SNVs}
 \usage{
-nbImport(cnv = NULL, snv = NULL)
+nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL)
 }
 \arguments{
 \item{cnv}{CNV data from \code{\link{readCNV}}}
 
 \item{snv}{SNV data from \code{\link{readVCF}}}
+
+\item{purity}{tumor cell content}
+
+\item{ploidy}{average copy number in the tumor sample}
 }
 \value{
 a data.table
@@ -22,7 +26,7 @@ snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", packa
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
 c_data <- readCNV(aceseq_cn)
-nb <- nbImport(cnv = c_data, snv = s_data)
+nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 }
 \seealso{
 \code{\link{plotNB}}
