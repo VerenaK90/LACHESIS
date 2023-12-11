@@ -9,11 +9,11 @@
 #' @param min.vaf Remove variants with vcf below threshold. Default 0.01
 #' @param min.depth Minimum required depth for a variant to be considered. Default 30.
 #' @examples
-#' mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "NBevolution")
+#' mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "LACHESIS")
 #' m_data = readVCF(vcf = mutect_vcf, vcf.source = "mutect")
-#' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "NBevolution")
+#' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka")
-#' dkfz_vcf = system.file("extdata", "snvs_XI003_22405_somatic_snvs_conf_8_to_10.vcf.gz", package = "NBevolution")
+#' dkfz_vcf = system.file("extdata", "snvs_XI003_22405_somatic_snvs_conf_8_to_10.vcf.gz", package = "LACHESIS")
 #' d_data = readVCF(vcf = dkfz_vcf, vcf.source = "dkfz")
 #' @import data.table vcfR
 #' @return a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf

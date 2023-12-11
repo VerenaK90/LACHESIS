@@ -1,0 +1,4 @@
+ID	cnv.file	snv.file	purity	ploidy	cnv.chr.col	cnv.start.col	cnv.end.col	cnv.A.col	cnv.B.col	cnv.tcn.col
+A										
+B										
+C										

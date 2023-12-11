@@ -21,9 +21,9 @@ plotNB(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL)
 Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number.
 }
 \examples{
-snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
+snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
+aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data)
 plotNB(nb)

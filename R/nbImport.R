@@ -6,9 +6,9 @@
 #' @param purity tumor cell content
 #' @param ploidy average copy number in the tumor sample
 #' @examples
-#' snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
+#' snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-#' aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
+#' aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' @seealso \code{\link{plotNB}}
@@ -63,9 +63,9 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' @param max.cn maximum copy number to be included in the plotting. Defaults to 4.
 #' @param samp.name Sample name. Optional. Default NULL
 #' @examples
-#' snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
+#' snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-#' aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
+#' aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data)
 #' plotNB(nb)

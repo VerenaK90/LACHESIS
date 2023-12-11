@@ -41,9 +41,9 @@
 #' \item{`A_time`}{Time of A allele gain (can be "ECA", "MRCA", "ECA/MRCA" if assignment is unclear, or "not mapped to ECA or MRCA" if density does not agree with either ECA or MRCA).}
 #' \item{`B_time`}{Time of B allele gain (can be "ECA", "MRCA", "ECA/MRCA" if assignment is unclear, or "not mapped to ECA or MRCA" if density does not agree with either ECA or MRCA).}
 #' }
-#' snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
+#' snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-#' aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
+#' aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' cl_muts <- clonalMutationCounter(nb)

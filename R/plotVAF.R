@@ -10,7 +10,7 @@
 #' @param col Default "#34495e"
 #' @param srtcounts Text angle if `showcounts` is TRUE. Default 45
 #' @examples
-#' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "NBevolution")
+#' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka", ignore.XY = FALSE)
 #' plotVAFdistr(s_data)
 #' @return data.table of frequency table

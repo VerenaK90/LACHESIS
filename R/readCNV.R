@@ -15,9 +15,9 @@
 #' @param ignore.XY Ignore allosomes. Default TRUE
 #' @param tumor.id Tumor ID, optional.
 #' @examples
-#' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "NBevolution")
+#' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
 #' cn_data = readCNV(aceseq_cn)
-#' ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "NBevolution")
+#' ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "LACHESIS")
 #' cn_data = readCNV(ascat_cn)
 #' @return A standardized data frame with copy number information per segment.
 #' readCNV()
