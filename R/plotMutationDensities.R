@@ -1,6 +1,6 @@
 #' Plot normalized mutation density at copy number gain and MRCA per segment
 #' @description
-#' Visualizes results from  \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.
+#' Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.
 #' @param mrcaObj output generated from \code{\link{MRCA}}
 #' @param samp.name sample name, optional
 #' @param min.seg.size minimal segment size to plot

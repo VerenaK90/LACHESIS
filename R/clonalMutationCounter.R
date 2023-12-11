@@ -43,7 +43,6 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
   splt.countObj <- split(countObj, by = c("chrom", "TCN", "A", "B"))
 
   splt.countObj <- lapply(splt.countObj, function(splt){
-
     # A, B, TCN
     A <- as.numeric(as.character(splt[,"A"]))
     B <- as.numeric(as.character(splt[,"B"]))
@@ -56,7 +55,8 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     }))
     clonal.vafs <- unique(sort(clonal.vafs[clonal.vafs>0]))
     # order of the clonal peaks
-    clone.order <- clonal.vafs*TCN
+    clone.order <- sort(unique(c(1, B, A)))
+    clone.order <- clone.order[clone.order > 0]
 
     # In order to avoid overestimation of the clonal peak due to subclonal SVNs, we quantify the first-order clonal peak on its upper half only
     measured.muts <- nbObj[splt][t_vaf >= min(clonal.vafs)]
@@ -73,7 +73,7 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
 
     ## If there's only one mutation, assign it to its most likely state by comparing its VAF with the clonal frequencies
     if(nrow(measured.muts) == 1){
-      which.order <- clone.order[which.min(c(clonal.vafs - measured.muts[,"t_vaf"])^2)]
+      which.order <- clone.order[which.min(measured.muts[,(clonal.vafs - t_vaf)^2])]
       if(which.order==1){
         n_mut <- 2 # first-order peak is quantified on the upper half only, thus multiply by 2
       }else{
@@ -85,6 +85,9 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
       }else if(which.order == B){
         splt$n_mut_A = 0
         splt$n_mut_B = n_mut
+      }else{
+        splt$n_mut_A = 0
+        splt$n_mut_B = 0
       }
       splt$n_mut_total = n_mut
 

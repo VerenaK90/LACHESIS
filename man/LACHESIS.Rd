@@ -9,7 +9,7 @@ LACHESIS(
   ids = NULL,
   cnv.files = NULL,
   snv.files = NULL,
-  vcf.source = "strelka",
+  vcf.source = NULL,
   purity = NULL,
   ploidy = NULL,
   cnv.chr.col = NULL,
@@ -18,6 +18,12 @@ LACHESIS(
   cnv.A.col = NULL,
   cnv.B.col = NULL,
   cnv.tcn.col = NULL,
+  age = NULL,
+  OS.time = NULL,
+  OS = NULL,
+  EFS.time = NULL,
+  EFS = NULL,
+  output.dir,
   ...
 )
 }
@@ -46,8 +52,20 @@ LACHESIS(
 
 \item{cnv.B.col}{column index of the number of B alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.}
 
-\item{cnv.tcn.col}{column index of the total copy number. Is computed to A + B if not provided.
+\item{cnv.tcn.col}{column index of the total copy number. Is computed to A + B if not provided.}
+
+\item{age, }{optional, the age at diagnosis}
+
+\item{OS.time, }{optional, overall survival time}
+
+\item{OS, }{optional, overall survival indicator variable}
+
+\item{EFS.time, }{optional, event-free survival time}
+
+\item{EFS, }{optional, event-free survival indicator variable
 optional arguments}
+
+\item{output.dir}{link to directory in which output is to be stored.}
 
 \item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
 
