@@ -43,6 +43,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
                      cnv.B.col = NULL, cnv.tcn.col = NULL, age = NULL,
                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,  ...){
 
+
   if(is.null(input.files) & is.null(cnv.files)){
     stop("Missing input file!")
   }else if(is.null(input.files)){
@@ -252,6 +253,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
   # plot the distribution of Mutation densities at ECA and MRCA
 
+  p3 <- plotLachesis(cohort.densities)
+  if(!is.null(output.dir)){
+    pdf(paste(output.dir, "SNV_densities_cohort.pdf", sep="/"), width = 8, height = 6)
+    print(p3)
+    dev.off()
+  }
+
   return(cohort.densities)
 }
 
@@ -335,6 +343,9 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
     title(main = "SNV densities at MRCA vs age", cex.main = 1.2)
     mtext(text = "SNVs per Mb", side = 1, line = 2.5, cex = 0.8)
     mtext(text = "Age at diagnosis", side = 2, line = 1.8, cex = 0.8)
+    text(0.55*1.05*max(to.plot[,MRCA_time_mean]),
+         0.75*max(to.plot[,Age]), labels = paste("Pearson's r = ", to.plot[,round(cor(MRCA_time_mean, Age), digits=3)]),
+         cex = 0.8)
 
     par(mar = c(3, 1, 3, 1), xpd = FALSE)
 
@@ -343,6 +354,9 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
     title(main = "SNV densities at ECA vs age", cex.main = 1.2)
     mtext(text = "SNVs per Mb", side = 1, line = 2.5, cex = 0.8)
     mtext(text = "Age at diagnosis", side = 2, line = 1.8, cex = 0.8)
+    text(0.5*1.05*max(to.plot[,ECA_time_mean]),
+         0.75*max(to.plot[,Age]), labels = paste("Pearson's r = ", to.plot[,round(cor(ECA_time_mean, Age), digits=3)]),
+         cex = 0.8)
   }else{
     # empty plots
     plot.new()
@@ -389,6 +403,10 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   plot.ecdf(lachesis$ECA_time_mean, col = "black", add = T)
 
   title(main = paste("SNV densities at ECA/MRCA"), cex.main = 1.2)
+
+  ## Plot OS / EFS statistics in dependence of MRCA density
+
+
 
 }
 

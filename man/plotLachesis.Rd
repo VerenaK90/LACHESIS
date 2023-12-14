@@ -27,16 +27,10 @@ plotLachesis(
 \item{binwidth}{optional; the bin-width in the histogram.}
 }
 \description{
-Visualizes results from \code{\link{LACHESIS}}. Top plot, histograms of mean mutation densities; bottom plots, cumulative distribution of mean mutation densities with 95\% confidence intervals.
+Visualizes results from \code{\link{LACHESIS}}. Top plot, histograms of mean mutation densities; optional, correlation with age at diagnosis; bottom plots, cumulative distribution of mean mutation densities with 95\% confidence intervals.
 }
 \examples{
-snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
-s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
-c_data <- readCNV(aceseq_cn)
-nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
-cl_muts <- clonalMutationCounter(nb)
-norm_muts <- normalizeCounts(cl_muts)
-mrca <- MRCA(norm_muts)
-plotMutationDensities(mrca)
+input.files = system.file("extdata", "Sample_template.txt")
+lachesis <- LACHESIS(input.files = input.files)
+plotLachesis(lachesis)
 }

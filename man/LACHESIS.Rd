@@ -23,7 +23,7 @@ LACHESIS(
   OS = NULL,
   EFS.time = NULL,
   EFS = NULL,
-  output.dir,
+  output.dir = NULL,
   ...
 )
 }
@@ -91,12 +91,9 @@ Takes a set of SNV and CNV files as input and outputs per-tumor SNV densities. I
 the sample specifications or vectors giving direct paths to the sample files. CNV file requires columns for the chromosome number, start and end of the segment, and either the total copy number or the number of A- and B-alleles
 }
 \examples{
-snvs <- system.file("extdata", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
-s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
-c_data <- readCNV(aceseq_cn)
-nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
+input.files = system.file("extdata", "Sample_template.txt")
+lachesis <- LACHESIS(input.files = input.files)
 }
 \seealso{
-\code{\link{plotNB}}
+\code{\link{MRCA}} \code{\link{clonalMutationCounter}} \code{\link{normalizeCounts}}
 }
