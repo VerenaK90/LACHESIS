@@ -189,12 +189,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
       message("Computing SNV density for sample ", ids[i])
 
-      cnv <- readCNV(cn.info = cnv.files[i], chr.col = ifelse(is.na(cnv.chr.col[i]), NULL, cnv.chr.col[i]),
-                     start.col = ifelse(is.na(cnv.start.col[i]), NULL, cnv.start.col[i]),
-                     end.col = ifelse(is.na(cnv.end.col[i]), NULL, cnv.end.col[i]),
-                     A.col = ifelse(is.na(cnv.A.col[i]), NULL, cnv.A.col[i]),
-                     B.col = ifelse(is.na(cnv.B.col[i]), NULL, cnv.B.col[i]),
-                     tcn.col = ifelse(is.na(cnv.tcn.col[i]), NULL, cnv.tcn.col[i]), tumor.id = ids[i], ...)
+      cnv <- readCNV(cn.info = cnv.files[i], chr.col = ifelse(is.null(cnv.chr.col[i]) || is.na(cnv.chr.col[i]), NULL, cnv.chr.col[i]),
+                     start.col = ifelse(is.null(cnv.start.col[i]) || is.na(cnv.start.col[i]), NULL, cnv.start.col[i]),
+                     end.col = ifelse(is.null(cnv.end.col[i]) || is.na(cnv.end.col[i]), NULL, cnv.end.col[i]),
+                     A.col = ifelse(is.null(cnv.A.col[i]) || is.na(cnv.A.col[i]), NULL, cnv.A.col[i]),
+                     B.col = ifelse(is.null(cnv.B.col[i]) || is.na(cnv.B.col[i]), NULL, cnv.B.col[i]),
+                     tcn.col = ifelse(is.null(cnv.tcn.col[i]) || is.na(cnv.tcn.col[i]), NULL, cnv.tcn.col[i]), tumor.id = ids[i], ...)
 
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = ids[i], ...)
       vaf.p <- plotVAFdistr(snv)
