@@ -147,7 +147,10 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     d_ad$t_vaf <- d_ad$t_alt_count / d_ad$t_depth
     d <-cbind(d, d_ad)
   }else if(source == "other"){
-    d_ad <- data.frame(t_depth=d$DP, t_vaf = d$AF, t_ref_count=d$DP*(1-d$AF), t_alt_count=d$DP*d$AF)
+    d_ad <- data.frame(t_depth=d$DP, t_vaf = d$AF)
+    d_ad = as.data.frame(apply(d_ad, 2, as.numeric))
+    d_ad$t_ref_count=d_ad$t_depth*(1-d_ad$t_vaf)
+    d_ad$t_alt_count=d_ad$t_depth*d_ad$t_vaf
     d <-cbind(d, d_ad)
   }else{
     stop("Unknown format!")
