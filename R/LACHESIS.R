@@ -118,12 +118,14 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
                      tcn.col = x$cnv.tcn.col, tumor.id = x$ID, ...)
 
       snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$ID, ...)
+      vaf.p1 <- plotVAFdistr(snv)
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
       nb.p1 <- plotNB(nb = nb, samp.name = x$ID, ...)
 
       if(!is.null(output.dir)){
         pdf(paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), width = 8, height = 6)
+        print(vaf.p1)
         print(nb.p1)
         dev.off()
       }
@@ -172,8 +174,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
       ids[is.na(ids)] <- which(is.na(ids))
     }
 
-    sample.specs.spl <- split(sample.specs, sample.specs$ID)
-
     for(i in 1:length(cnv.files)){
 
       message("Computing SNV density for sample ", x$ID)
@@ -182,18 +182,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
         warning("No CNV file provided for sample ", ids[i], "; sample will be excluded")
         next
       }
-      if(is.na(cnv.files)[i]){
+      if(is.na(snv.files)[i]){
         warning("No SNV file provided for sample ", ids[i], "; sample will be excluded")
         next
       }
 
-      x <- sample.specs.spl[[i]]
-      x[,which(sapply(x, is.na)):=NULL] # remove NA entries
-
-      if(is.null(x$ID)){
-        stop()
-      }
-      message("Computing SNV density for sample ", x$ID)
+      message("Computing SNV density for sample ", ids[i])
 
       cnv <- readCNV(cn.info = cnv.files[i], chr.col = ifelse(is.na(cnv.chr.col[i]), NULL, cnv.chr.col[i]),
                      start.col = ifelse(is.na(cnv.start.col[i]), NULL, cnv.start.col[i]),
@@ -203,12 +197,14 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
                      tcn.col = ifelse(is.na(cnv.tcn.col[i]), NULL, cnv.tcn.col[i]), tumor.id = ids[i], ...)
 
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = ids[i], ...)
+      vaf.p <- plotVAFdistr(snv)
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i])
       nb.p1 <- plotNB(nb = nb, samp.name = ids[i], ...)
 
       if(!is.null(output.dir)){
         pdf(paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), width = 8, height = 6)
+        print(vaf.p)
         print(nb.p1)
         dev.off()
       }
