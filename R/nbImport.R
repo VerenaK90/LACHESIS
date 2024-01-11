@@ -123,7 +123,7 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
       mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
       mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
       if(!is.null(purity) & !is.null(ploidy)){
-        abline(v = .expectedClVAF(CN = cn, purity = purity, ploidy = ploidy), linetype = 2)
+        abline(v = .expectedClVAF(CN = cn, purity = purity), linetype = 2)
       }
     }
   }
@@ -203,8 +203,8 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
   return(seg.spl.transformed)
 }
 
-# expected clonal VAFs for copy number CN at a given ploidy/purity on autosomes
-.expectedClVAF <- function(CN, purity, ploidy){
-  (1:CN)/(purity*ploidy + 2*(1-purity))
+# expected clonal VAFs for copy number CN at a given purity on autosomes
+.expectedClVAF <- function(CN, purity){
+  (1:CN)/(purity*CN + 2*(1-purity))
 }
 
