@@ -5,9 +5,11 @@
 #' @param vcf Input indexed VCF file.
 #' @param ignore.XY Ignore allosomes. Default TRUE
 #' @param t.sample Sample name for tumor. Must be same as in VCF. Strelka hardcodes tumor sample name to "TUMOR"
-#' @param vcf.source Tool used for generating VCF file. Can be `strelka` or `mutect` or `dkfz`
+#' @param vcf.source Tool used for generating VCF file. Can be `strelka` or `mutect` or `dkfz` or `other`
 #' @param min.vaf Remove variants with vcf below threshold. Default 0.01
 #' @param min.depth Minimum required depth for a variant to be considered. Default 30.
+#' @param info.af The string encoding the allele frequency field in the FORMAT column. Defaults to `AF`and will be ignored if `vcf.source` != `other`.
+#' @param info.dp The string encoding the read depth field in the FORMAT column. Defaults to `DP`and will be ignored if `vcf.source` != `other`.
 #' @examples
 #' mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "LACHESIS")
 #' m_data = readVCF(vcf = mutect_vcf, vcf.source = "mutect")
@@ -19,7 +21,7 @@
 #' @return a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf
 #' @export
 
-readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL){
+readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL, info.af = "AF", info.dp = "DP"){
 
   chrom <- t_vaf <- t_depth <- . <- pos <- ref <- alt <- t_ref_count <- t_alt_count <- NULL
 
@@ -27,7 +29,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     stop("Missing input VCF file!")
   }
 
-  vcf.sources <- c("strelka", "mutect", "dkfz")
+  vcf.sources <- c("strelka", "mutect", "dkfz", "other")
   vcf.source <- match.arg(arg = vcf.source, choices = vcf.sources, several.ok = FALSE)
 
   if(vcf.source == 'dkfz'){
@@ -143,6 +145,9 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     d_ad = as.data.frame(apply(d_ad, 2, as.numeric))
     d_ad$t_depth <- rowSums(d_ad)
     d_ad$t_vaf <- d_ad$t_alt_count / d_ad$t_depth
+    d <-cbind(d, d_ad)
+  }else if(source == "other"){
+    d_ad <- data.frame(t_depth=d$DP, t_vaf = d$AF, t_ref_count=d$DP*(1-d$AF), t_alt_count=d$DP*d$AF)
     d <-cbind(d, d_ad)
   }else{
     stop("Unknown format!")
