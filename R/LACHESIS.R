@@ -176,7 +176,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
     for(i in 1:length(cnv.files)){
 
-      message("Computing SNV density for sample ", x$ID)
+      message("Computing SNV density for sample ", ids[i])
 
       if(is.na(cnv.files)[i]){
         warning("No CNV file provided for sample ", ids[i], "; sample will be excluded")
@@ -203,7 +203,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
       nb.p1 <- plotNB(nb = nb, samp.name = ids[i], ...)
 
       if(!is.null(output.dir)){
-        pdf(paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), width = 8, height = 6)
+        pdf(paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), width = 8, height = 6)
         print(vaf.p)
         print(nb.p1)
         dev.off()
@@ -216,14 +216,14 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
       # output the result for this sample
       if(!is.null(output.dir)){
         write(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")],
-              file = paste(output.dir, x$ID, paste("MRCA_densities_", x$ID, ".txt", sep=""), sep="/"))
-        write.table(mrca, file = paste(output.dir, x$ID, paste("SNV_timing_per_segment_", x$ID, ".txt", sep=""), sep="/"))
+              file = paste(output.dir, ids[i], paste("MRCA_densities_", ids[i], ".txt", sep=""), sep="/"))
+        write.table(mrca, file = paste(output.dir, x$ID, paste("SNV_timing_per_segment_", ids[i], ".txt", sep=""), sep="/"))
       }
 
-      mrca.p2 <- plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, ...)
+      mrca.p2 <- plotMutationDensities(mrcaObj = mrca, samp.name = ids[i], ...)
 
       if(!is.null(output.dir)){
-        pdf(paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), width = 8, height = 6)
+        pdf(paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), width = 8, height = 6)
         print(mrca.p2)
         dev.off()
       }
