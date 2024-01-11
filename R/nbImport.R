@@ -214,6 +214,6 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
 
 # expected clonal VAFs for copy number CN at a given purity on autosomes
 .expectedClVAF <- function(CN, purity){
-  (1:CN)/(purity*CN + 2*(1-purity))
+  (1:CN)*purity/(purity*CN + 2*(1-purity))
 }
 
