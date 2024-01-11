@@ -123,7 +123,7 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
       mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
       mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
       if(!is.null(purity) & !is.null(ploidy)){
-        abline(v = .expectedClVAF(CN = cn, purity = purity), linetype = 2)
+        abline(v = .expectedClVAF(CN = cn, purity = purity), lty = 2)
       }
     }
   }
