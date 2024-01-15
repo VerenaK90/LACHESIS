@@ -45,6 +45,12 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     if(is.null(t.sample)){
       t.sample <- .get_t_SM(vcf = vcf)
       message("Assuming ", t.sample, " as tumor")
+    }else{
+      vcf.cols <- .get_vcf_cols(vcf = vcf)
+      if(!any(grepl(t.sample, vcf.cols))){
+        t.sample <- .get_t_SM(vcf = vcf)
+        message("Assuming ", t.sample, " as tumor")
+      }
     }
 
     message("Importing VCF..")
@@ -168,6 +174,14 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
   sm_ids = setdiff(colnames(temp), stdcols)
   #In case matched normal is used, second entry will always be the tumor sample, if not first sample is assumed to be tumor
   ifelse(length(sm_ids) > 1, yes = sm_ids[2], no = sm_ids[1])
+}
+
+#retrieve available column names in vcf file
+.get_vcf_cols = function(vcf){
+  temp <- data.table::fread(file = vcf, skip = "#CHROM", nrows = 1)
+  stdcols = c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT")
+  sm_ids = setdiff(colnames(temp), stdcols)
+  return(sm_ids)
 }
 
 #Parse DKFZ weird data format
