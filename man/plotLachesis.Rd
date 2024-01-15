@@ -10,7 +10,9 @@ plotLachesis(
   log.densities = FALSE,
   fill.multi = NULL,
   l.col = NULL,
-  binwidth = NULL
+  binwidth = NULL,
+  fill.zero = NULL,
+  output.file = NULL
 )
 }
 \arguments{
@@ -25,6 +27,8 @@ plotLachesis(
 \item{l.col, }{optional, the line color}
 
 \item{binwidth}{optional; the bin-width in the histogram.}
+
+\item{output.file}{optional; the file to which the plot will be stored.}
 }
 \description{
 Visualizes results from \code{\link{LACHESIS}}. Top plot, histograms of mean mutation densities; optional, correlation with age at diagnosis; bottom plots, cumulative distribution of mean mutation densities with 95\% confidence intervals.

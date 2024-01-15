@@ -9,6 +9,7 @@
 #' @param showdensity Show additional inset plot of density. Default TRUE
 #' @param col Default "#34495e"
 #' @param srtcounts Text angle if `showcounts` is TRUE. Default 45
+#' @param output.file optional, will save the plot.
 #' @examples
 #' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka", ignore.XY = FALSE)
@@ -16,10 +17,14 @@
 #' @return data.table of frequency table
 #' @importFrom graphics axis box grid hist mtext par text title
 #' @export
-plotVAFdistr <- function(vaf = NULL, vafbreak = 0.05, t_sample = NULL, showcounts = FALSE, showdensity = TRUE, col = "#34495e", srtcounts = 45){
+plotVAFdistr <- function(vaf = NULL, vafbreak = 0.05, t_sample = NULL, showcounts = FALSE, showdensity = TRUE, col = "#34495e", srtcounts = 45, output.file = NULL){
 
   if(is.null(vaf)){
     stop("Missing input vaf. Use `readVCF` to extract vaf.")
+  }
+
+  if(!is.null(output.file)){
+    pdf(output.file, width = 4, height = 4)
   }
 
   par(mar = c(4, 4, 2, 1), fig = c(0,1,0,1))
@@ -50,4 +55,7 @@ plotVAFdistr <- function(vaf = NULL, vafbreak = 0.05, t_sample = NULL, showcount
 
   data.table::data.table(breaks = h$breaks, counts = c(0, h$counts))
 
+  if(!is.null(output.file)){
+    dev.off()
+  }
 }

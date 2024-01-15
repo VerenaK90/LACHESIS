@@ -91,8 +91,11 @@ Takes a set of SNV and CNV files as input and outputs per-tumor SNV densities. I
 the sample specifications or vectors giving direct paths to the sample files. CNV file requires columns for the chromosome number, start and end of the segment, and either the total copy number or the number of A- and B-alleles
 }
 \examples{
-input.files = system.file("extdata", "Sample_template.txt")
+input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 lachesis <- LACHESIS(input.files = input.files)
+strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
+aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
+lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
 }
 \seealso{
 \code{\link{MRCA}} \code{\link{clonalMutationCounter}} \code{\link{normalizeCounts}}

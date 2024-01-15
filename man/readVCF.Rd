@@ -10,7 +10,9 @@ readVCF(
   vcf.source = "strelka",
   min.vaf = 0.01,
   min.depth = 30,
-  t.sample = NULL
+  t.sample = NULL,
+  info.af = "AF",
+  info.dp = "DP"
 )
 }
 \arguments{
@@ -18,13 +20,17 @@ readVCF(
 
 \item{ignore.XY}{Ignore allosomes. Default TRUE}
 
-\item{vcf.source}{Tool used for generating VCF file. Can be \code{strelka} or \code{mutect} or \code{dkfz}}
+\item{vcf.source}{Tool used for generating VCF file. Can be \code{strelka} or \code{mutect} or \code{dkfz} or \code{other}}
 
 \item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
 
 \item{min.depth}{Minimum required depth for a variant to be considered. Default 30.}
 
 \item{t.sample}{Sample name for tumor. Must be same as in VCF. Strelka hardcodes tumor sample name to "TUMOR"}
+
+\item{info.af}{The string encoding the allele frequency field in the FORMAT column. Defaults to \code{AF}and will be ignored if \code{vcf.source} != \code{other}.}
+
+\item{info.dp}{The string encoding the read depth field in the FORMAT column. Defaults to \code{DP}and will be ignored if \code{vcf.source} != \code{other}.}
 }
 \value{
 a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf

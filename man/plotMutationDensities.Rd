@@ -12,7 +12,8 @@ plotMutationDensities(
   fill.multi = NULL,
   l.col = NULL,
   show.den = NULL,
-  binwidth = NULL
+  binwidth = NULL,
+  output.file = NULL
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ plotMutationDensities(
 \item{show.den}{optional; if \code{TRUE}, the density distribution of mutation densities on single copies is shown in the histogram of mutation densities on multiple copies.}
 
 \item{binwidth}{optional; the bin-width in the histogram.}
+
+\item{output.file}{optional; will save the plot.}
 }
 \description{
 Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95\% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.

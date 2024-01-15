@@ -11,7 +11,8 @@ plotVAFdistr(
   showcounts = FALSE,
   showdensity = TRUE,
   col = "#34495e",
-  srtcounts = 45
+  srtcounts = 45,
+  output.file = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ plotVAFdistr(
 \item{col}{Default "#34495e"}
 
 \item{srtcounts}{Text angle if \code{showcounts} is TRUE. Default 45}
+
+\item{output.file}{optional, will save the plot.}
 }
 \value{
 data.table of frequency table

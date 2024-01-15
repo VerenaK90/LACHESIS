@@ -4,7 +4,16 @@
 \alias{plotNB}
 \title{Plot VAF distribution per copy number}
 \usage{
-plotNB(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL)
+plotNB(
+  nb = NULL,
+  ref_build = "hg19",
+  min.cn = 2,
+  max.cn = 4,
+  samp.name = NULL,
+  purity = NULL,
+  ploidy = NULL,
+  output.file = NULL
+)
 }
 \arguments{
 \item{nb}{output generated from \code{\link{nbImport}}}
@@ -16,6 +25,12 @@ plotNB(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL)
 \item{max.cn}{maximum copy number to be included in the plotting. Defaults to 4.}
 
 \item{samp.name}{Sample name. Optional. Default NULL}
+
+\item{purity}{optional. If \code{purity} and \code{ploidy} are both given, expected positions of clonal peaks are shown.}
+
+\item{ploidy}{optional. If \code{purity} and \code{ploidy} are both given, expected positions of clonal peaks are shown.}
+
+\item{output.file}{optional, will save the plot.}
 }
 \description{
 Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number.

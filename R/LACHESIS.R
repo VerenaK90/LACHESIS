@@ -31,8 +31,11 @@
 #' @param ignore.XY Ignore allosomes. Default TRUE
 #' @param ref_build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @examples
-#' input.files = system.file("extdata", "Sample_template.txt")
+#' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 #' lachesis <- LACHESIS(input.files = input.files)
+#' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
+#' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
+#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
 #' @seealso \code{\link{MRCA}} \code{\link{clonalMutationCounter}} \code{\link{normalizeCounts}}
 #' @return a data.table
 #' @export
@@ -124,10 +127,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
       nb.p1 <- plotNB(nb = nb, samp.name = x$ID, ...)
 
       if(!is.null(output.dir)){
-        pdf(paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), width = 8, height = 6)
-        print(vaf.p1)
-        print(nb.p1)
-        dev.off()
+        plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"))
+        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ...)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, ...)
@@ -158,12 +159,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
         write.table(mrca, file = paste(output.dir, x$ID, paste("SNV_timing_per_segment_", x$ID, ".txt", sep=""), sep="/"))
       }
 
-      mrca.p2 <- plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, ...)
-
       if(!is.null(output.dir)){
-        pdf(paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), width = 8, height = 6)
-        print(mrca.p2)
-        dev.off()
+        plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), ...)
       }
     }
     rm(sample.specs.spl)
@@ -189,12 +186,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
       message("Computing SNV density for sample ", ids[i])
 
-      cnv <- readCNV(cn.info = cnv.files[i], chr.col = ifelse(is.null(cnv.chr.col[i]) || is.na(cnv.chr.col[i]), NULL, cnv.chr.col[i]),
-                     start.col = ifelse(is.null(cnv.start.col[i]) || is.na(cnv.start.col[i]), NULL, cnv.start.col[i]),
-                     end.col = ifelse(is.null(cnv.end.col[i]) || is.na(cnv.end.col[i]), NULL, cnv.end.col[i]),
-                     A.col = ifelse(is.null(cnv.A.col[i]) || is.na(cnv.A.col[i]), NULL, cnv.A.col[i]),
-                     B.col = ifelse(is.null(cnv.B.col[i]) || is.na(cnv.B.col[i]), NULL, cnv.B.col[i]),
-                     tcn.col = ifelse(is.null(cnv.tcn.col[i]) || is.na(cnv.tcn.col[i]), NULL, cnv.tcn.col[i]), tumor.id = ids[i], ...)
+      cnv <- readCNV(cn.info = cnv.files[i], chr.col = cnv.chr.col[i], start.col = cnv.start.col[i],
+                     end.col = cnv.end.col[i], A.col = cnv.A.col[i], B.col = cnv.B.col[i],
+                     tcn.col = cnv.tcn.col[i], tumor.id = ids[i], ...)
 
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = ids[i], ...)
       vaf.p <- plotVAFdistr(snv)
@@ -203,30 +197,36 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
       nb.p1 <- plotNB(nb = nb, samp.name = ids[i], ...)
 
       if(!is.null(output.dir)){
-        pdf(paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), width = 8, height = 6)
-        print(vaf.p)
-        print(nb.p1)
-        dev.off()
+        plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"))
+        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ...)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, ...)
       norm.counts <- normalizeCounts(countObj = raw.counts)
-      mrca <- MRCA(normObj = norm.counts, ...)
+      if(nrow(norm.counts)==1){
+        warning("Too few segments to estimate MRCA density for sample ", ids[i], ".")
+        mrca <- ""
+        attr(mrca, "MRCA_time_mean") <- NA
+        attr(mrca, "MRCA_time_upper") <- NA
+        attr(mrca, "MRCA_time_lower") <- NA
+        attr(mrca, "ECA_time_mean") <- NA
+        attr(mrca, "ECA_time_lower") <- NA
+        attr(mrca, "ECA_time_upper") <- NA
+      }else{
+        mrca <- MRCA(normObj = norm.counts, ...)
 
-      # output the result for this sample
-      if(!is.null(output.dir)){
-        write(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")],
-              file = paste(output.dir, ids[i], paste("MRCA_densities_", ids[i], ".txt", sep=""), sep="/"))
-        write.table(mrca, file = paste(output.dir, x$ID, paste("SNV_timing_per_segment_", ids[i], ".txt", sep=""), sep="/"))
+        # output the result for this sample
+        if(!is.null(output.dir)){
+          write(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")],
+                file = paste(output.dir, ids[i], paste("MRCA_densities_", ids[i], ".txt", sep=""), sep="/"))
+          write.table(mrca, file = paste(output.dir, x$ID, paste("SNV_timing_per_segment_", ids[i], ".txt", sep=""), sep="/"))
+        }
+
+        if(!is.null(output.dir)){
+          plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), ...)
+        }
       }
 
-      mrca.p2 <- plotMutationDensities(mrcaObj = mrca, samp.name = ids[i], ...)
-
-      if(!is.null(output.dir)){
-        pdf(paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), width = 8, height = 6)
-        print(mrca.p2)
-        dev.off()
-      }
 
       this.tumor.density <- data.table::data.table(Sample_ID = ids[i],
                                                    MRCA_time_mean = attributes(mrca)$MRCA_time_mean,
@@ -249,11 +249,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
   # plot the distribution of Mutation densities at ECA and MRCA
 
-  p3 <- plotLachesis(cohort.densities)
   if(!is.null(output.dir)){
-    pdf(paste(output.dir, "SNV_densities_cohort.pdf", sep="/"), width = 8, height = 6)
-    print(p3)
-    dev.off()
+    plotLachesis(cohort.densities, output.file = paste(output.dir, "SNV_densities_cohort.pdf", sep="/"))
   }
 
   return(cohort.densities)
@@ -269,6 +266,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 #' @param fill.multi  optional, the color code for ECA and MRCA.
 #' @param l.col, optional, the line color
 #' @param binwidth optional; the bin-width in the histogram.
+#' @param output.file optional; the file to which the plot will be stored.
 #' @examples
 #' input.files = system.file("extdata", "Sample_template.txt")
 #' lachesis <- LACHESIS(input.files = input.files)
@@ -276,10 +274,21 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
 
-plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densities = FALSE, fill.multi = NULL, l.col = NULL, binwidth = NULL){
+plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densities = FALSE, fill.multi = NULL, l.col = NULL, binwidth = NULL, fill.zero = NULL, output.file = NULL){
 
   if(is.null(lachesis)){
     stop("Missing input. Please provide the output generated by LACHESIS()")
+  }
+  if(any(is.na(lachesis$MRCA_time_mean))){
+    warning("Removing ", sum(is.na(lachesis$MRCA_time_mean)), " samples with missing MRCA density estimate.")
+    lachesis <- lachesis[!is.na(MRCA_time_mean),]
+  }
+  if(nrow(lachesis)==0){
+    warning("No sample with MRCA density estimate provided. Returning zero.")
+    return(NULL)
+  }
+  if(!is.null(output.file)){
+    pdf(output.file, width = 8, height = 6)
   }
   # graphical settings:
   if(is.null(l.col)){
@@ -403,6 +412,9 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   ## Plot OS / EFS statistics in dependence of MRCA density
 
 
+  if(!is.null(output.file)){
+    dev.off()
+  }
 
 }
 
@@ -412,7 +424,6 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 #' @param mean column name containing mean values.
 #' @param lower column name containing lower bounds.
 #' @param upper  column name containing upper bounds.
-#' @importFrom data.table
 
 .ecdf.stats <- function(data, mean, lower, upper){
   if(nrow(data)==0){
