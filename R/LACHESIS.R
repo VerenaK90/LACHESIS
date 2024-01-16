@@ -31,9 +31,30 @@
 #' @param ignore.XY Ignore allosomes. Default TRUE
 #' @param ref_build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @examples
+#' #an example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
-#' lachesis <- LACHESIS(input.files = input.files)
-#' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
+#' input.files = data.table::fread(input.files)
+#'
+#' #cnv and snv files for example tumors
+#' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+#' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+#' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+#'
+#' cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+#' snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+#'
+#' input.files$cnv.file = cnv.file
+#' input.files$snv.file = snv.file
+#'
+#' # Make an axample input file with paths to cnv and snv file along with other meta data
+#' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+#' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+#'
+#' #Exampele with template file with paths to multiple cnv/snv files as an input
+#' lachesis <- LACHESIS(input.files = lachesis_input)
+#'
+#' #Example with a single sample input
+#' strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
 #' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
 #' @seealso \code{\link{MRCA}} \code{\link{clonalMutationCounter}} \code{\link{normalizeCounts}}
