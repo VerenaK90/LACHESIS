@@ -392,8 +392,6 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   # Cumulative densities at ECA/MRCA
   par(mar = c(3, 1, 3, 1), xpd = FALSE)
 
-  to.plot <- .ecdf.stats(lachesis, mean = "MRCA_time_mean", lower = "MRCA_time_lower", upper = "MRCA_time_upper")
-
   x.min = 0
   x.max = max(c(lachesis$MRCA_time_upper))*1.3
   y.min = 0
@@ -404,15 +402,19 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
   mtext(text = "Number of tumors", side = 2, line = 2, cex = 0.7)
 
-  polygon(c(sort(lachesis$MRCA_time_mean), sort(lachesis$MRCA_time_mean, decreasing = T)),
-          c(sort(to.plot$ecdf.upper), sort(to.plot$ecdf.lower, decreasing = T)),
+  to.plot <- data.frame(x.lower = rep(sort(c( lachesis$MRCA_time_mean)), each = 2)[-1],
+                        x.upper = rep(sort(c( lachesis$MRCA_time_mean)), each = 2)[-2*(nrow(lachesis) )])
+  to.plot$y.lower <- sapply(rep(sort(c( lachesis$MRCA_time_mean)), each = 2), function(x){sum(lachesis$MRCA_time_upper <= x)})[-2*(nrow(lachesis) )]
+  to.plot$y.upper <- sapply(rep(sort(c( lachesis$MRCA_time_mean)), each = 2), function(x){sum(lachesis$MRCA_time_lower <= x)})[-1]
+
+  polygon(c(to.plot$x.lower, rev(to.plot$x.upper)),
+          c(to.plot$y.lower, rev(to.plot$y.upper))/nrow(lachesis),
           col = fill.zero, border = NA)
-  plot.ecdf(lachesis$MRCA_time_mean, col = "black", add=T)
+
+  plot.ecdf(lachesis$MRCA_time_mean, col = "black", add=TRUE, verticals = TRUE)
 
   # ECA:
   par(mar = c(3, 1, 3, 1), xpd = FALSE)
-
-  to.plot <- .ecdf.stats(lachesis, mean = "ECA_time_mean", lower = "ECA_time_lower", upper = "ECA_time_upper")
 
   x.min = 0
   x.max = max(c(lachesis$ECA_time_upper))*1.3
@@ -424,9 +426,15 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
   mtext(text = "Number of tumors", side = 2, line = 2, cex = 0.7)
 
-  polygon(c(sort(lachesis$ECA_time_mean), sort(lachesis$ECA_time_mean, decreasing = T)),
-          c(sort(to.plot$ecdf.upper), sort(to.plot$ecdf.lower, decreasing=T)), col = fill.zero, border = NA)
-  plot.ecdf(lachesis$ECA_time_mean, col = "black", add = T)
+  to.plot <- data.frame(x.lower = rep(sort(c( lachesis$ECA_time_mean)), each = 2)[-1],
+                        x.upper = rep(sort(c( lachesis$ECA_time_mean)), each = 2)[-2*(nrow(lachesis) )])
+  to.plot$y.lower <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_upper <= x)})[-2*(nrow(lachesis) )]
+  to.plot$y.upper <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_lower <= x)})[-1]
+
+  polygon(c(to.plot$x.lower, rev(to.plot$x.upper)),
+          c(to.plot$y.lower, rev(to.plot$y.upper))/nrow(lachesis),
+          col = fill.zero, border = NA)
+  plot.ecdf(lachesis$ECA_time_mean, col = "black", add = TRUE, verticals = TRUE)
 
   title(main = paste("SNV densities at ECA/MRCA"), cex.main = 1.2)
 
@@ -439,21 +447,3 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 
 }
 
-
-#' Compute ECDF statistics with lower and upper bounds
-#' @param data data table containing mean, lower and upper bound of value of interest.
-#' @param mean column name containing mean values.
-#' @param lower column name containing lower bounds.
-#' @param upper  column name containing upper bounds.
-
-.ecdf.stats <- function(data, mean, lower, upper){
-  if(nrow(data)==0){
-    return(NULL)
-  }
-  l <- ecdf(unlist(data[,..lower]))
-  u <- ecdf(unlist(data[,..upper]))
-  m <- ecdf(unlist(data[,..mean]))
-  data.table::data.table(ecdf.lower = l(unlist(data[,..mean])),
-              ecdf.mean = m(unlist(data[,..mean])),
-              ecdf.upper = u(unlist(data[,..mean])))
-}
