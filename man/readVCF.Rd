@@ -20,7 +20,7 @@ readVCF(
 
 \item{ignore.XY}{Ignore allosomes. Default TRUE}
 
-\item{vcf.source}{Tool used for generating VCF file. Can be \code{strelka} or \code{mutect} or \code{dkfz} or \code{other}}
+\item{vcf.source}{Tool used for generating VCF file. Can be \code{strelka} or \code{mutect} or \code{dkfz} or \code{sentieon}}
 
 \item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
 
@@ -28,9 +28,9 @@ readVCF(
 
 \item{t.sample}{Sample name for tumor. Must be same as in VCF. Strelka hardcodes tumor sample name to "TUMOR"}
 
-\item{info.af}{The string encoding the allele frequency field in the FORMAT column. Defaults to \code{AF}and will be ignored if \code{vcf.source} != \code{other}.}
+\item{info.af}{The string encoding the allele frequency field in the FORMAT column. Defaults to \code{AF}and will be ignored if \code{vcf.source} != \code{sentieon}.}
 
-\item{info.dp}{The string encoding the read depth field in the FORMAT column. Defaults to \code{DP}and will be ignored if \code{vcf.source} != \code{other}.}
+\item{info.dp}{The string encoding the read depth field in the FORMAT column. Defaults to \code{DP}and will be ignored if \code{vcf.source} != \code{sentieon}.}
 }
 \value{
 a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf

@@ -62,26 +62,11 @@ LACHESIS(
 
 \item{EFS.time, }{optional, event-free survival time}
 
-\item{EFS, }{optional, event-free survival indicator variable
-optional arguments}
+\item{EFS, }{optional, event-free survival indicator variable}
 
 \item{output.dir}{link to directory in which output is to be stored.}
 
-\item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
-
-\item{min.depth}{Minimum required depth for a variant to be considered. Default 30.}
-
-\item{min.cn}{maximum copy number to be included in the plotting. Defaults to 2.}
-
-\item{max.cn}{maximum copy number to be included in the analysis. Defaults to 4.}
-
-\item{chromosomes}{vector of chromosomes to include in SNV density estimation}
-
-\item{merge.tolerance}{the maximum distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp.}
-
-\item{ignore.XY}{Ignore allosomes. Default TRUE}
-
-\item{ref_build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}}
+\item{...}{further arguments and parameters passed to \code{readVCF}, \code{readCNV}, \code{plotNB}, \code{MRCA}, \code{plotMutationDensities}.}
 }
 \value{
 a data.table
