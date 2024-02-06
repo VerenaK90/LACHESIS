@@ -28,7 +28,7 @@ LACHESIS(
   min.cn = 1,
   max.cn = 4,
   merge.tolerance = 10^5,
-  min.var = 0.01,
+  min.vaf = 0.01,
   min.depth = 30,
   vcf.info.af = "AF",
   vcf.info.dp = "DP",
@@ -86,6 +86,8 @@ LACHESIS(
 
 \item{merge.tolerance}{the maximum distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp.}
 
+\item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
+
 \item{min.depth}{Minimum required depth for a variant to be considered. Default 30.}
 
 \item{vcf.info.af}{The string encoding the allele frequency field in the FORMAT column of the .vcf file. Defaults to \code{AF}and will be ignored if \code{vcf.source} != \code{sentieon}.}
@@ -101,8 +103,6 @@ LACHESIS(
 \item{excl.chr}{a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.}
 
 \item{ref_build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}}
-
-\item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
 
 \item{...}{further arguments and parameters passed to \code{plotMutationDensities}.}
 }

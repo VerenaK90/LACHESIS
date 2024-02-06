@@ -72,7 +72,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
                      cnv.chr.col = NULL, cnv.start.col = NULL, cnv.end.col = NULL, cnv.A.col = NULL,
                      cnv.B.col = NULL, cnv.tcn.col = NULL, age = NULL,
                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
-                     ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.var = 0.01, min.depth = 30,
+                     ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, min.depth = 30,
                      vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
                      ref_build = "hg19"){
 
