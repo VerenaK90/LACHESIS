@@ -21,7 +21,20 @@
 #' @param OS, optional, overall survival indicator variable
 #' @param EFS.time, optional, event-free survival time
 #' @param EFS, optional, event-free survival indicator variable
-#' @param ... further arguments and parameters passed to `readVCF`, `readCNV`, `plotNB`, `MRCA`, `plotMutationDensities`.
+#' @param min.cn minimum copy number to be included in the analysis. Default 2.
+#' @param max.cn maximum copy number to be included in the analysis. Default 4.
+#' @param merge.tolerance the maximum distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp.
+#' @param ignore.XY Ignore allosomes. Default TRUE
+#' @param min.vaf Remove variants with vcf below threshold. Default 0.01
+#' @param min.depth Minimum required depth for a variant to be considered. Default 30.
+#' @param vcf.info.af The string encoding the allele frequency field in the FORMAT column of the .vcf file. Defaults to `AF`and will be ignored if `vcf.source` != `sentieon`.
+#' @param vcf.info.dp The string encoding the read depth field in the FORMAT column of the .vcf file. Defaults to `DP`and will be ignored if `vcf.source` != `sentieon`.
+#' @param min.seg.size the minimal segment length to be included in the quantification
+#' @param fp.mean optional, the average false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
+#' @param fp.sd optional, the standard deviation of the false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
+#' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
+#' @param ref_build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
+#' @param ... further arguments and parameters passed to `plotMutationDensities`.
 #' @examples
 #' #an example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -58,7 +71,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
                      purity = NULL, ploidy = NULL,
                      cnv.chr.col = NULL, cnv.start.col = NULL, cnv.end.col = NULL, cnv.A.col = NULL,
                      cnv.B.col = NULL, cnv.tcn.col = NULL, age = NULL,
-                     OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,  ...){
+                     OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
+                     ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.var = 0.01, min.depth = 30,
+                     vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
+                     ref_build = "hg19"){
 
 
   ID <- cnv.file <- snv.file <- write.table <- NULL
@@ -71,6 +87,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
     }else if(length(cnv.files) != length(snv.files)){
       stop("Please provide snv and cnv input for every sample!")
     }
+  }
+
+  incl.chr <- setdiff(c(1:22), excl.chr)
+  if(!ignore.XY){
+    incl.chr <- c(incl.chr, "X", "Y")
   }
 
   # collect ECA and MRCA densities for each tumor
@@ -91,7 +112,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
   if(!is.null(input.files)){
 
-    sample.specs <- data.table::fread(input.files, sep = "\t", header = T, stringsAsFactors = F)
+    sample.specs <- data.table::fread(input.files, sep = "\t", header = T, stringsAsFactors = FALSE)
 
     if(any(is.na(sample.specs[,ID]))){
       warning("No sample name provided for samples ", sample.specs[,which(is.na(ID))], "; sample name was set to 1 - ", sample.specs[,sum(is.na(ID))])
@@ -134,22 +155,23 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
       cnv <- readCNV(cn.info = x$cnv.file, chr.col = x$cnv.chr.col, start.col = x$cnv.start.col,
                      end.col = x$cnv.end.col, A.col = x$cnv.A.col, B.col = x$cnv.B.col,
-                     tcn.col = x$cnv.tcn.col, tumor.id = x$ID, ...)
+                     tcn.col = x$cnv.tcn.col, tumor.id = x$ID, merge.tolerance = merge.tolerance,
+                     max.cn = max.cn, ignore.XY = ignore.XY)
 
-      snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$ID, ...)
+      snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$ID, min.depth = min.depth,
+                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
       vaf.p1 <- plotVAFdistr(snv)
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
-      nb.p1 <- plotNB(nb = nb, samp.name = x$ID, ...)
 
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"))
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ...)
+        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn)
       }
 
-      raw.counts <- clonalMutationCounter(nbObj = nb, ...)
+      raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
       norm.counts <- normalizeCounts(countObj = raw.counts)
-      mrca <- MRCA(normObj = norm.counts, ...)
+      mrca <- MRCA(normObj = norm.counts, min.seg.size = min.seg.size, fp.mean = fp.mean, excl.chr = excl.chr)
 
       this.tumor.density <- data.table::data.table(Sample_ID = x$ID,
                                                    MRCA_time_mean = attributes(mrca)$MRCA_time_mean,
@@ -204,20 +226,21 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
       cnv <- readCNV(cn.info = cnv.files[i], chr.col = cnv.chr.col[i], start.col = cnv.start.col[i],
                      end.col = cnv.end.col[i], A.col = cnv.A.col[i], B.col = cnv.B.col[i],
-                     tcn.col = cnv.tcn.col[i], tumor.id = ids[i], ...)
+                     tcn.col = cnv.tcn.col[i], tumor.id = ids[i], merge.tolerance = merge.tolerance,
+                     max.cn = max.cn, ignore.XY = ignore.XY)
 
-      snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = ids[i], ...)
+      snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = ids[i], min.depth = min.depth,
+                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
       vaf.p <- plotVAFdistr(snv)
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i])
-      nb.p1 <- plotNB(nb = nb, samp.name = ids[i], ...)
 
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"))
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ...)
+        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn)
       }
 
-      raw.counts <- clonalMutationCounter(nbObj = nb, ...)
+      raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
       norm.counts <- normalizeCounts(countObj = raw.counts)
       if(nrow(norm.counts)==1){
         warning("Too few segments to estimate MRCA density for sample ", ids[i], ".")
@@ -229,7 +252,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
         attr(mrca, "ECA_time_lower") <- NA
         attr(mrca, "ECA_time_upper") <- NA
       }else{
-        mrca <- MRCA(normObj = norm.counts, ...)
+        mrca <- MRCA(normObj = norm.counts, min.seg.size = min.seg.size, fp.mean = fp.mean, excl.chr = excl.chr)
 
         # output the result for this sample
         if(!is.null(output.dir)){
@@ -350,7 +373,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
     hist(to.plot[,log10(MRCA_time_mean)], xlim = c(min.x, max.x),
          breaks = 20,
          col = fill.zero, border = l.col, main = NA,
-         xlab = NA, ylab = NA, axes = F)
+         xlab = NA, ylab = NA, axes = FALSE)
 
     Axis(side = 1, at = seq(min.x, max.x, length.out = 10),
          labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2))
@@ -368,7 +391,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
 
   # Cumulative densities at MRCA
-  par(mar = c(3, 2, 3, 1), xpd = FALSE)
+  par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
   x.min = 0
   x.max = max(c(lachesis$MRCA_time_upper))*1.3
@@ -411,7 +434,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
     hist(to.plot[,log10(ECA_time_mean)], xlim = c(min.x, max.x),
          breaks = 20,
          col = fill.zero, border = l.col, main = NA,
-         xlab = NA, ylab = NA, axes = F)
+         xlab = NA, ylab = NA, axes = FALSE)
 
     Axis(side = 1, at = seq(min.x, max.x, length.out = 10),
          labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2))
@@ -429,7 +452,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
 
   # Cumulative mutation densities at ECA:
-  par(mar = c(3, 2, 3, 1), xpd = FALSE)
+  par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
   x.min = 0
   x.max = max(c(lachesis$ECA_time_upper))*1.3
@@ -459,6 +482,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 
 }
 
+
 #' Correlate SNV density at ECA/MRCA with clinical parameters such as age, OS, etc.
 #' @description
 #' Takes SNV densities as computed by `LACHESIS` as input and correlates them with clinical data such as age at diagnosis, survival data etc.
@@ -473,11 +497,15 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 #' plotClinicalCorrelations(lachesis)
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows points
+#' @importFrom stats cor
 
 plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress.outliers = FALSE, log.densities = FALSE,  output.file = NULL){
 
   ECA_time_mean <- NULL
 
+  if(!clin.par %in% colnames(lachesis)){
+    stop(clin.par, " not found!")
+  }
   if(is.null(lachesis)){
     stop("Missing input. Please provide the output generated by LACHESIS()")
   }
@@ -537,3 +565,4 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
   }
 
 }
+

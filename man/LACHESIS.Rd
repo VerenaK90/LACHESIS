@@ -24,7 +24,19 @@ LACHESIS(
   EFS.time = NULL,
   EFS = NULL,
   output.dir = NULL,
-  ...
+  ignore.XY = TRUE,
+  min.cn = 1,
+  max.cn = 4,
+  merge.tolerance = 10^5,
+  min.var = 0.01,
+  min.depth = 30,
+  vcf.info.af = "AF",
+  vcf.info.dp = "DP",
+  min.seg.size = 10^7,
+  fp.mean = 0,
+  fp.sd = 0,
+  excl.chr = NULL,
+  ref_build = "hg19"
 )
 }
 \arguments{
@@ -66,7 +78,33 @@ LACHESIS(
 
 \item{output.dir}{link to directory in which output is to be stored.}
 
-\item{...}{further arguments and parameters passed to \code{readVCF}, \code{readCNV}, \code{plotNB}, \code{MRCA}, \code{plotMutationDensities}.}
+\item{ignore.XY}{Ignore allosomes. Default TRUE}
+
+\item{min.cn}{minimum copy number to be included in the analysis. Default 2.}
+
+\item{max.cn}{maximum copy number to be included in the analysis. Default 4.}
+
+\item{merge.tolerance}{the maximum distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp.}
+
+\item{min.depth}{Minimum required depth for a variant to be considered. Default 30.}
+
+\item{vcf.info.af}{The string encoding the allele frequency field in the FORMAT column of the .vcf file. Defaults to \code{AF}and will be ignored if \code{vcf.source} != \code{sentieon}.}
+
+\item{vcf.info.dp}{The string encoding the read depth field in the FORMAT column of the .vcf file. Defaults to \code{DP}and will be ignored if \code{vcf.source} != \code{sentieon}.}
+
+\item{min.seg.size}{the minimal segment length to be included in the quantification}
+
+\item{fp.mean}{optional, the average false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.}
+
+\item{fp.sd}{optional, the standard deviation of the false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.}
+
+\item{excl.chr}{a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.}
+
+\item{ref_build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}}
+
+\item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
+
+\item{...}{further arguments and parameters passed to \code{plotMutationDensities}.}
 }
 \value{
 a data.table

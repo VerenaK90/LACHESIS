@@ -17,5 +17,6 @@ Depends:
     data.table,
     R (>= 2.10),
     vcfR,
-    tidyr
+    tidyr,
+    stats
 RoxygenNote: 7.2.3
