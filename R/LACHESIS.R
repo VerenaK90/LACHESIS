@@ -308,8 +308,27 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 #' @param binwidth optional; the bin-width in the histogram.
 #' @param output.file optional; the file to which the plot will be stored.
 #' @examples
-#' input.files = system.file("extdata", "Sample_template.txt")
-#' lachesis <- LACHESIS(input.files = input.files)
+#' #an example file with sample annotations and meta data
+#' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+#' input.files = data.table::fread(input.files)
+#'
+#' #cnv and snv files for example tumors
+#' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+#' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+#' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+#'
+#' cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+#' snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+#'
+#' input.files$cnv.file = cnv.file
+#' input.files$snv.file = snv.file
+#'
+#' # Make an example input file with paths to cnv and snv file along with other meta data
+#' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+#' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+#'
+#' #Example with template file with paths to multiple cnv/snv files as an input
+#' lachesis <- LACHESIS(input.files = lachesis_input)
 #' plotLachesis(lachesis)
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
@@ -492,8 +511,27 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 #' @param log.densities plot logarithmic densities. Default `FALSE`
 #' @param output.file optional; the file to which the plot will be stored.
 #' @examples
-#' input.files = system.file("extdata", "Sample_template.txt")
-#' lachesis <- LACHESIS(input.files = input.files)
+#' #an example file with sample annotations and meta data
+#' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+#' input.files = data.table::fread(input.files)
+#'
+#' #cnv and snv files for example tumors
+#' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+#' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+#' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+#'
+#' cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+#' snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+#'
+#' input.files$cnv.file = cnv.file
+#' input.files$snv.file = snv.file
+#'
+#' # Make an axample input file with paths to cnv and snv file along with other meta data
+#' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+#' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+#'
+#' #Exampele with template file with paths to multiple cnv/snv files as an input
+#' lachesis <- LACHESIS(input.files = lachesis_input)
 #' plotClinicalCorrelations(lachesis)
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows points
