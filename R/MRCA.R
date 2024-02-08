@@ -125,13 +125,19 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
 
   mutation.time.eca <- sum(mut.counts.eca)/sum(seg.length.eca)*10^6
 
-  # bootstrap upper and lower limits of the mutation time
-  bootstrapped.eca.time <- sapply(1:1000, function(x){
-    res <- sample(x = 1:length(mut.counts.eca), size = length(mut.counts.eca), prob = seg.length.eca, replace=T)
-    res <- sum(mut.counts.eca[res])/sum(seg.length.eca[res])*10^6
-  })
-  mutation.time.eca.lower <- quantile(bootstrapped.eca.time, 0.025)
-  mutation.time.eca.upper <- quantile(bootstrapped.eca.time, 0.975)
+  if(!is.na(mutation.time.eca)){
+    # bootstrap upper and lower limits of the mutation time
+    bootstrapped.eca.time <- sapply(1:1000, function(x){
+      res <- sample(x = 1:length(mut.counts.eca), size = length(mut.counts.eca), prob = seg.length.eca, replace=T)
+      res <- sum(mut.counts.eca[res])/sum(seg.length.eca[res])*10^6
+    })
+    mutation.time.eca.lower <- quantile(bootstrapped.eca.time, 0.025)
+    mutation.time.eca.upper <- quantile(bootstrapped.eca.time, 0.975)
+  }else{
+    mutation.time.eca.lower <- NA
+    mutation.time.eca.upper <- NA
+  }
+
 
   # test whether mutation densities on A allele agree with the density at ECA
   workObj$p_A_to_eca <- apply(workObj[,c("A", "n_mut_A", "Seglength", "p_adj_A_to_mrca")], 1, function(x){
@@ -213,11 +219,11 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
     if(x[1] <= 1){return(NA)}
     if(is.na(x[2]) & is.na(x[3])){
       return("not mapped to ECA or MRCA")
-    }else if(x[2] >= 0.01 & x[3] >= 0.01){
+    }else if(x[2] >= 0.01 & !is.na(x[3]) & x[3] >= 0.01){
       return("ECA/MRCA")
     }else if(x[2] >= 0.01){
       return("MRCA")
-    }else if(x[3] >= 0.01){
+    }else if(!is.na(x[3]) & x[3] >= 0.01){
       return("ECA")
     }else{
       return("not mapped to ECA or MRCA")
@@ -230,11 +236,11 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
       return(x[2])
     }else if(is.na(x[4]) & is.na(x[5])){
       return("not mapped to ECA or MRCA")
-    }else if(x[4] >= 0.01 & x[5] >= 0.01){
+    }else if(x[4] >= 0.01 & !is.na(x[5]) & x[5] >= 0.01){
       return("ECA/MRCA")
     }else if(x[4] >= 0.01){
       return("MRCA")
-    }else if(x[5] >= 0.01){
+    }else if(!is.na(x[5]) & x[5] >= 0.01){
       return("ECA")
     }else{
       return("not mapped to ECA or MRCA")
