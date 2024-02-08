@@ -36,7 +36,8 @@ LACHESIS(
   fp.mean = 0,
   fp.sd = 0,
   excl.chr = NULL,
-  ref_build = "hg19"
+  ref_build = "hg19",
+  ...
 )
 }
 \arguments{
