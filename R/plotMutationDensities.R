@@ -8,7 +8,7 @@
 #' @param fill.multi  optional, the color code for densities of mutations present on multiple copies.
 #' @param l.col, optional, the line color
 #' @param show.den optional; if `TRUE`, the density distribution of mutation densities on single copies is shown in the histogram of mutation densities on multiple copies.
-#' @param binwidth optional; the bin-width in the histogram.
+#' @param bins optional; the number of bins in the histogram.
 #' @param output.file optional; will save the plot.
 #' @examples
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -23,7 +23,7 @@
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
 
-plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, fill.zero = NULL, fill.multi = NULL, l.col = NULL, show.den = NULL, binwidth = NULL, output.file = NULL){
+plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, fill.zero = NULL, fill.multi = NULL, l.col = NULL, show.den = NULL, bins = NULL, output.file = NULL){
 
   Seglength <- . <- A <- B <- variable <- value <- lines <- density <- chrom <- TCN <- Seglength <- n_mut_A <- n_mut_B <- n_mut_total <- density_total_mean <- density_A_mean <- density_B_mean <- density_total_lower <- density_total_upper <- density_A_lower <- density_A_upper <- density_B_lower <- density_B_upper <- p_total_to_mrca <- p_A_to_mrca <- p_B_to_mrca <- p_adj_total_to_mrca <- p_adj_A_to_mrca <- p_adj_B_to_mrca <- MRCA_qual <- p_A_to_eca <- p_B_to_eca <- p_adj_A_to_eca <- p_adj_B_to_eca <- A_time <- B_time <- NULL
   if(is.null(mrcaObj)){
@@ -54,8 +54,8 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
                        !(variable == "density_total_A" & A == 1) &
                        !(variable == "density_total_B" & B == 1),]
 
-  if(is.null(binwidth)){
-    binwidth = (max(to.plot$value) - min(to.plot$value))/20
+  if(is.null(bins)){
+    bins = 20
   }
 
   lo_mat <- matrix(data = c(1, 2, 3, 3), nrow = 2, ncol=2, byrow = TRUE)
@@ -64,7 +64,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   par(mar = c(3, 4, 3, 1))
 
   hist(to.plot[variable == "density_total_mean",value], xlim = c(0, 1.05 * max(to.plot[,value])),
-       breaks = seq(0, max(to.plot[Seglength > min.seg.size,value]), binwidth), col = fill.zero, border = l.col, main = NA,
+       breaks = bins, col = fill.zero, border = l.col, main = NA,
        xlab = NA, ylab = NA)
 
   title(main = paste("Single-copy SNV densities"), cex.main = 1.2)
@@ -75,7 +75,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
   hist(to.plot[(variable == "density_A_mean" & A > 1) |
                  (variable == "density_B_mean" & B > 1 & A != B),value], xlim = c(0, 1.05 * max(to.plot[,value])),
-       breaks = seq(0, max(to.plot[Seglength > min.seg.size,value]), binwidth), col = fill.multi, border = l.col, main = NA,
+       breaks = bins, col = fill.multi, border = l.col, main = NA,
        xlab = NA, ylab = NA)
   # add density of MRCA
   if(show.den == TRUE){

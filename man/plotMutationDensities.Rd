@@ -12,7 +12,7 @@ plotMutationDensities(
   fill.multi = NULL,
   l.col = NULL,
   show.den = NULL,
-  binwidth = NULL,
+  bins = NULL,
   output.file = NULL
 )
 }
@@ -31,7 +31,7 @@ plotMutationDensities(
 
 \item{show.den}{optional; if \code{TRUE}, the density distribution of mutation densities on single copies is shown in the histogram of mutation densities on multiple copies.}
 
-\item{binwidth}{optional; the bin-width in the histogram.}
+\item{bins}{optional; the number of bins in the histogram.}
 
 \item{output.file}{optional; will save the plot.}
 }
