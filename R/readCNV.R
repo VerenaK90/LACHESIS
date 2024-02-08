@@ -15,25 +15,30 @@
 #' @param ignore.XY Ignore allosomes. Default TRUE
 #' @param tumor.id Tumor ID, optional.
 #' @examples
-#' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "NBevolution")
+#' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
 #' cn_data = readCNV(aceseq_cn)
-#' ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "NBevolution")
+#' ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "LACHESIS")
 #' cn_data = readCNV(ascat_cn)
 #' @return A standardized data frame with copy number information per segment.
 #' readCNV()
-#' @importFrom utils read.delim
+#' @importFrom utils read.delim write.table
+#' @importFrom graphics plot.new
+#' @importFrom grDevices dev.off pdf
+#' @importFrom stats cor density end plot.ecdf start
 #' @export
 
 readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL){
 
+  . <- Alt <- Chr <- Chromosome <- ECA_time_mean <- End_position <- ID <- MRCA_time_mean <- Ref <- Start <- Start_Position <- TCN <- chrom <- cnv.file <- end <- start <- t_alt_count <-t_depth <- t_ref_count <- t_vaf <- NULL
+
   ## Check input format
-  if(is.null(cn.info)){
+  if(is.null(cn.info) || is.na(cn.info)){
     stop("Error: missing cn.info! Please provide path to file with copy number information.")
   }
 
   cn.info = read.delim(cn.info, sep="\t", header = TRUE)
 
-  if(is.null(chr.col)){
+  if(is.null(chr.col) || is.na(chr.col)){
     chr.col <- colnames(cn.info)[grepl("chr", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
     chr.col <- ifelse(length(chr.col) > 0, chr.col, 1)
     warning("No chromosome identifier provided, assuming ", chr.col)
@@ -47,7 +52,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: 'arg' should be string or numeric.")
   }
 
-  if(is.null(start.col)){
+  if(is.null(start.col) || is.na(start.col)){
     start.col <- colnames(cn.info)[grepl("start", colnames(cn.info), ignore.case = TRUE) | grepl("pos", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     start.col <- ifelse(length(start.col) > 0, start.col[1], 2)
     warning("No start position identifier provided, assuming ", start.col)
@@ -61,7 +66,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: 'arg' should be string or numeric.")
   }
 
-  if(is.null(end.col)){
+  if(is.null(end.col) || is.na(end.col)){
     end.col <- colnames(cn.info)[grepl("end", colnames(cn.info), ignore.case = TRUE) | grepl("pos2", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     end.col <- ifelse(length(end.col) > 0, end.col[1], 3)
     warning("No end position identifier provided, assuming ", end.col)
@@ -77,7 +82,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
   estimate.alleles <- FALSE # will be set to TRUE if allele info is not provided, see below
 
-  if(is.null(A.col)){
+  if(is.null(A.col) || is.na(A.col)){
     A.col <- colnames(cn.info)[grepl("major", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     if(length(A.col)==0){
       if("A" %in% colnames(cn.info)){
@@ -105,7 +110,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: 'arg' should be string or numeric.")
   }
 
-  if(is.null(B.col)){
+  if(is.null(B.col) || is.na(B.col)){
     B.col <- colnames(cn.info)[grepl("minor", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     if(length(B.col)==0){
       if("B" %in% colnames(cn.info)){
@@ -131,7 +136,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: 'arg' should be string or numeric.")
   }
 
-  if(is.null(tcn.col)){
+  if(is.null(tcn.col) || is.na(tcn.col)){
     if(!is.null(A.col) & !is.null(B.col)){
       cn.info$TCN <- as.numeric(cn.info[,A.col]) + as.numeric(cn.info[,B.col])
       tcn.col <- "TCN"

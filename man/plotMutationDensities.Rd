@@ -12,7 +12,8 @@ plotMutationDensities(
   fill.multi = NULL,
   l.col = NULL,
   show.den = NULL,
-  binwidth = NULL
+  binwidth = NULL,
+  output.file = NULL
 )
 }
 \arguments{
@@ -31,14 +32,16 @@ plotMutationDensities(
 \item{show.den}{optional; if \code{TRUE}, the density distribution of mutation densities on single copies is shown in the histogram of mutation densities on multiple copies.}
 
 \item{binwidth}{optional; the bin-width in the histogram.}
+
+\item{output.file}{optional; will save the plot.}
 }
 \description{
-Visualizes results from  \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95\% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.
+Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95\% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.
 }
 \examples{
-snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "NBevolution")
+snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "NBevolution")
+aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 cl_muts <- clonalMutationCounter(nb)

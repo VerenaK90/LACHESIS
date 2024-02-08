@@ -1,0 +1,4 @@
+ID	cnv.file	snv.file	vcf.source	purity	ploidy	cnv.chr.col	cnv.start.col	cnv.end.col	cnv.A.col	cnv.B.col	cnv.tcn.col	Age	OS.time	OS	EFS.time	EFS
+NBE11	inst/extdata/NBE11/NBE11_comb_pro_extra2.59_0.83.txt	inst/extdata/NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf	dkfz	0.83	2.59							4094	6706	0	240	1
+NBE15	inst/extdata/NBE15/NBE15_comb_pro_extra2.51_1.txt	inst/extdata/NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf	dkfz	1	2.51							2143	2407	0	330	1
+NBE63	inst/extdata/NBE63/NBE63_comb_pro_extra2.3_0.97.txt	inst/extdata/NBE63/snvs_NBE63_somatic_snvs_conf_8_to_10.vcf	dkfz	0.97	0.97							1507	3634	0	3634	1

@@ -11,7 +11,8 @@ plotVAFdistr(
   showcounts = FALSE,
   showdensity = TRUE,
   col = "#34495e",
-  srtcounts = 45
+  srtcounts = 45,
+  output.file = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ plotVAFdistr(
 \item{col}{Default "#34495e"}
 
 \item{srtcounts}{Text angle if \code{showcounts} is TRUE. Default 45}
+
+\item{output.file}{optional, will save the plot.}
 }
 \value{
 data.table of frequency table
@@ -36,7 +39,7 @@ data.table of frequency table
 Plot frequency distribution of variant allele frequencies
 }
 \examples{
-strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "NBevolution")
+strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka", ignore.XY = FALSE)
 plotVAFdistr(s_data)
 }
