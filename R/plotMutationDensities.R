@@ -74,7 +74,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
 
   if(nrow(to.plot[(variable == "density_A_mean" & A > 1) |
-                 (variable == "density_B_mean" & B > 1 & A != B),value]) > 0){
+                 (variable == "density_B_mean" & B > 1 & A != B),]) > 0){
     par(mar = c(3, 4, 3, 1))
     hist(to.plot[(variable == "density_A_mean" & A > 1) |
                    (variable == "density_B_mean" & B > 1 & A != B),value], xlim = c(0, 1.05 * max(to.plot[,value])),
@@ -118,8 +118,11 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
   signs <- c("ECA" = 19, "MRCA" = 17, "ECA/MRCA" = 15, "none" = 1)
   # A alleles:
-  points(mrcaObj[A>1,density_A_mean], 1:mrcaObj[,sum(A>1)], col=1:mrcaObj[,sum(A>1)], pch=signs[mrcaObj[A>1,A_time]])
-  arrows(x0=mrcaObj[A>1,density_A_lower], y0=1:mrcaObj[,sum(A>1)], x1=mrcaObj[A>1,density_A_upper], y1=1:mrcaObj[,sum(A>1)], code=3, angle=90, length=0, col=1:mrcaObj[,sum(A>1)], lwd=1)
+  if(nrow(mrcaObj[A>1,])>0){
+    points(mrcaObj[A>1,density_A_mean], 1:mrcaObj[,sum(A>1)], col=1:mrcaObj[,sum(A>1)], pch=signs[mrcaObj[A>1,A_time]])
+    arrows(x0=mrcaObj[A>1,density_A_lower], y0=1:mrcaObj[,sum(A>1)], x1=mrcaObj[A>1,density_A_upper], y1=1:mrcaObj[,sum(A>1)], code=3, angle=90, length=0, col=1:mrcaObj[,sum(A>1)], lwd=1)
+    legend("topright",box.lwd = 0, pch=signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time], legend = names(signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time]), cex = 0.7)
+  }
   # B alleles:
   if(nrow(mrcaObj[B>1 & B!=A,])>0){
     points(mrcaObj[B>1 & B!=A,density_B_mean], (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), col=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), pch=signs[mrcaObj[B>1 & B!=A,B_time]])
@@ -134,7 +137,6 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
   }
 
-  legend("topright",box.lwd = 0, pch=signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time], legend = names(signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time]), cex = 0.7)
 
   title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2)
 
