@@ -112,7 +112,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
   if(!is.null(input.files)){
 
-    sample.specs <- data.table::fread(input.files, sep = "\t", header = T, stringsAsFactors = FALSE)
+    sample.specs <- data.table::fread(input.files, sep = "\t", stringsAsFactors = FALSE)
 
     if(any(is.na(sample.specs[,ID]))){
       warning("No sample name provided for samples ", sample.specs[,which(is.na(ID))], "; sample name was set to 1 - ", sample.specs[,sum(is.na(ID))])
