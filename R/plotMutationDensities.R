@@ -121,6 +121,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   if(nrow(mrcaObj[A>1,])>0){
     points(mrcaObj[A>1,density_A_mean], 1:mrcaObj[,sum(A>1)], col=1:mrcaObj[,sum(A>1)], pch=signs[mrcaObj[A>1,A_time]])
     arrows(x0=mrcaObj[A>1,density_A_lower], y0=1:mrcaObj[,sum(A>1)], x1=mrcaObj[A>1,density_A_upper], y1=1:mrcaObj[,sum(A>1)], code=3, angle=90, length=0, col=1:mrcaObj[,sum(A>1)], lwd=1)
+    legend("topright",box.lwd = 0, pch=signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time], legend = names(signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time]), cex = 0.7)
   }
   # B alleles:
   if(nrow(mrcaObj[B>1 & B!=A,])>0){
@@ -136,7 +137,6 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
   }
 
-  legend("topright",box.lwd = 0, pch=signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time], legend = names(signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time]), cex = 0.7)
 
   title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2)
 
