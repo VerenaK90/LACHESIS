@@ -71,26 +71,34 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   mtext(text = "SNVs per Mb", side = 1, line = 2.5, cex = 0.8)
   mtext(text = "No. of genomic segments", side = 2, line = 1.8, cex = 0.8)
 
-  par(mar = c(3, 4, 3, 1))
 
-  hist(to.plot[(variable == "density_A_mean" & A > 1) |
-                 (variable == "density_B_mean" & B > 1 & A != B),value], xlim = c(0, 1.05 * max(to.plot[,value])),
-       breaks = bins, col = fill.multi, border = l.col, main = NA,
-       xlab = NA, ylab = NA)
-  # add density of MRCA
-  if(show.den == TRUE){
-    lines(density(to.plot[variable == "density_total_mean",value]), lty = 2)
+
+  if(nrow(to.plot[(variable == "density_A_mean" & A > 1) |
+                 (variable == "density_B_mean" & B > 1 & A != B),value]) > 0){
+    par(mar = c(3, 4, 3, 1))
+    hist(to.plot[(variable == "density_A_mean" & A > 1) |
+                   (variable == "density_B_mean" & B > 1 & A != B),value], xlim = c(0, 1.05 * max(to.plot[,value])),
+         breaks = bins, col = fill.multi, border = l.col, main = NA,
+         xlab = NA, ylab = NA)
+    # add density of MRCA
+    if(show.den == TRUE){
+      lines(density(to.plot[variable == "density_total_mean",value]), lty = 2)
+    }
+
+    title(main = paste("Multi-copy SNV densities"), cex.main = 1.2)
+    mtext(text = "SNVs per Mb", side = 1, line = 2.5, cex = 0.8)
+    mtext(text = "No. of genomic segments", side = 2, line = 1.8, cex = 0.8)
+
+  }else{
+    plot(NA, NA, xlim = c(0, 1), ylim = c(0, 1), xlab = NA, ylab = NA, main = NA, axes = FALSE, frame.plot = FALSE)
   }
 
-  title(main = paste("Multi-copy SNV densities"), cex.main = 1.2)
-  mtext(text = "SNVs per Mb", side = 1, line = 2.5, cex = 0.8)
-  mtext(text = "No. of genomic segments", side = 2, line = 1.8, cex = 0.8)
 
   # Timeline summary
   par(mar = c(3, 1, 3, 1), xpd = FALSE)
 
   x.min = 0
-  x.max = max(c(mrcaObj$density_total_upper, mrcaObj$density_A_upper, mrcaObj$density_B_upper))*1.3
+  x.max = max(c(mrcaObj$density_total_upper, mrcaObj$density_A_upper, mrcaObj$density_B_upper), na.rm = TRUE)*1.3
   y.min = 0
   y.max.a = nrow(mrcaObj[A>1,])
   y.max = nrow(mrcaObj[A>1,]) + nrow(mrcaObj[B>1 & B!=A])
