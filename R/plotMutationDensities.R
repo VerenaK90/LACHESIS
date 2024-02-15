@@ -116,7 +116,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
           col = fill.zero, border = NA)
   abline(v = attr(mrcaObj, "MRCA_time_mean"), lty = 2)
 
-  signs <- c("ECA" = 19, "MRCA" = 17, "ECA/MRCA" = 15, "none" = 1)
+  signs <- c("ECA" = 19, "MRCA" = 17, "ECA/MRCA" = 15, "not mapped to ECA or MRCA" = 1)
   # A alleles:
   if(nrow(mrcaObj[A>1,])>0){
     points(mrcaObj[A>1,density_A_mean], 1:mrcaObj[,sum(A>1)], col=1:mrcaObj[,sum(A>1)], pch=signs[mrcaObj[A>1,A_time]])
