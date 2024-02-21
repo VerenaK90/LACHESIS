@@ -208,7 +208,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
       adj.p <- adj.p[-(1:sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm=TRUE))]
     }
     if(any(workObj$p_adj_B_to_mrca >= 0.01, na.rm = TRUE)){
-      workObj[p_adj_B_to_mrca >= 0.01,"p_adj_B_to_eca"] <- adj.p
+      workObj[p_adj_B_to_mrca >= 0.01,"p_adj_B_to_eca"] <- adj.p[1:sum(workObj$p_adj_B_to_mrca >= 0.01, na.rm=T)]
     }
     rm(adj.p)
   }
