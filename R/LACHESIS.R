@@ -137,6 +137,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
     sample.specs.spl <- split(sample.specs, sample.specs$ID)
 
+    if(any(lapply(sample.specs.spl, nrow) > 1)){
+      stop("Duplicated IDs found!")
+    }
+
     for(i in 1:length(sample.specs.spl)){
 
       x <- sample.specs.spl[[i]]
@@ -148,7 +152,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
       message("Computing SNV density for sample ", x$ID)
 
       if(!is.null(output.dir)){
-        dir.create(paste(output.dir, x$ID, sep="/")) # create per-sample output directory
+        dir.create(paste(output.dir, x$ID, sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
       }else{
         warning("No output directory specified. Per-sample output will be discarded.")
       }
@@ -212,6 +216,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
     for(i in 1:length(cnv.files)){
 
       message("Computing SNV density for sample ", ids[i])
+
+      if(!is.null(output.dir)){
+        dir.create(paste(output.dir, ids[i], sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
+      }else{
+        warning("No output directory specified. Per-sample output will be discarded.")
+      }
 
       if(is.na(cnv.files)[i]){
         warning("No CNV file provided for sample ", ids[i], "; sample will be excluded")
@@ -282,7 +292,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
                                                    EFS.time = EFS.time[i],
                                                    EFS = EFS[i])
 
-      cohort.densities <- merge(cohort.densities, this.tumor.density, all=T)
+      cohort.densities <- merge(cohort.densities, this.tumor.density, all=TRUE)
     }
   }
 
