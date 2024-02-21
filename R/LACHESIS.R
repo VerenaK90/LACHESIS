@@ -454,6 +454,8 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   if(all(is.na(lachesis$ECA_time_mean)) & !is.null(output.file)){
     dev.off()
     return()
+  }else if(all(is.na(lachesis$ECA_time_mean))){
+    return()
   }
 
   to.plot <- lachesis
@@ -466,8 +468,8 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   par(mar = c(3, 4, 3, 1))
 
   if(log.densities){
-    min.x <- floor(min(to.plot[,log10(ECA_time_mean)]))
-    max.x <- ceiling(max(to.plot[,log10(ECA_time_mean)]))
+    min.x <- floor(min(to.plot[,log10(ECA_time_mean)], na.rm = TRUE))
+    max.x <- ceiling(max(to.plot[,log10(ECA_time_mean)], na.rm = TRUE))
 
     hist(to.plot[,log10(ECA_time_mean)], xlim = c(min.x, max.x),
          breaks = 20,
@@ -478,9 +480,9 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
          labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2))
     Axis(side = 2)
   }else{
-    binwidth = (max(to.plot$ECA_time_mean) - min(to.plot$ECA_time_mean))/20
-    hist(to.plot[,ECA_time_mean], xlim = c(0, 1.05 * max(to.plot[,ECA_time_mean])),
-         breaks = seq(0, max(to.plot[,ECA_time_mean])*1.05, binwidth), col = fill.multi, border = l.col, main = NA,
+    binwidth = (max(to.plot$ECA_time_mean, na.rm = TRUE) - min(to.plot$ECA_time_mean, na.rm = TRUE))/20
+    hist(to.plot[,ECA_time_mean], xlim = c(0, 1.05 * max(to.plot[,ECA_time_mean], na.rm = TRUE)),
+         breaks = seq(0, max(to.plot[,ECA_time_mean], na.rm = TRUE)*1.05, binwidth), col = fill.multi, border = l.col, main = NA,
          xlab = NA, ylab = NA)
   }
 
@@ -493,7 +495,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
   x.min = 0
-  x.max = max(c(lachesis$ECA_time_upper))*1.3
+  x.max = max(lachesis$ECA_time_upper, na.rm = TRUE)*1.3
   y.min = 0
   y.max = 1
   plot(NA, NA, xlim=c(x.min, x.max), ylim=c(y.min, y.max), xlab = NA, ylab = NA, main = NA, axes = FALSE, frame.plot = FALSE)
@@ -503,12 +505,12 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   mtext(text = "No. of tumors", side = 2, line = 2, cex = 0.7)
 
   to.plot <- data.frame(x.lower = rep(sort(c( lachesis$ECA_time_mean)), each = 2)[-1],
-                        x.upper = rep(sort(c( lachesis$ECA_time_mean)), each = 2)[-2*(nrow(lachesis) )])
-  to.plot$y.lower <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_upper <= x)})[-2*(nrow(lachesis) )]
-  to.plot$y.upper <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_lower <= x)})[-1]
+                        x.upper = rep(sort(c( lachesis$ECA_time_mean)), each = 2)[-2*(nrow(lachesis[!is.na(ECA_time_mean),]) )])
+  to.plot$y.lower <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_upper <= x, na.rm = TRUE)})[-2*(nrow(lachesis[!is.na(ECA_time_mean),]) )]
+  to.plot$y.upper <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_lower <= x, na.rm = TRUE)})[-1]
 
   polygon(c(to.plot$x.lower, rev(to.plot$x.upper)),
-          c(to.plot$y.lower, rev(to.plot$y.upper))/nrow(lachesis),
+          c(to.plot$y.lower, rev(to.plot$y.upper))/nrow(lachesis[!is.na(ECA_time_mean),]),
           col = fill.multi, border = NA)
   plot.ecdf(lachesis$ECA_time_mean, col = "black", add = TRUE, verticals = TRUE)
 
