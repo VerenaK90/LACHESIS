@@ -167,8 +167,9 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
 
     posteriors <- apply(p.priors, 1, function(p){
       sum(apply(measured.muts, 1, function(x){
-        L <- dmultinom(x = c(as.numeric(as.character(x["t_alt_count"])), as.numeric(as.character(x["t_ref_count"]))),
-                       prob = clonal.vafs)
+        L <-  dbinom(x = as.numeric(as.character(x["t_alt_count"])), size=as.numeric(as.character(x["t_depth"])), prob = clonal.vafs)
+        #L <- dmultinom(x = c(as.numeric(as.character(x["t_alt_count"])), as.numeric(as.character(x["t_ref_count"]))),
+        #               prob = clonal.vafs)
         P <- L/sum(L)
         log(sum(c(p[1], p[2], (1-sum(p)))*P))
       }))
