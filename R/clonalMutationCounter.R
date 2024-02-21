@@ -178,7 +178,7 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     p.clones <- c(p.priors[which.max(posteriors),], 1-sum(p.priors[which.max(posteriors),]))
   }
 
-  return(p.clones)
+  return(unlist(p.clones))
 
 }
 
