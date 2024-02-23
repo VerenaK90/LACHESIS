@@ -137,6 +137,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
     sample.specs.spl <- split(sample.specs, sample.specs$ID)
 
+    if(any(lapply(sample.specs.spl, nrow) > 1)){
+      stop("Duplicated IDs found!")
+    }
+
     for(i in 1:length(sample.specs.spl)){
 
       x <- sample.specs.spl[[i]]
@@ -148,7 +152,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
       message("Computing SNV density for sample ", x$ID)
 
       if(!is.null(output.dir)){
-        dir.create(paste(output.dir, x$ID, sep="/")) # create per-sample output directory
+        dir.create(paste(output.dir, x$ID, sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
       }else{
         warning("No output directory specified. Per-sample output will be discarded.")
       }
@@ -213,6 +217,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
       message("Computing SNV density for sample ", ids[i])
 
+      if(!is.null(output.dir)){
+        dir.create(paste(output.dir, ids[i], sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
+      }else{
+        warning("No output directory specified. Per-sample output will be discarded.")
+      }
+
       if(is.na(cnv.files)[i]){
         warning("No CNV file provided for sample ", ids[i], "; sample will be excluded")
         next
@@ -221,8 +231,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
         warning("No SNV file provided for sample ", ids[i], "; sample will be excluded")
         next
       }
-
-      message("Computing SNV density for sample ", ids[i])
 
       cnv <- readCNV(cn.info = cnv.files[i], chr.col = cnv.chr.col[i], start.col = cnv.start.col[i],
                      end.col = cnv.end.col[i], A.col = cnv.A.col[i], B.col = cnv.B.col[i],
@@ -237,7 +245,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"))
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn)
+        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -256,13 +264,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
         # output the result for this sample
         if(!is.null(output.dir)){
-          write(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")],
+          write(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]),
                 file = paste(output.dir, ids[i], paste("MRCA_densities_", ids[i], ".txt", sep=""), sep="/"))
-          write.table(mrca, file = paste(output.dir, x$ID, paste("SNV_timing_per_segment_", ids[i], ".txt", sep=""), sep="/"))
+          write.table(mrca, file = paste(output.dir, ids[i], paste("SNV_timing_per_segment_", ids[i], ".txt", sep=""), sep="/"))
         }
 
         if(!is.null(output.dir)){
-          plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), ...)
+          plotMutationDensities(mrcaObj = mrca, samp.name = ids[i], output.file = paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), ...)
         }
       }
 
@@ -282,7 +290,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
                                                    EFS.time = EFS.time[i],
                                                    EFS = EFS[i])
 
-      cohort.densities <- merge(cohort.densities, this.tumor.density, all=T)
+      cohort.densities <- merge(cohort.densities, this.tumor.density, all=TRUE)
     }
   }
 
@@ -444,6 +452,8 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   if(all(is.na(lachesis$ECA_time_mean)) & !is.null(output.file)){
     dev.off()
     return()
+  }else if(all(is.na(lachesis$ECA_time_mean))){
+    return()
   }
 
   to.plot <- lachesis
@@ -456,8 +466,8 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   par(mar = c(3, 4, 3, 1))
 
   if(log.densities){
-    min.x <- floor(min(to.plot[,log10(ECA_time_mean)]))
-    max.x <- ceiling(max(to.plot[,log10(ECA_time_mean)]))
+    min.x <- floor(min(to.plot[,log10(ECA_time_mean)], na.rm = TRUE))
+    max.x <- ceiling(max(to.plot[,log10(ECA_time_mean)], na.rm = TRUE))
 
     hist(to.plot[,log10(ECA_time_mean)], xlim = c(min.x, max.x),
          breaks = 20,
@@ -468,9 +478,9 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
          labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2))
     Axis(side = 2)
   }else{
-    binwidth = (max(to.plot$ECA_time_mean) - min(to.plot$ECA_time_mean))/20
-    hist(to.plot[,ECA_time_mean], xlim = c(0, 1.05 * max(to.plot[,ECA_time_mean])),
-         breaks = seq(0, max(to.plot[,ECA_time_mean])*1.05, binwidth), col = fill.multi, border = l.col, main = NA,
+    binwidth = (max(to.plot$ECA_time_mean, na.rm = TRUE) - min(to.plot$ECA_time_mean, na.rm = TRUE))/20
+    hist(to.plot[,ECA_time_mean], xlim = c(0, 1.05 * max(to.plot[,ECA_time_mean], na.rm = TRUE)),
+         breaks = seq(0, max(to.plot[,ECA_time_mean], na.rm = TRUE)*1.05, binwidth), col = fill.multi, border = l.col, main = NA,
          xlab = NA, ylab = NA)
   }
 
@@ -483,7 +493,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
   x.min = 0
-  x.max = max(c(lachesis$ECA_time_upper))*1.3
+  x.max = max(lachesis$ECA_time_upper, na.rm = TRUE)*1.3
   y.min = 0
   y.max = 1
   plot(NA, NA, xlim=c(x.min, x.max), ylim=c(y.min, y.max), xlab = NA, ylab = NA, main = NA, axes = FALSE, frame.plot = FALSE)
@@ -493,12 +503,12 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   mtext(text = "No. of tumors", side = 2, line = 2, cex = 0.7)
 
   to.plot <- data.frame(x.lower = rep(sort(c( lachesis$ECA_time_mean)), each = 2)[-1],
-                        x.upper = rep(sort(c( lachesis$ECA_time_mean)), each = 2)[-2*(nrow(lachesis) )])
-  to.plot$y.lower <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_upper <= x)})[-2*(nrow(lachesis) )]
-  to.plot$y.upper <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_lower <= x)})[-1]
+                        x.upper = rep(sort(c( lachesis$ECA_time_mean)), each = 2)[-2*(nrow(lachesis[!is.na(ECA_time_mean),]) )])
+  to.plot$y.lower <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_upper <= x, na.rm = TRUE)})[-2*(nrow(lachesis[!is.na(ECA_time_mean),]) )]
+  to.plot$y.upper <- sapply(rep(sort(c( lachesis$ECA_time_mean)), each = 2), function(x){sum(lachesis$ECA_time_lower <= x, na.rm = TRUE)})[-1]
 
   polygon(c(to.plot$x.lower, rev(to.plot$x.upper)),
-          c(to.plot$y.lower, rev(to.plot$y.upper))/nrow(lachesis),
+          c(to.plot$y.lower, rev(to.plot$y.upper))/nrow(lachesis[!is.na(ECA_time_mean),]),
           col = fill.multi, border = NA)
   plot.ecdf(lachesis$ECA_time_mean, col = "black", add = TRUE, verticals = TRUE)
 

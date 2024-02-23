@@ -202,7 +202,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
 
   # adjust p values and cut off at 0.01. Gains with p < 0.01 likely occurred at a different time point
   if(nrow(workObj[p_adj_A_to_mrca >= 0.01 | p_adj_B_to_mrca >= 0.01,])>0){
-    adj.p <- p.adjust(unlist(workObj[p_adj_A_to_mrca >= 0.01,p_A_to_eca], workObj[p_adj_B_to_mrca >= 0.01, p_B_to_eca]))
+    adj.p <- p.adjust(unlist(c(workObj[p_adj_A_to_mrca >= 0.01,p_A_to_eca], workObj[p_adj_B_to_mrca >= 0.01, p_B_to_eca])))
     if(any(workObj$p_adj_A_to_mrca >= 0.01, na.rm = TRUE)){
       workObj[p_adj_A_to_mrca >= 0.01,"p_adj_A_to_eca"] <- adj.p[1:sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm=T)]
       adj.p <- adj.p[-(1:sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm=TRUE))]
