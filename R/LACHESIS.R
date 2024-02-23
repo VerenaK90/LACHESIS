@@ -232,8 +232,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
         next
       }
 
-      message("Computing SNV density for sample ", ids[i])
-
       cnv <- readCNV(cn.info = cnv.files[i], chr.col = cnv.chr.col[i], start.col = cnv.start.col[i],
                      end.col = cnv.end.col[i], A.col = cnv.A.col[i], B.col = cnv.B.col[i],
                      tcn.col = cnv.tcn.col[i], tumor.id = ids[i], merge.tolerance = merge.tolerance,
@@ -247,7 +245,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"))
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn)
+        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -266,13 +264,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
         # output the result for this sample
         if(!is.null(output.dir)){
-          write(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")],
+          write(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]),
                 file = paste(output.dir, ids[i], paste("MRCA_densities_", ids[i], ".txt", sep=""), sep="/"))
-          write.table(mrca, file = paste(output.dir, x$ID, paste("SNV_timing_per_segment_", ids[i], ".txt", sep=""), sep="/"))
+          write.table(mrca, file = paste(output.dir, ids[i], paste("SNV_timing_per_segment_", ids[i], ".txt", sep=""), sep="/"))
         }
 
         if(!is.null(output.dir)){
-          plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), ...)
+          plotMutationDensities(mrcaObj = mrca, samp.name = ids[i], output.file = paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), ...)
         }
       }
 
