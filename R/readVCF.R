@@ -47,7 +47,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
       message("Assuming ", t.sample, " as tumor")
     }else{
       vcf.cols <- .get_vcf_cols(vcf = vcf)
-      if(!any(grepl(t.sample, vcf.cols))){
+      if(!any(t.sample == vcf.cols)){
         t.sample <- .get_t_SM(vcf = vcf)
         message("Assuming ", t.sample, " as tumor")
       }
