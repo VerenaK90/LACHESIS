@@ -229,8 +229,8 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   message("********** Retaining ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info$Chr)), " chromosomes.")
 
   if(any(cn.info$End < cn.info$Start)){
-    warning("Removing ", sum(cn.info$End < cn.info$Start), "segments with start > end")
-    cn.info[cn.info$Start <= cn.info$End,]
+    warning("Removing ", sum(cn.info$End < cn.info$Start), " segments with start > end")
+    cn.info <- cn.info[cn.info$Start <= cn.info$End,]
   }
   if(sum(cn.info$End - cn.info$Start) < 3*10^8){
     warning("Less than 10% of the genome with valid copy number information.")
