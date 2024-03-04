@@ -4,6 +4,7 @@
 #' the sample specifications or vectors giving direct paths to the sample files. CNV file requires columns for the chromosome number, start and end of the segment, and either the total copy number or the number of A- and B-alleles
 #' @param input.files a tab-delimited sample-specification file, it must contain the sample name, the path to the SNV file, path to CNV file, and optionally purity, ploidy, cnv.chr.col, cnv.start.col, cnv.end.col, cnv.A.col, cnv.B.col, cnv.tcn.col. A template for this spreadsheet can be downloaded from ...
 #' @param ids vector of sample names, will be ignored if `input.files` is specified.
+#' @param vcf.tumor.ids vector of sample names as given in the vcf file; will be ignored if `input.files` is specified.
 #' @param cnv.files vector of cnv files in same order as ids; should be in tab-delimited format, will be ignored if `input.files` is specified.
 #' @param snv.files vector of snv files in same order as ids; should be in vcf format, will be ignored if `input.files` is specified.
 #' @param vcf.source Tool used for generating VCF file. Can be `strelka` or `mutect` or `dkfz`
@@ -147,7 +148,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
       x[,which(sapply(x, is.na)):=NULL] # remove NA entries
 
       if(is.null(x$ID)){
-        stop()
+        stop("Please provide sample identifiers.")
+      }
+      if(is.null(x$vcf.source)){
+        x$vcf.source <- x$ID
+      }else if(any(is.na(x$vcf.source))){
+        warning("No column identifier provided for sample ", which(is.na(x$vcf.source)), "; will be inferred.")
+        x$vcf.source[is.na(x$vcf.source)] <- x$id[is.na(x$vcf.source)]
       }
       message("Computing SNV density for sample ", x$ID)
 
@@ -162,7 +169,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
                      tcn.col = x$cnv.tcn.col, tumor.id = x$ID, merge.tolerance = merge.tolerance,
                      max.cn = max.cn, ignore.XY = ignore.XY)
 
-      snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$ID, min.depth = min.depth,
+      snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$vcf.tumor.ids, min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
       vaf.p1 <- plotVAFdistr(snv)
 
@@ -212,6 +219,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
       warning("No sample name provided for samples ", which(is.na(ids)), "; sample name was set to 1 - ", sum(is.na(ids)))
       ids[is.na(ids)] <- which(is.na(ids))
     }
+    if(is.null(vcf.tumor.ids)){
+      warning("No column identifiers provided.")
+      vcf.tumor.ids <- ids
+    }else if(any(is.na(vcf.tumor.ids))){
+      warning("No column identifier  provided for samples ", which(is.na(vcf.tumor.ids)), "; column name will be inferred")
+      vcf.tumor.ids[is.na(vcf.tumor.ids)] <- ids[is.na(vcf.tumor.ids)]
+    }
 
     for(i in 1:length(cnv.files)){
 
@@ -232,12 +246,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
         next
       }
 
+
       cnv <- readCNV(cn.info = cnv.files[i], chr.col = cnv.chr.col[i], start.col = cnv.start.col[i],
                      end.col = cnv.end.col[i], A.col = cnv.A.col[i], B.col = cnv.B.col[i],
                      tcn.col = cnv.tcn.col[i], tumor.id = ids[i], merge.tolerance = merge.tolerance,
                      max.cn = max.cn, ignore.XY = ignore.XY)
 
-      snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = ids[i], min.depth = min.depth,
+      snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = vcf.tumor.ids[i], min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
       vaf.p <- plotVAFdistr(snv)
 
