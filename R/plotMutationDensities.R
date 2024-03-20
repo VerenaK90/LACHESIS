@@ -101,7 +101,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   x.max = max(c(mrcaObj$density_total_upper, mrcaObj$density_A_upper, mrcaObj$density_B_upper), na.rm = TRUE)*1.3
   y.min = 0
   y.max.a = nrow(mrcaObj[A>1,])
-  y.max = nrow(mrcaObj[A>1,]) + nrow(mrcaObj[B>1 & B!=A])
+  y.max = max(c(1, nrow(mrcaObj[A>1,]) + nrow(mrcaObj[B>1 & B!=A])))
   plot(NA, NA, xlim=c(x.min, x.max), ylim=c(y.min, y.max), xlab = NA, ylab = NA, main = NA, axes = FALSE, frame.plot = FALSE)
   Axis(side=1, cex = 0.7)
   mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
