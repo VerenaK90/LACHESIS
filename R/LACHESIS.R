@@ -447,7 +447,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   Axis(side=1, cex = 0.7)
   Axis(side=2, cex = 0.7)
   mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
-  mtext(text = "No. of tumors", side = 2, line = 2, cex = 0.7)
+  mtext(text = "Fraction of tumors", side = 2, line = 2, cex = 0.7)
 
   to.plot <- data.frame(x.lower = rep(sort(c( lachesis$MRCA_time_mean)), each = 2)[-1],
                         x.upper = rep(sort(c( lachesis$MRCA_time_mean)), each = 2)[-2*(nrow(lachesis) )])
@@ -502,7 +502,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 
   title(main = paste("SNV densities at ECA"), cex.main = 1)
   mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
-  mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
+  mtext(text = "Fraction of tumors", side = 2, line = 1.8, cex = 0.7)
 
   # Cumulative mutation densities at ECA:
   par(mar = c(3, 4, 3, 1), xpd = FALSE)
