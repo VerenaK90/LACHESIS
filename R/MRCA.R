@@ -142,7 +142,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
   # test whether mutation densities on A allele agree with the density at ECA
   workObj$p_A_to_eca <- apply(workObj[,c("A", "n_mut_A", "Seglength", "p_adj_A_to_mrca")], 1, function(x){
     if(x[1]<=1 | x[4] >= 0.01){return(NA)} # no gain or already mapped to MRCA
-    if(x[2]==0 & sum(mut.counts.eca)==0){
+    if(x[2]==0 & sum(mut.counts.eca)==0 & length(mut.counts.eca)>0){
       return(1)
     }
     if(length(mut.counts.eca)==1){
@@ -156,7 +156,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
   # test whether mutation densities on B allele agree with the density at ECA
   workObj$p_B_to_eca <- apply(workObj[,c("A", "B", "n_mut_B", "Seglength", "p_adj_B_to_mrca")], 1, function(x){
     if(x[2]<=1 | x[1]==x[2] | x[4] >= 0.01){return(NA)} # no gain or A = B or already mapped to MRCA
-    if(x[2]==0 & sum(mut.counts.eca)==0){
+    if(x[2]==0 & sum(mut.counts.eca)==0 & length(mut.counts.eca)>0){
       return(1)
     }
     if(length(mut.counts.eca)==1){
@@ -178,7 +178,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
   # test whether mutation densities on A allele agree with the density at ECA
   workObj$p_A_to_eca <- apply(workObj[,c("A", "n_mut_A", "Seglength", "p_adj_A_to_mrca", "p_A_to_eca")], 1, function(x){
     if(x[1]<=1 | x[4] < 0.01){return(x[5])} # no gain or already mapped to MRCA
-    if(x[2]==0 & sum(mut.counts.eca)==0){
+    if(x[2]==0 & sum(mut.counts.eca)==0 & length(mut.counts.eca)>0){
       return(1)
     }
     if(length(mut.counts.eca)==1){
@@ -191,7 +191,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
   # test whether mutation densities on B allele agree with the density at ECA
   workObj$p_B_to_eca <- apply(workObj[,c("A", "B", "n_mut_B", "Seglength", "p_adj_B_to_mrca", "p_B_to_eca")], 1, function(x){
     if(x[2]<=1 | x[1]==x[2] | x[4] < 0.01){return(x[5])} # no gain or A = B or already mapped to MRCA
-    if(x[2]==0 & sum(mut.counts.eca)==0){
+    if(x[2]==0 & sum(mut.counts.eca)==0 & length(mut.counts.eca)>0){
       return(1)
     }
     if(length(mut.counts.eca)==1){
