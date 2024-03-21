@@ -81,7 +81,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
          breaks = bins, col = fill.multi, border = l.col, main = NA,
          xlab = NA, ylab = NA)
     # add density of MRCA
-    if(show.den == TRUE){
+    if(show.den == TRUE & nrow(to.plot[variable == "density_total_mean"])>1){
       lines(density(to.plot[variable == "density_total_mean",value]), lty = 2)
     }
 
