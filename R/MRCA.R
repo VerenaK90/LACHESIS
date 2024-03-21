@@ -110,7 +110,11 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
   rm(adj.p)
 
   # fragments where total mutation count does not agree with mutation density at MRCA (quality control):
-  workObj$MRCA_qual <- workObj[,lapply(.SD, function(x){ifelse(x < 0.01, "FAIL", "PASS")}), .SDcols = "p_adj_total_to_mrca"]
+  if(mutation.time.mrca==0){
+    workObj$MRCA_qual <- "FAIL"
+  }else{
+    workObj$MRCA_qual <- workObj[,lapply(.SD, function(x){ifelse(x < 0.01, "FAIL", "PASS")}), .SDcols = "p_adj_total_to_mrca"]
+  }
 
   if(any(workObj$MRCA_qual == "FAIL")){
     warning(sum(workObj$MRCA_qual == "FAIL"), " segments did not conform to the mutation density at MRCA.")
