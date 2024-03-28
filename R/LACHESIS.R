@@ -618,7 +618,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 
     par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
-    to.plot[,plot(ECA_time_mean, get(clin.par), xlab = NA, ylab = NA, xlim = c(0, 1.05*max(ECA_time_mean)),
+    to.plot[,plot(ECA_time_mean, get(clin.par), xlab = NA, ylab = NA, xlim = c(0, 1.05*max(ECA_time_mean, na.rm=T)),
                   ylim = c(0, 1.05*max(get(clin.par))), cex.axis = 0.7, log = ifelse(log.densities, "x", ""))]
     title(main = "SNV densities at ECA vs age", cex.main = 1)
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.8)
