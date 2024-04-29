@@ -175,6 +175,24 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
 
+      if(nrow(nb)==0){
+        warning("Insufficient data for sample ", x$ID)
+        this.tumor.density <- data.table::data.table(Sample_ID = x$ID,
+                                                     MRCA_time_mean = NA,
+                                                     MRCA_time_lower = NA,
+                                                     MRCA_time_upper = NA,
+                                                     ECA_time_mean = NA,
+                                                     ECA_time_lower = NA,
+                                                     ECA_time_upper = NA,
+                                                     Ploidy = x$ploidy,
+                                                     Purity = x$purity,
+                                                     Age = x$Age,
+                                                     OS.time = x$OS.time,
+                                                     OS = x$OS,
+                                                     EFS.time = x$EFS.time,
+                                                     EFS = x$EFS)
+        next
+      }
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"))
         plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn, purity = x$purity, ploidy = x$ploidy)
@@ -258,6 +276,25 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i])
 
+      if(nrow(nb)==0){
+        warning("Insufficient data for sample ", x$ID)
+        this.tumor.density <- data.table::data.table(Sample_ID = ids[i],
+                                                     MRCA_time_mean = NA,
+                                                     MRCA_time_lower = NA,
+                                                     MRCA_time_upper = NA,
+                                                     ECA_time_mean = NA,
+                                                     ECA_time_lower = NA,
+                                                     ECA_time_upper = NA,
+                                                     Ploidy = ploidy[i],
+                                                     Purity = purity[i],
+                                                     Age = age[i],
+                                                     OS.time = OS.time[i],
+                                                     OS = OS[i],
+                                                     EFS.time = EFS.time[i],
+                                                     EFS = EFS[i])
+
+        next
+      }
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"))
         plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn, purity = purity[i], ploidy = ploidy[i])
