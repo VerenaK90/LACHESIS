@@ -6,6 +6,7 @@
 \usage{
 readCNV(
   cn.info = NULL,
+  cn.source = NULL,
   chr.col = NULL,
   start.col = NULL,
   end.col = NULL,
@@ -20,6 +21,8 @@ readCNV(
 }
 \arguments{
 \item{cn.info}{Path to the copy number information. Requires columns for the chromosome number, start and end of the segment, and either the total copy number or the number of A- and B-alleles}
+
+\item{cn.source}{Tool used for generating CN file. Can be \code{dnacopy} or \code{aceseq} or \code{ascat}}
 
 \item{chr.col}{column index of chromosome number}
 
@@ -53,6 +56,8 @@ aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", p
 cn_data = readCNV(aceseq_cn)
 ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "LACHESIS")
 cn_data = readCNV(ascat_cn)
+dnacopy_cn = system.file("extdata", "", package = "LACHESIS")
+dnacopy_cn = readCNV(dnacopy_cn)
 }
 \author{
 {Verena Körber}

@@ -7,6 +7,7 @@
 LACHESIS(
   input.files = NULL,
   ids = NULL,
+  vcf.tumor.ids = NULL,
   cnv.files = NULL,
   snv.files = NULL,
   vcf.source = NULL,
@@ -44,6 +45,8 @@ LACHESIS(
 \item{input.files}{a tab-delimited sample-specification file, it must contain the sample name, the path to the SNV file, path to CNV file, and optionally purity, ploidy, cnv.chr.col, cnv.start.col, cnv.end.col, cnv.A.col, cnv.B.col, cnv.tcn.col. A template for this spreadsheet can be downloaded from ...}
 
 \item{ids}{vector of sample names, will be ignored if \code{input.files} is specified.}
+
+\item{vcf.tumor.ids}{vector of sample names as given in the vcf file; will be ignored if \code{input.files} is specified.}
 
 \item{cnv.files}{vector of cnv files in same order as ids; should be in tab-delimited format, will be ignored if \code{input.files} is specified.}
 

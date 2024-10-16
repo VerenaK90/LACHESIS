@@ -68,7 +68,7 @@
 #' @return a data.table
 #' @export
 
-LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files = NULL, vcf.source = NULL,
+LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.files = NULL, snv.files = NULL, vcf.source = NULL,
                      purity = NULL, ploidy = NULL,
                      cnv.chr.col = NULL, cnv.start.col = NULL, cnv.end.col = NULL, cnv.A.col = NULL,
                      cnv.B.col = NULL, cnv.tcn.col = NULL, age = NULL,
