@@ -172,7 +172,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
   message("********** Read in ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info[,chr.col])), " chromosomes.")
 
-  cn.info[,tcn.col] <- as.numeric(cn.info[,tcn.col])
+  cn.info[,tcn.col] <- round(as.numeric(cn.info[,tcn.col]))
   message("********** Removing ", sum(is.na(cn.info[,tcn.col])), " segments without copy number information...")
 
   cn.info <- cn.info[!is.na(cn.info[,tcn.col]),]
@@ -194,8 +194,8 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   }
 
   ## in ACEseq output A and B alleles are characters - transform to numeric
-  cn.info[,A.col] <- as.numeric(as.character(cn.info[,A.col]))
-  cn.info[,B.col] <- as.numeric(as.character(cn.info[,B.col]))
+  cn.info[,A.col] <- round(as.numeric(as.character(cn.info[,A.col])))
+  cn.info[,B.col] <- round(as.numeric(as.character(cn.info[,B.col])))
 
   ## check chromosome format and amend if not 'chr1', 'chr2', etc.
   if(grepl("chr", cn.info[1,chr.col])){
