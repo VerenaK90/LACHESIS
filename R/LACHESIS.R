@@ -145,7 +145,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
     for(i in 1:length(sample.specs.spl)){
 
       x <- sample.specs.spl[[i]]
-      x[,which(sapply(x, is.na)):=NULL] # remove NA entries
+      #x[,which(sapply(x, is.na)):=NULL] # remove NA entries
 
       if(is.null(x$ID)){
         stop("Please provide sample identifiers.")
