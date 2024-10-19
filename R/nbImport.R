@@ -102,6 +102,7 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
 
   #n_copies <- length(min.cn:max.cn)
   n_copy_combs <- nrow(unique(nb[TCN >= min.cn & TCN <= max.cn,TCN, B]))
+  n_copy_combs <- n_copy_combs + n_copy_combs%%2
   lo_mat <- matrix(data = c(rep(1, n_copy_combs/2), 2:(n_copy_combs/2+1), (n_copy_combs/2 + 2):(n_copy_combs+1)), nrow = 3, byrow = TRUE)
  # lo_mat <- matrix(data = c(rep(1, n_copies), 2:(n_copies+1)), (n_copies + 2), nrow = 3, byrow = TRUE)
   graphics::layout(mat = lo_mat, heights = c(3, 2, 2))
