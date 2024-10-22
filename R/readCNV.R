@@ -172,7 +172,12 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
   message("********** Read in ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info[,chr.col])), " chromosomes.")
 
-  cn.info[,tcn.col] <- round(as.numeric(cn.info[,tcn.col]))
+  ## round copy number to multiples of 0.2
+  cn.info[,tcn.col] <- as.numeric(as.character(cn.info[,tcn.col]))
+  ## for callers without subconal/clonal assignment, remove subclonals based on maximal deviation of 0.2
+  cn.info <- cn.info[cn.info[,tcn.col]%%1 <=  0.2 | cn.info[,tcn.col]%%1 >= 0.8,,drop=F]
+  ## round the remaining copy numbers
+  cn.info[,tcn.col] <- round(cn.info[,tcn.col])
   message("********** Removing ", sum(is.na(cn.info[,tcn.col])), " segments without copy number information...")
 
   cn.info <- cn.info[!is.na(cn.info[,tcn.col]),]
@@ -193,9 +198,18 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     cn.info <- .estimate_alleles(cn.info, tcn.col)
   }
 
-  ## in ACEseq output A and B alleles are characters - transform to numeric
-  cn.info[,A.col] <- round(as.numeric(as.character(cn.info[,A.col])))
-  cn.info[,B.col] <- round(as.numeric(as.character(cn.info[,B.col])))
+  ## in ACEseq output A and B alleles are characters - transform to numeric.
+  ## moreover, round copy numbers to 1 digit (for e.g. input from PURPLE)
+  cn.info[,A.col] <- as.numeric(as.character(cn.info[,A.col]))
+  cn.info[,B.col] <- as.numeric(as.character(cn.info[,B.col]))
+
+  ## for callers without subconal/clonal assignment, remove subclonals based on maximal deviation of 0.2
+  cn.info <- cn.info[cn.info[,A.col]%%1 <=  0.1 | cn.info[,A.col]%%1 >= 0.9,,drop=F]
+  cn.info <- cn.info[cn.info[,B.col]%%1 <=  0.1 | cn.info[,B.col]%%1 >= 0.9,,drop=F]
+  ## round the remaining copy numbers
+  cn.info[,A.col] <- round(cn.info[,A.col])
+  cn.info[,B.col] <- round(cn.info[,B.col])
+
 
   ## check chromosome format and amend if not 'chr1', 'chr2', etc.
   if(grepl("chr", cn.info[1,chr.col])){
