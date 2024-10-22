@@ -4,7 +4,6 @@
 #' @description Convert a user-specified bed-file with copy number information into a standardized format. Perform various quality checks on the file input and return the clean and standardized data-frame. If column identifiers for chromosomal positions and allele-specific copy number information are not provided, the function attempts to identify these columns based on standard nomenclature. If total copy number information is provided but allele-specific information is missing, the function assumes that the number of B alleles is the rounded off of half the total copy number.
 #'
 #' @param cn.info Path to the copy number information. Requires columns for the chromosome number, start and end of the segment, and either the total copy number or the number of A- and B-alleles
-#' @param cn.source Tool used for generating CN file. Can be `dnacopy` or `aceseq` or `ascat`
 #' @param chr.col column index of chromosome number
 #' @param start.col column index of first position of the segment
 #' @param end.col column index of last position of the segment
@@ -20,8 +19,6 @@
 #' cn_data = readCNV(aceseq_cn)
 #' ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "LACHESIS")
 #' cn_data = readCNV(ascat_cn)
-#' dnacopy_cn = system.file("extdata", "", package = "LACHESIS")
-#' dnacopy_cn = readCNV(dnacopy_cn)
 #' @return A standardized data frame with copy number information per segment.
 #' readCNV()
 #' @importFrom utils read.delim write.table
@@ -30,7 +27,7 @@
 #' @importFrom stats cor density end plot.ecdf start
 #' @export
 
-readCNV <- function(cn.info = NULL, cn.source = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL){
+readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL){
 
   . <- Alt <- Chr <- Chromosome <- ECA_time_mean <- End_position <- ID <- MRCA_time_mean <- Ref <- Start <- Start_Position <- TCN <- chrom <- cnv.file <- end <- start <- t_alt_count <-t_depth <- t_ref_count <- t_vaf <- NULL
 
@@ -39,17 +36,7 @@ readCNV <- function(cn.info = NULL, cn.source = NULL, chr.col = NULL, start.col 
     stop("Error: missing cn.info! Please provide path to file with copy number information.")
   }
 
-  cn.sources <- c("dnacopy", "aceseq", "dkfz")
-  cn.source <- match.arg(arg = cn.source, choices = cn.sources, several.ok = FALSE)
-
-  ## Process DNAcopy file
-    if (cn.source == "dnacopy") {
-    cn.info = process_dnacopy(cn.info)
-    warning("DNAcopy file: processing to compatible dataframe")
-
-  } else {
-    cn.info = read.delim(cn.info, sep="\t", header = TRUE)
-  }
+  cn.info = read.delim(cn.info, sep="\t", header = TRUE)
 
   if(is.null(chr.col) || is.na(chr.col)){
     chr.col <- colnames(cn.info)[grepl("chr", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
@@ -123,6 +110,7 @@ readCNV <- function(cn.info = NULL, cn.source = NULL, chr.col = NULL, start.col 
     stop("Error: 'arg' should be string or numeric.")
   }
 
+
   if(is.null(B.col) || is.na(B.col)){
     B.col <- colnames(cn.info)[grepl("minor", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     if(length(B.col)==0){
@@ -150,14 +138,16 @@ readCNV <- function(cn.info = NULL, cn.source = NULL, chr.col = NULL, start.col 
   }
 
   if(is.null(tcn.col) || is.na(tcn.col)){
-    if(!is.null(A.col) & !is.null(B.col)){
-      cn.info$TCN <- as.numeric(cn.info[,A.col]) + as.numeric(cn.info[,B.col])
-      tcn.col <- "TCN"
-      message("********** Total copy number computed as A + B.")
-    }else{
-      tcn.col <- colnames(cn.info)[grepl("\\btcn\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcnt\\b", colnames(cn.info), ignore.case = TRUE) |
-                                     grepl("\\bcopynumber\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcopy number\\b", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
-      if(length(tcn.col)==0){
+    tcn.col <- colnames(cn.info)[grepl("\\btcn\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcnt\\b", colnames(cn.info), ignore.case = TRUE) |
+                                   grepl("\\bcopynumber\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcopy number\\b", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
+
+    if(length(tcn.col)==0){
+      if(!is.null(A.col) & !is.null(B.col)){
+        cn.info$TCN <- as.numeric(cn.info[,A.col]) + as.numeric(cn.info[,B.col])
+        tcn.col <- "TCN"
+        message("********** Total copy number computed as A + B.")
+      }
+      else {
         stop("Error: TCN identifier is not provided and could not be inferred!")
       }
       tcn.col <- tcn.col[1]
@@ -252,46 +242,6 @@ readCNV <- function(cn.info = NULL, cn.source = NULL, chr.col = NULL, start.col 
   attr(cn.info, "ID") <- tumor.id
 
   return(cn.info)
-
-}
-
-.process_dnacopy <- function(dnacopy_cn, ID = NULL, chrom = NULL, loc.start = NULL, loc.end = NULL, tcn = NULL) {
-
-  ## reading as data table
-  dnacopy.dt <- data.table::fread(dnacopy_cn)
-
-  ## changing header to new names
-  setnames(dnacopy.dt, old = names(dnacopy.dt)[1:6], new = c("ID", "chr", "start", "end", "NA", "tcn"))
-
-  ## deleting V5
-  dnacopy.dt[,"NA":= NULL]
-
-  ## deleting rows with "", NA, tabs in chr
-  dnacopy.dt <- dnacopy.dt[dnacopy.dt$chr != "" & !is.na(dnacopy.dt$chr), ]
-  dnacopy.dt$chr <- trimws(dnacopy.dt$chr)
-
-  ## forcing chr to be character
-  segment.smoothed.dt$chr <- as.character(segment.smoothed.dt$chr)
-
-  #forcing start and end to numeric
-  dnacopy.dt$start <- as.numeric(dnacopy.dt$start)
-  dnacopy.dt$end <- as.numeric(dnacopy.dt$end)
-
-  ## calculating tumor cell content
-  segment.smoothed.dt[, tcn := 2*(2^get("tcn"))]
-  segment.smoothed.dt[, tcn := round(tcn)]
-
-  ## estimating A:B
-  dnacopy.dt[, A := ceiling(dnacopy.dt[,tcn] / 2)]
-  dnacopy.dt[, B := floor(dnacopy.dt[,tcn] / 2)]
-
-  ## changing the order
-  setcolorder(dnacopy.dt, c("ID", "chr", "start", "end", "A", "B", "tcn"))
-
-  ## converting datatable into dataframe
-  dnacopy.df <- as.data.frame(dnacopy.dt)
-
-  return(dnacopy.df)
 
 }
 
