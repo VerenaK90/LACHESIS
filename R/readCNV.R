@@ -43,7 +43,7 @@ readCNV <- function(cn.info = NULL, cn.source = NULL, chr.col = NULL, start.col 
   cn.source <- match.arg(arg = cn.source, choices = cn.sources, several.ok = FALSE)
 
   ## Process DNAcopy file
-    if (cn.source == "DNAcopy") {
+    if (cn.source == "dnacopy") {
     cn.info = process_dnacopy(cn.info)
     warning("DNAcopy file: processing to compatible dataframe")
 
@@ -266,11 +266,11 @@ readCNV <- function(cn.info = NULL, cn.source = NULL, chr.col = NULL, start.col 
   ## deleting V5
   dnacopy.dt[,"NA":= NULL]
 
-  # deleting rows with "", NA, tabs in chr
+  ## deleting rows with "", NA, tabs in chr
   dnacopy.dt <- dnacopy.dt[dnacopy.dt$chr != "" & !is.na(dnacopy.dt$chr), ]
   dnacopy.dt$chr <- trimws(dnacopy.dt$chr)
 
-  # forcing chr to be character
+  ## forcing chr to be character
   segment.smoothed.dt$chr <- as.character(segment.smoothed.dt$chr)
 
   #forcing start and end to numeric
