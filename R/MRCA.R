@@ -82,22 +82,22 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
 
   # test with a negative binomial distribution whether the individual fragments agree with a joint time point (hence accounting for overdispersion of the local mutation rate):
   workObj$p_total_to_mrca <- apply(workObj[,c("n_mut_total", "Seglength")], 1, function(x){
-    lower.tail <- ifelse(x[1] < round(tot.muts.mrca * x[2]/tot.seglength.mrca), TRUE, FALSE)
-    test <- pnbinom(q = x[1], size = round(tot.muts.mrca), prob = round(tot.muts.mrca)/(round(tot.muts.mrca)*(1+x[2]/tot.seglength.mrca)), lower.tail = lower.tail)
+    lower.tail <- ifelse(x[1] < .true_round(tot.muts.mrca * x[2]/tot.seglength.mrca), TRUE, FALSE)
+    test <- pnbinom(q = x[1], size = .true_round(tot.muts.mrca), prob = .true_round(tot.muts.mrca)/(.true_round(tot.muts.mrca)*(1+x[2]/tot.seglength.mrca)), lower.tail = lower.tail)
   })
 
   # test whether mutation densities on A allele agree with the density at MRCA
   workObj$p_A_to_mrca <- apply(workObj[,c("A", "n_mut_A", "Seglength")], 1, function(x){
     if(x[1]<=1){return(NA)} # no gain
-    lower.tail <- ifelse(x[2] < round(tot.muts.mrca*(1 - fp.mean) * x[3]/tot.seglength.mrca), TRUE, FALSE)
-    test <- pnbinom(q = x[2], size = round(tot.muts.mrca * (1-fp.mean)), prob = round(tot.muts.mrca * (1 - fp.mean))/(round(tot.muts.mrca * (1 - fp.mean))*(1+x[3]/tot.seglength.mrca)), lower.tail = lower.tail)
+    lower.tail <- ifelse(x[2] < .true_round(tot.muts.mrca*(1 - fp.mean) * x[3]/tot.seglength.mrca), TRUE, FALSE)
+    test <- pnbinom(q = x[2], size = .true_round(tot.muts.mrca * (1-fp.mean)), prob = .true_round(tot.muts.mrca * (1 - fp.mean))/(.true_round(tot.muts.mrca * (1 - fp.mean))*(1+x[3]/tot.seglength.mrca)), lower.tail = lower.tail)
   })
 
   # test whether mutation densities on B allele agree with the density at MRCA
   workObj$p_B_to_mrca <- apply(workObj[,c("A", "B", "n_mut_B", "Seglength")], 1, function(x){
     if(x[2]<=1 | x[1]==x[2]){return(NA)} # no gain or A = B
-    lower.tail <- ifelse(x[3] < round(tot.muts.mrca*(1 - fp.mean) * x[4]/tot.seglength.mrca), TRUE, FALSE)
-    test <- pnbinom(q = x[3], size = round(tot.muts.mrca * (1-fp.mean)), prob = round(tot.muts.mrca * (1 - fp.mean))/(round(tot.muts.mrca * (1 - fp.mean))*(1+x[4]/tot.seglength.mrca)), lower.tail = lower.tail)
+    lower.tail <- ifelse(x[3] < .true_round(tot.muts.mrca*(1 - fp.mean) * x[4]/tot.seglength.mrca), TRUE, FALSE)
+    test <- pnbinom(q = x[3], size = .true_round(tot.muts.mrca * (1-fp.mean)), prob = .true_round(tot.muts.mrca * (1 - fp.mean))/(.true_round(tot.muts.mrca * (1 - fp.mean))*(1+x[4]/tot.seglength.mrca)), lower.tail = lower.tail)
   })
 
   # adjust p values and cut off at 0.01. Gains with p < 0.01 likely occurred at a different time point
@@ -260,4 +260,14 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
   attr(workObj, "ECA_time_upper") <- mutation.time.eca.upper
 
   return(workObj)
+}
+
+
+.true_round <- function(number, digits = 0) {
+  posneg <- sign(number)
+  number <- abs(number) * 10^digits
+  number <- number + 0.5 + sqrt(.Machine$double.eps)
+  number <- trunc(number)
+  number <- number / 10 ^ digits
+  number * posneg
 }

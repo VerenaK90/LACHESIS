@@ -178,6 +178,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   cn.info <- cn.info[cn.info[,tcn.col]%%1 <=  0.2 | cn.info[,tcn.col]%%1 >= 0.8,,drop=F]
   ## round the remaining copy numbers
   cn.info[,tcn.col] <- round(cn.info[,tcn.col])
+
   message("********** Removing ", sum(is.na(cn.info[,tcn.col])), " segments without copy number information...")
 
   cn.info <- cn.info[!is.na(cn.info[,tcn.col]),]
