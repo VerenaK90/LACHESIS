@@ -116,8 +116,9 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
   mtext(text = "Chromosome", side = 1, line = 2, cex = 0.9)
   title(main = ifelse(is.null(samp.name), yes = attr(nb, "t.sample"), no = samp.name))
 
+  nb <- nb[TCN >= min.cn & TCN <= max.cn,]
   nb$TCN <- factor(nb$TCN, levels = 1:max.cn)
-  nb <- split(nb, nb$TCN)[min.cn:max.cn]
+  nb <- split(nb, nb$TCN)
 
   for(cn in seq_along(nb)){
     nb. <- split(nb[[cn]], nb[[cn]]$B)
@@ -138,7 +139,7 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
         mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
         mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
         if(!is.null(purity) & !is.null(ploidy)){
-          abline(v = .expectedClVAF(CN = cn, purity = purity), lty = 2)
+          abline(v = .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity), lty = 2)
         }
       }
     }
