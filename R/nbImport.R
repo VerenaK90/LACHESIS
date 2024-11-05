@@ -64,8 +64,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' @param min.cn maximum copy number to be included in the plotting. Defaults to 2.
 #' @param max.cn maximum copy number to be included in the plotting. Defaults to 4.
 #' @param samp.name Sample name. Optional. Default NULL
-#' @param purity optional. If `purity` and `ploidy` are both given, expected positions of clonal peaks are shown.
-#' @param ploidy optional. If `purity` and `ploidy` are both given, expected positions of clonal peaks are shown.
 #' @param output.file optional, will save the plot.
 #' @examples
 #' snvs = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -77,7 +75,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' @export
 #' @importFrom graphics abline axis box grid hist mtext par rect text title
 
-plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL, purity = NULL, ploidy = NULL, output.file = NULL){
+plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL, output.file = NULL){
 
   chrom <- start <- t_vaf <- NULL
 
@@ -138,8 +136,8 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
         title(main = paste0("CN:", as.numeric(ploidy), " (", as.numeric(ploidy) - as.numeric(B), ":", as.numeric(B), ")"), cex.main = 1.2)
         mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
         mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
-        if(!is.null(purity) & !is.null(ploidy)){
-          abline(v = .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity), lty = 2)
+        if(!is.null(attr(nb, "purity")) & !is.null(attr(nb, "ploidy"))){
+          abline(v = .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = attr(nb, "purity")), lty = 2)
         }
       }
     }
