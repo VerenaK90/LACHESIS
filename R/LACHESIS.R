@@ -68,7 +68,7 @@
 #' @return a data.table
 #' @export
 
-LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files = NULL, vcf.source = NULL,
+LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.files = NULL, snv.files = NULL, vcf.source = NULL,
                      purity = NULL, ploidy = NULL,
                      cnv.chr.col = NULL, cnv.start.col = NULL, cnv.end.col = NULL, cnv.A.col = NULL,
                      cnv.B.col = NULL, cnv.tcn.col = NULL, age = NULL,
@@ -145,7 +145,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, cnv.files = NULL, snv.files
     for(i in 1:length(sample.specs.spl)){
 
       x <- sample.specs.spl[[i]]
-      x[,which(sapply(x, is.na)):=NULL] # remove NA entries
+      #x[,which(sapply(x, is.na)):=NULL] # remove NA entries
 
       if(is.null(x$ID)){
         stop("Please provide sample identifiers.")
