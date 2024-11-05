@@ -175,7 +175,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   ## round copy number to multiples of 0.2
   cn.info[,tcn.col] <- as.numeric(as.character(cn.info[,tcn.col]))
   ## for callers without subconal/clonal assignment, remove subclonals based on maximal deviation of 0.2
-  cn.info <- cn.info[cn.info[,tcn.col]%%1 <=  0.2 | cn.info[,tcn.col]%%1 >= 0.8,,drop=F]
+  cn.info <- cn.info[cn.info[,tcn.col]%%1 <=  0.2 | cn.info[,tcn.col]%%1 >= 0.8,,drop = FALSE]
   ## round the remaining copy numbers
   cn.info[,tcn.col] <- round(cn.info[,tcn.col])
 
@@ -204,9 +204,9 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   cn.info[,A.col] <- as.numeric(as.character(cn.info[,A.col]))
   cn.info[,B.col] <- as.numeric(as.character(cn.info[,B.col]))
 
-  ## for callers without subconal/clonal assignment, remove subclonals based on maximal deviation of 0.2
-  cn.info <- cn.info[cn.info[,A.col]%%1 <=  0.1 | cn.info[,A.col]%%1 >= 0.9,,drop=F]
-  cn.info <- cn.info[cn.info[,B.col]%%1 <=  0.1 | cn.info[,B.col]%%1 >= 0.9,,drop=F]
+  ## for callers without subconal/clonal assignment, remove subclonals based on maximal deviation of 0.2 for the total CN (A+B), and based on a maximal deviation of 0.1 for each allele
+  cn.info <- cn.info[cn.info[,A.col]%%1 <=  0.1 | cn.info[,A.col]%%1 >= 0.9,,drop = FALSE]
+  cn.info <- cn.info[cn.info[,B.col]%%1 <=  0.1 | cn.info[,B.col]%%1 >= 0.9,,drop = FALSE]
   ## round the remaining copy numbers
   cn.info[,A.col] <- round(cn.info[,A.col])
   cn.info[,B.col] <- round(cn.info[,B.col])
