@@ -91,6 +91,8 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
     pdf(output.file, width = 7, height = 9)
   }
 
+  purity = attr(nb, "purity")
+
   segs <- attr(nb, "cnv")
   segs <- segs[order(chrom, start)]
   colnames(segs)[1:3] <- c("Chromosome", "Start_Position", "End_Position")
@@ -136,8 +138,8 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
         title(main = paste0("CN:", as.numeric(ploidy), " (", as.numeric(ploidy) - as.numeric(B), ":", as.numeric(B), ")"), cex.main = 1.2)
         mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
         mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
-        if(!is.null(attr(nb, "purity")) & !is.null(attr(nb, "ploidy"))){
-          abline(v = .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = attr(nb, "purity")), lty = 2)
+        if(!is.null(purity)){
+          abline(v = .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity), lty = 2)
         }
       }
     }

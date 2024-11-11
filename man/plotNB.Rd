@@ -10,8 +10,6 @@ plotNB(
   min.cn = 2,
   max.cn = 4,
   samp.name = NULL,
-  purity = NULL,
-  ploidy = NULL,
   output.file = NULL
 )
 }
@@ -25,10 +23,6 @@ plotNB(
 \item{max.cn}{maximum copy number to be included in the plotting. Defaults to 4.}
 
 \item{samp.name}{Sample name. Optional. Default NULL}
-
-\item{purity}{optional. If \code{purity} and \code{ploidy} are both given, expected positions of clonal peaks are shown.}
-
-\item{ploidy}{optional. If \code{purity} and \code{ploidy} are both given, expected positions of clonal peaks are shown.}
 
 \item{output.file}{optional, will save the plot.}
 }
