@@ -43,4 +43,3 @@ normalizeCounts <- function(countObj = NULL){
 
   return(normObj)
 }
-

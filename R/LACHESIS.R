@@ -201,7 +201,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       } else {
         plotVAFdistr(snv)
         plotNB(nb, samp.name = x$ID, ref_build = ref_build, min.cn = min.cn, max.cn = max.cn, purity = x$purity, ploidy = x$ploidy)
-        }
+      }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
       norm.counts <- normalizeCounts(countObj = raw.counts)
@@ -227,18 +227,18 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       # output the result for this sample
       if(!is.null(output.dir)){
         write.table(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]),
-              file = paste(output.dir, x$ID, paste("MRCA_densities_", x$ID, ".txt", sep=""), sep="/"), quote = F, col.names = F, sep="\t")
+                    file = paste(output.dir, x$ID, paste("MRCA_densities_", x$ID, ".txt", sep=""), sep="/"), quote = F, col.names = F, sep="\t")
         write.table(mrca, file = paste(output.dir, x$ID, paste("SNV_timing_per_segment_", x$ID, ".txt", sep=""), sep="/"), row.names = F, quote=F, sep="\t")
       } else {
         write.table(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]), quote = F, col.names = F, sep="\t")
         write.table(mrca, row.names = F, quote=F, sep="\t")
-        }
+      }
 
       if(!is.null(output.dir)){
         plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), ...)
       } else {
         plotMutationalDensities(mrcaObj = mrca, samp.name = x$ID, ...)
-        }
+      }
     }
     rm(sample.specs.spl)
   }else{
@@ -309,9 +309,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"))
         plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn, purity = purity[i], ploidy = ploidy[i])
       } else {
-          plotVAFdistr(snv)
-          plotNB(nb, samp.name = ids[i], ref_build = ref_build, min.cn = min.cn, max.cn = max.cn, purity = purity[i], ploidy = ploidy[i])
-        }
+        plotVAFdistr(snv)
+        plotNB(nb, samp.name = ids[i], ref_build = ref_build, min.cn = min.cn, max.cn = max.cn, purity = purity[i], ploidy = ploidy[i])
+      }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
       norm.counts <- normalizeCounts(countObj = raw.counts)
@@ -366,12 +366,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
   # plot the distribution of Mutation densities at ECA and MRCA
   plotLachesis(cohort.densities)
-#
-#   if(!is.null(output.dir)){
-#     plotLachesis(cohort.densities, output.file = paste(output.dir, "SNV_densities_cohort.pdf", sep="/"))
-#   } else {
-#     plotLachesis(cohort.densities)
-#   }
+  #
+  #   if(!is.null(output.dir)){
+  #     plotLachesis(cohort.densities, output.file = paste(output.dir, "SNV_densities_cohort.pdf", sep="/"))
+  #   } else {
+  #     plotLachesis(cohort.densities)
+  #   }
 
   return(cohort.densities)
 }
@@ -452,7 +452,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 
   if(suppress.outliers){
     to.plot <- to.plot[MRCA_time_mean < quantile(MRCA_time_mean, 0.975) &
-              MRCA_time_mean > quantile(MRCA_time_mean, 0.025),]
+                         MRCA_time_mean > quantile(MRCA_time_mean, 0.025),]
   }
 
   if(is.null(binwidth)){
@@ -695,4 +695,3 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
   }
 
 }
-

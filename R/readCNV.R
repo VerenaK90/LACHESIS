@@ -110,7 +110,6 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: 'arg' should be string or numeric.")
   }
 
-
   if(is.null(B.col) || is.na(B.col)){
     B.col <- colnames(cn.info)[grepl("minor", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     if(length(B.col)==0){
@@ -138,16 +137,14 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   }
 
   if(is.null(tcn.col) || is.na(tcn.col)){
-    tcn.col <- colnames(cn.info)[grepl("\\btcn\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcnt\\b", colnames(cn.info), ignore.case = TRUE) |
-                                   grepl("\\bcopynumber\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcopy number\\b", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
-
-    if(length(tcn.col)==0){
-      if(!is.null(A.col) & !is.null(B.col)){
-        cn.info$TCN <- as.numeric(cn.info[,A.col]) + as.numeric(cn.info[,B.col])
-        tcn.col <- "TCN"
-        message("********** Total copy number computed as A + B.")
-      }
-      else {
+    if(!is.null(A.col) & !is.null(B.col)){
+      cn.info$TCN <- as.numeric(cn.info[,A.col]) + as.numeric(cn.info[,B.col])
+      tcn.col <- "TCN"
+      message("********** Total copy number computed as A + B.")
+    }else{
+      tcn.col <- colnames(cn.info)[grepl("\\btcn\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcnt\\b", colnames(cn.info), ignore.case = TRUE) |
+                                     grepl("\\bcopynumber\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcopy number\\b", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
+      if(length(tcn.col)==0){
         stop("Error: TCN identifier is not provided and could not be inferred!")
       }
       tcn.col <- tcn.col[1]
@@ -175,7 +172,13 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
   message("********** Read in ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info[,chr.col])), " chromosomes.")
 
-  cn.info[,tcn.col] <- as.numeric(cn.info[,tcn.col])
+  ## round copy number to multiples of 0.2
+  cn.info[,tcn.col] <- as.numeric(as.character(cn.info[,tcn.col]))
+  ## for callers without subconal/clonal assignment, remove subclonals based on maximal deviation of 0.2
+  cn.info <- cn.info[cn.info[,tcn.col]%%1 <=  0.2 | cn.info[,tcn.col]%%1 >= 0.8,,drop = FALSE]
+  ## round the remaining copy numbers
+  cn.info[,tcn.col] <- round(cn.info[,tcn.col])
+
   message("********** Removing ", sum(is.na(cn.info[,tcn.col])), " segments without copy number information...")
 
   cn.info <- cn.info[!is.na(cn.info[,tcn.col]),]
@@ -196,9 +199,18 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     cn.info <- .estimate_alleles(cn.info, tcn.col)
   }
 
-  ## in ACEseq output A and B alleles are characters - transform to numeric
+  ## in ACEseq output A and B alleles are characters - transform to numeric.
+  ## moreover, round copy numbers to 1 digit (for e.g. input from PURPLE)
   cn.info[,A.col] <- as.numeric(as.character(cn.info[,A.col]))
   cn.info[,B.col] <- as.numeric(as.character(cn.info[,B.col]))
+
+  ## for callers without subconal/clonal assignment, remove subclonals based on maximal deviation of 0.2 for the total CN (A+B), and based on a maximal deviation of 0.1 for each allele
+  cn.info <- cn.info[cn.info[,A.col]%%1 <=  0.1 | cn.info[,A.col]%%1 >= 0.9,,drop = FALSE]
+  cn.info <- cn.info[cn.info[,B.col]%%1 <=  0.1 | cn.info[,B.col]%%1 >= 0.9,,drop = FALSE]
+  ## round the remaining copy numbers
+  cn.info[,A.col] <- round(cn.info[,A.col])
+  cn.info[,B.col] <- round(cn.info[,B.col])
+
 
   ## check chromosome format and amend if not 'chr1', 'chr2', etc.
   if(grepl("chr", cn.info[1,chr.col])){

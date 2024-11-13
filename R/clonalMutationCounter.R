@@ -98,7 +98,11 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     if(TCN %in% c(1,2) & A == 1){
       n_mut <- nrow(measured.muts)*2 # first-order peak is quantified on the upper half only, thus multiply by 2
       splt$n_mut_A = n_mut/2 # distribute mutations equally between A and B allele
-      splt$n_mut_B = n_mut/2
+      if(B == 0){
+        splt$n_mut_B = 0
+      }else{
+        splt$n_mut_B = n_mut/2
+      }
       splt$n_mut_total = n_mut
 
       return(splt)
@@ -181,4 +185,3 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
   return(unlist(p.clones))
 
 }
-

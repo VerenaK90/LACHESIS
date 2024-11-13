@@ -58,14 +58,12 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 
 #' Plot VAF distribution per copy number
 #' @description
-#' Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number.
+#' Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.
 #' @param nb output generated from \code{\link{nbImport}}
 #' @param ref_build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @param min.cn maximum copy number to be included in the plotting. Defaults to 2.
 #' @param max.cn maximum copy number to be included in the plotting. Defaults to 4.
 #' @param samp.name Sample name. Optional. Default NULL
-#' @param purity optional. If `purity` and `ploidy` are both given, expected positions of clonal peaks are shown.
-#' @param ploidy optional. If `purity` and `ploidy` are both given, expected positions of clonal peaks are shown.
 #' @param output.file optional, will save the plot.
 #' @examples
 #' snvs = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -77,7 +75,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' @export
 #' @importFrom graphics abline axis box grid hist mtext par rect text title
 
-plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL, purity = NULL, ploidy = NULL, output.file = NULL){
+plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL, output.file = NULL){
 
   chrom <- start <- t_vaf <- NULL
 
@@ -90,8 +88,10 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
   }
 
   if(!is.null(output.file)){
-    pdf(output.file, width = 7, height = 6)
+    pdf(output.file, width = 7, height = 9)
   }
+
+  purity = attr(nb, "purity")
 
   segs <- attr(nb, "cnv")
   segs <- segs[order(chrom, start)]
@@ -100,9 +100,12 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
 
   contig_lens <- cumsum(.getContigLens(build = ref_build))
 
-  n_copies <- length(min.cn:max.cn)
-  lo_mat <- matrix(data = c(rep(1, n_copies), 2:(n_copies+1)), nrow = 2, byrow = TRUE)
-  graphics::layout(mat = lo_mat, heights = c(3, 2))
+  #n_copies <- length(min.cn:max.cn)
+  n_copy_combs <- nrow(unique(nb[TCN >= min.cn & TCN <= max.cn,TCN, B]))
+  n_copy_combs <- n_copy_combs + n_copy_combs%%2
+  lo_mat <- matrix(data = c(rep(1, n_copy_combs/2), 2:(n_copy_combs/2+1), (n_copy_combs/2 + 2):(n_copy_combs+1)), nrow = 3, byrow = TRUE)
+  # lo_mat <- matrix(data = c(rep(1, n_copies), 2:(n_copies+1)), (n_copies + 2), nrow = 3, byrow = TRUE)
+  graphics::layout(mat = lo_mat, heights = c(3, 2, 2))
   par(mar = c(3, 4, 4, 3))
   plot(NA, ylim = c(0, max.cn), xlim = c(0, max(contig_lens)), axes = FALSE, xlab = NA, ylab = NA)
   abline(h = 1:max.cn, v = contig_lens, lty = 2, col = "gray70", lwd = 0.4)
@@ -113,26 +116,31 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
   mtext(text = "Chromosome", side = 1, line = 2, cex = 0.9)
   title(main = ifelse(is.null(samp.name), yes = attr(nb, "t.sample"), no = samp.name))
 
+  nb <- nb[TCN >= min.cn & TCN <= max.cn,]
   nb$TCN <- factor(nb$TCN, levels = 1:max.cn)
-  nb <- split(nb, nb$TCN)[min.cn:max.cn]
+  nb <- split(nb, nb$TCN)
 
   for(cn in seq_along(nb)){
+    nb. <- split(nb[[cn]], nb[[cn]]$B)
     ploidy = names(nb)[cn]
-    tcn <- nb[[cn]]
-    if(nrow(tcn) == 0){
-      par(mar = c(3, 4, 3, 1))
-      plot(NA, xlim = c(0, 1), ylim = c(0, 50), xlab = NA, ylab = NA, col = "#34495e", main = NA, frame.plot = FALSE)
-      title(main = paste0("Total CN:", ploidy), cex.main = 1.2)
-      mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
-      mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
-    }else{
-      par(mar = c(3, 4, 3, 1))
-      hist(tcn[,t_vaf], breaks = 100, xlim = c(0, 1), xlab = NA, ylab = NA,  border = NA, col = "#34495e", main = NA)
-      title(main = paste0("Total CN:", ploidy), cex.main = 1.2)
-      mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
-      mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
-      if(!is.null(purity) & !is.null(ploidy)){
-        abline(v = .expectedClVAF(CN = cn, purity = purity), lty = 2)
+    for(b in seq_along(nb.)){
+      tcn <- nb.[[b]]
+      B <- names(nb.)[b]
+      if(nrow(tcn) == 0){
+        par(mar = c(3, 4, 3, 1))
+        plot(NA, xlim = c(0, 1), ylim = c(0, 50), xlab = NA, ylab = NA, col = "#34495e", main = NA, frame.plot = FALSE)
+        title(main = paste0("Total CN:", ploidy), cex.main = 1.2)
+        mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
+        mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
+      }else{
+        par(mar = c(3, 4, 3, 1))
+        hist(tcn[,t_vaf], breaks = 100, xlim = c(0, 1), xlab = NA, ylab = NA,  border = NA, col = "#34495e", main = NA)
+        title(main = paste0("CN:", as.numeric(ploidy), " (", as.numeric(ploidy) - as.numeric(B), ":", as.numeric(B), ")"), cex.main = 1.2)
+        mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
+        mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
+        if(!is.null(purity)){
+          abline(v = .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity), lty = 2)
+        }
       }
     }
   }
@@ -222,4 +230,3 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
 .expectedClVAF <- function(CN, purity){
   (1:CN)*purity/(purity*CN + 2*(1-purity))
 }
-
