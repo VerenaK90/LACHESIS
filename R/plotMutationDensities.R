@@ -76,10 +76,15 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   if(nrow(to.plot[(variable == "density_A_mean" & A > 1) |
                   (variable == "density_B_mean" & B > 1 & A != B),]) > 0){
     par(mar = c(3, 4, 3, 1))
+
+
+    #Get y and x axis limits
+    temp_d = density(to.plot[variable == "density_total_mean",value])
+
     hist(to.plot[(variable == "density_A_mean" & A > 1) |
-                   (variable == "density_B_mean" & B > 1 & A != B),value], xlim = c(0, 1.05 * max(to.plot[,value])),
+                   (variable == "density_B_mean" & B > 1 & A != B),value], xlim = range(temp_d$x, na.rm = TRUE),
          breaks = bins, col = fill.multi, border = l.col, main = NA,
-         xlab = NA, ylab = NA)
+         xlab = NA, ylab = NA, ylim = range(temp_d$y, na.rm = TRUE))
     # add density of MRCA
     if(show.den == TRUE & nrow(to.plot[variable == "density_total_mean"])>1){
       lines(density(to.plot[variable == "density_total_mean",value]), lty = 2)
@@ -143,3 +148,4 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   if(!is.null(output.file)){
     dev.off()
   }
+}
