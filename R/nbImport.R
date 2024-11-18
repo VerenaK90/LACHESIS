@@ -50,8 +50,8 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
   colnames(sv)[which(colnames(sv) == "start")] <- "cn_start"
   colnames(sv)[which(colnames(sv) == "end")] <- "cn_end"
   attr(sv, "cnv") <- cnv
-  attr(sv, "purity") <- purity
-  attr(sv, "ploidy") <- ploidy
+  attr(sv, "purity") <- as.numeric(purity)
+  attr(sv, "ploidy") <- as.numeric(ploidy)
   sv
 }
 
