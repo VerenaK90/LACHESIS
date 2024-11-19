@@ -71,13 +71,14 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   mtext(text = "SNVs per Mb", side = 1, line = 2.5, cex = 0.8)
   mtext(text = "No. of genomic segments", side = 2, line = 1.8, cex = 0.8)
 
-
+  #Get y and x axis limits
+  temp_d = density(to.plot[variable == "density_total_mean",value])
 
   if(nrow(to.plot[(variable == "density_A_mean" & A > 1) |
                  (variable == "density_B_mean" & B > 1 & A != B),]) > 0){
     par(mar = c(3, 4, 3, 1))
     hist(to.plot[(variable == "density_A_mean" & A > 1) |
-                   (variable == "density_B_mean" & B > 1 & A != B),value], xlim = c(0, 1.05 * max(to.plot[,value])),
+                   (variable == "density_B_mean" & B > 1 & A != B),value], xlim = range(temp_d$x, na.rm = TRUE), ylim = range(temp_d$y, na.rm = TRUE),
          breaks = bins, col = fill.multi, border = l.col, main = NA,
          xlab = NA, ylab = NA)
     # add density of MRCA
