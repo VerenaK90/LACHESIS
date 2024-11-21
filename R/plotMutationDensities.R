@@ -135,7 +135,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
     legend("bottomright", box.lwd = 0, lty=1, col= c(1:mrcaObj[,sum(A>1)],  (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)])),
            legend = c(paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"),
                       paste(paste0("chr", mrcaObj[B>1 & B!=A,chrom]), mrcaObj[B>1 & B!=A,TCN], mrcaObj[B>1 & B!=A,B], sep = "_")
-           ), cex = 0.7)
+           ), cex = 0.7, ncol = 2)
   }else{
     legend("bottomright", box.lwd = 0, lty=1, col= c(1:mrcaObj[,sum(A>1)]),
            legend = paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"), cex = 0.7, ncol = 2)
@@ -143,7 +143,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   }
 
 
-  title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2, ncol = 2)
+  title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2)
 
   if(!is.null(output.file)){
     dev.off()
