@@ -71,16 +71,20 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   mtext(text = "SNVs per Mb", side = 1, line = 2.5, cex = 0.8)
   mtext(text = "No. of genomic segments", side = 2, line = 1.8, cex = 0.8)
 
+
   #Get y and x axis limits
   temp_d = density(to.plot[variable == "density_total_mean",value])
 
   if(nrow(to.plot[(variable == "density_A_mean" & A > 1) |
-                 (variable == "density_B_mean" & B > 1 & A != B),]) > 0){
+                  (variable == "density_B_mean" & B > 1 & A != B),]) > 0){
     par(mar = c(3, 4, 3, 1))
     hist(to.plot[(variable == "density_A_mean" & A > 1) |
-                   (variable == "density_B_mean" & B > 1 & A != B),value], xlim = range(temp_d$x, na.rm = TRUE), ylim = range(temp_d$y, na.rm = TRUE),
+                   (variable == "density_B_mean" & B > 1 & A != B),value],
+         xlim = c(0, max(temp_d$x, na.rm = TRUE)),
+         ylim = range(temp_d$y, na.rm = TRUE),
          breaks = bins, col = fill.multi, border = l.col, main = NA,
          xlab = NA, ylab = NA)
+
     # add density of MRCA
     if(show.den == TRUE & nrow(to.plot[variable == "density_total_mean"])>1){
       lines(density(to.plot[variable == "density_total_mean",value]), lty = 2)
@@ -134,12 +138,12 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
            ), cex = 0.7)
   }else{
     legend("bottomright", box.lwd = 0, lty=1, col= c(1:mrcaObj[,sum(A>1)]),
-           legend = paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"), cex = 0.7)
+           legend = paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"), cex = 0.7, ncol = 2)
 
   }
 
 
-  title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2)
+  title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2, ncol = 2)
 
   if(!is.null(output.file)){
     dev.off()
