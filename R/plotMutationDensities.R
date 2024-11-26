@@ -85,7 +85,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
     hist(to.plot[(variable == "density_A_mean" & A > 1) |
                    (variable == "density_B_mean" & B > 1 & A != B),value],
          xlim = c(0, max(c(to.plot[,value], max(temp_d$x, na.rm = TRUE)))),
-         ylim = c(0, max(temp_hist_y, max(temp_d$x, na.rm = TRUE))),
+         ylim = c(0, max(c(temp_hist_y, max(temp_d$y, na.rm = TRUE)))),
          breaks = bins, col = fill.multi, border = l.col, main = NA,
          xlab = NA, ylab = NA)
 
