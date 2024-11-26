@@ -74,14 +74,18 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
   #Get y and x axis limits
   temp_d = density(to.plot[variable == "density_total_mean",value])
+  temp_hist <- hist(to.plot[(variable == "density_A_mean" & A > 1) |
+                              (variable == "density_B_mean" & B > 1 & A != B), value],
+                    breaks = bins, plot = FALSE)
+  temp_hist_y <- max(temp_hist$counts, na.rm = TRUE)
 
   if(nrow(to.plot[(variable == "density_A_mean" & A > 1) |
                   (variable == "density_B_mean" & B > 1 & A != B),]) > 0){
     par(mar = c(3, 4, 3, 1))
     hist(to.plot[(variable == "density_A_mean" & A > 1) |
                    (variable == "density_B_mean" & B > 1 & A != B),value],
-         xlim = c(0, max(temp_d$x, na.rm = TRUE)),
-         ylim = range(temp_d$y, na.rm = TRUE),
+         xlim = c(0, max(c(to.plot[,value], max(temp_d$x, na.rm = TRUE)))),
+         ylim = c(0, max(temp_hist_y, max(temp_d$x, na.rm = TRUE))),
          breaks = bins, col = fill.multi, border = l.col, main = NA,
          xlab = NA, ylab = NA)
 
