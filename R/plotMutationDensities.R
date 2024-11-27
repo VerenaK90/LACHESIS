@@ -72,14 +72,24 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   mtext(text = "No. of genomic segments", side = 2, line = 1.8, cex = 0.8)
 
 
+  #Get y and x axis limits
+  temp_d = density(to.plot[variable == "density_total_mean",value])
+  temp_hist <- hist(to.plot[(variable == "density_A_mean" & A > 1) |
+                              (variable == "density_B_mean" & B > 1 & A != B), value],
+                    breaks = bins, plot = FALSE)
+  temp_hist_y <- max(temp_hist$counts, na.rm = TRUE)
+  temp_hist_x <- max(temp_hist$breaks, na.rm = TRUE)
 
   if(nrow(to.plot[(variable == "density_A_mean" & A > 1) |
-                 (variable == "density_B_mean" & B > 1 & A != B),]) > 0){
+                  (variable == "density_B_mean" & B > 1 & A != B),]) > 0){
     par(mar = c(3, 4, 3, 1))
     hist(to.plot[(variable == "density_A_mean" & A > 1) |
-                   (variable == "density_B_mean" & B > 1 & A != B),value], xlim = c(0, 1.05 * max(to.plot[,value])),
+                   (variable == "density_B_mean" & B > 1 & A != B),value],
+         xlim = c(0, max(c(temp_hist_x, max(temp_d$x, na.rm = TRUE)))),
+         ylim = c(0, max(c(temp_hist_y, max(temp_d$y, na.rm = TRUE)))),
          breaks = bins, col = fill.multi, border = l.col, main = NA,
          xlab = NA, ylab = NA)
+
     # add density of MRCA
     if(show.den == TRUE & nrow(to.plot[variable == "density_total_mean"])>1){
       lines(density(to.plot[variable == "density_total_mean",value]), lty = 2)
@@ -130,10 +140,10 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
     legend("bottomright", box.lwd = 0, lty=1, col= c(1:mrcaObj[,sum(A>1)],  (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)])),
            legend = c(paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"),
                       paste(paste0("chr", mrcaObj[B>1 & B!=A,chrom]), mrcaObj[B>1 & B!=A,TCN], mrcaObj[B>1 & B!=A,B], sep = "_")
-           ), cex = 0.7)
+           ), cex = 0.7, ncol = 2)
   }else{
     legend("bottomright", box.lwd = 0, lty=1, col= c(1:mrcaObj[,sum(A>1)]),
-           legend = paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"), cex = 0.7)
+           legend = paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"), cex = 0.7, ncol = 2)
 
   }
 
