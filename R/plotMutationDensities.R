@@ -71,17 +71,16 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   mtext(text = "SNVs per Mb", side = 1, line = 2.5, cex = 0.8)
   mtext(text = "No. of genomic segments", side = 2, line = 1.8, cex = 0.8)
 
-
-  #Get y and x axis limits
-  temp_d = density(to.plot[variable == "density_total_mean",value])
-  temp_hist <- hist(to.plot[(variable == "density_A_mean" & A > 1) |
-                              (variable == "density_B_mean" & B > 1 & A != B), value],
-                    breaks = bins, plot = FALSE)
-  temp_hist_y <- max(temp_hist$counts, na.rm = TRUE)
-  temp_hist_x <- max(temp_hist$breaks, na.rm = TRUE)
-
   if(nrow(to.plot[(variable == "density_A_mean" & A > 1) |
                   (variable == "density_B_mean" & B > 1 & A != B),]) > 0){
+    #Get y and x axis limits
+    temp_d = density(to.plot[variable == "density_total_mean",value])
+    temp_hist <- hist(to.plot[(variable == "density_A_mean" & A > 1) |
+                                (variable == "density_B_mean" & B > 1 & A != B), value],
+                      breaks = bins, plot = FALSE)
+    temp_hist_y <- max(temp_hist$counts, na.rm = TRUE)
+    temp_hist_x <- max(temp_hist$breaks, na.rm = TRUE)
+
     par(mar = c(3, 4, 3, 1))
     hist(to.plot[(variable == "density_A_mean" & A > 1) |
                    (variable == "density_B_mean" & B > 1 & A != B),value],
