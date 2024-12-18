@@ -21,7 +21,7 @@
 #' cn_data = readCNV(ascat_cn)
 #' @return A standardized data frame with copy number information per segment.
 #' readCNV()
-#' @importFrom utils read.delim write.table
+#' @import data.table
 #' @importFrom graphics plot.new
 #' @importFrom grDevices dev.off pdf
 #' @importFrom stats cor density end plot.ecdf start
@@ -38,7 +38,15 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   estimate.alleles <- FALSE # will be set to TRUE if allele info is not provided, see below
 
   ## Read cn.info and assume column index if not provided
-  cn.info <- .format_cnv_data(cn.info = cn.info, chr.col = chr.col, start.col = start.col, end.col = end.col, A.col = A.col, B.col = B.col, tcn.col = tcn.col)
+  format.cnv <- .format_cnv_data(cn.info = cn.info, chr.col = chr.col, start.col = start.col, end.col = end.col, A.col = A.col, B.col = B.col, tcn.col = tcn.col)
+
+  cn.info <- format.cnv$cn.info
+  chr.col <- format.cnv$chr.col
+  start.col <- format.cnv$start.col
+  end.col <- format.cnv$end.col
+  A.col <- format.cnv$A.col
+  B.col <- format.cnv$B.col
+  tcn.col <- format.cnv$tcn.col
 
   message("********** Read in ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info[[chr.col]])), " chromosomes.")
 
@@ -144,7 +152,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   return(cn.info)
 }
 
-.format_cnv_data <- function(cn.info = cn.info, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL) {
+.format_cnv_data <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL){
   cn.info <- data.table::fread(file = cn.info, sep = "\t", header = TRUE)
 
 
@@ -279,7 +287,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: end position must be numeric.")
   }
 
-  return(cn.info)
+  return(list(cn.info = cn.info, chr.col = chr.col, start.col = start.col, end.col = end.col, A.col = A.col, B.col = B.col, tcn.col = tcn.col))
 }
 
 .estimate_alleles <- function(cn.info, tcn.col){
