@@ -209,6 +209,8 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
   v <- cbind(v, tum_info_dt)
 
   v <- v[,.(Chr, Start, Ref, Alt, t_ref_count, t_alt_count, t_depth, t_vaf)]
+  v[, Chr := as.character(Chr)]
+  v[, Start := as.numeric(Start)]
   colnames(v) = c("chrom", "pos", "ref", "alt", "t_ref_count", "t_alt_count", "t_depth", "t_vaf")
   v
 }
