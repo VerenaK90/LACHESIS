@@ -75,7 +75,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' @export
 #' @importFrom graphics abline axis box grid hist mtext par rect text title
 
-plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL, output.file = NULL){
+plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL, output.file = NULL, ...){
 
   chrom <- start <- t_vaf <- NULL
 

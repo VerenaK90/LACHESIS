@@ -17,7 +17,7 @@
 #' @return data.table of frequency table
 #' @importFrom graphics axis box grid hist mtext par text title
 #' @export
-plotVAFdistr <- function(vaf = NULL, vafbreak = 0.05, t_sample = NULL, showcounts = FALSE, showdensity = TRUE, col = "#34495e", srtcounts = 45, output.file = NULL){
+plotVAFdistr <- function(vaf = NULL, vafbreak = 0.05, t_sample = NULL, showcounts = FALSE, showdensity = TRUE, col = "#34495e", srtcounts = 45, output.file = NULL, ...){
 
   if(is.null(vaf)){
     stop("Missing input vaf. Use `readVCF` to extract vaf.")

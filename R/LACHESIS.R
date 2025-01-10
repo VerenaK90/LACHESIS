@@ -392,7 +392,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
 
-plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densities = FALSE, fill.multi = NULL, l.col = NULL, binwidth = NULL, fill.zero = NULL, output.file = NULL){
+plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densities = FALSE, fill.multi = NULL, l.col = NULL, binwidth = NULL, fill.zero = NULL, output.file = NULL, ...){
 
   MRCA_time_mean <- ECA_time_mean <- NULL
 
@@ -607,7 +607,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows points
 #' @importFrom stats cor
 
-plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress.outliers = FALSE, log.densities = FALSE,  output.file = NULL){
+plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress.outliers = FALSE, log.densities = FALSE,  output.file = NULL, ...){
 
   ECA_time_mean <- NULL
 
