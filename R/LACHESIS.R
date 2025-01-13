@@ -114,24 +114,22 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
   # initializing log file datatable
   log.file.data.cohort <- data.table::data.table(Sample_ID = character(),
                                                  vcf.tumor.ids = character(),
-                                                 cnv.file = character(),
-                                                 snv.file = character(),
                                                  vcf.source = character(),
                                                  ploidy = numeric(),
                                                  purity = numeric(),
-                                                 cnv.chr.col = character(),
-                                                 cnv.start.col = character(),
-                                                 cnv.end.col = character(),
-                                                 cnv.A.col = character(),
-                                                 cnv.B.col = character(),
-                                                 cnv.tcn.col = character(),
+                                                 cnv.chr.col = numeric(),
+                                                 cnv.start.col = numeric(),
+                                                 cnv.end.col = numeric(),
+                                                 cnv.A.col = numeric(),
+                                                 cnv.B.col = numeric(),
+                                                 cnv.tcn.col
                                                  age = numeric(),
                                                  OS.time = numeric(),
                                                  OS = numeric(),
                                                  EFS.time = numeric(),
                                                  EFS = numeric(),
                                                  output.dir = character(),
-                                                 ignore.XY = character(),
+                                                 ignore.XY = logical(),
                                                  min.cn = numeric(),
                                                  max.cn = numeric(),
                                                  merge.tolerance = numeric(),
@@ -140,10 +138,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                  vcf.info.af = numeric(),
                                                  vcf.info.dp = numeric(),
                                                  min.seg.size = numeric(),
-                                                 fp.mean = numeric(),
-                                                 fp.sd = numeric(),
-                                                 excl.chr = character(),
-                                                 ref_build = character())
+                                                 fp.mean = double(),
+                                                 fp.sd = double(),
+                                                 excl.chr = numeric(),
+                                                 ref_build = character(),
+                                                 cnv.file = character(),
+                                                 snv.file = character())
   if(!is.null(input.files)){
 
     sample.specs <- data.table::fread(input.files, sep = "\t", stringsAsFactors = FALSE)
@@ -264,11 +264,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), ...)
       }
 
+      print(output.dir)
+
       # collecting data for log file
       log.file.data.single <- data.table::data.table(Sample_ID = x$ID,
                                               vcf.tumor.ids = x$vcf.tumor.ids,
-                                              cnv.file = x$cnv.file,
-                                              snv.file = x$snv.file,
                                               vcf.source = x$vcf.source,
                                               ploidy = x$ploidy,
                                               purity = x$purity,
@@ -277,14 +277,14 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                               cnv.end.col = x$cnv.end.col,
                                               cnv.A.col = x$cnv.A.col,
                                               cnv.B.col = x$cnv.B.col,
-                                              cnv.tcn.col = x$cnv.chr.col,
+                                              cnv.tcn.col = x$cnv.tcn.col,
                                               age = x$age,
                                               OS.time = x$OS.time,
                                               OS = x$OS,
                                               EFS.time = x$EFS.time,
                                               EFS = x$EFS,
-                                              output.dir = x$output.dir,
-                                              ignore.XY = x$ignore.XY,
+                                              output.dir = output.dir,
+                                              ignore.XY = ignore.XY,
                                               min.cn = min.cn,
                                               max.cn = max.cn,
                                               merge.tolerance = merge.tolerance,
@@ -296,7 +296,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                               fp.mean = fp.mean,
                                               fp.sd = fp.sd,
                                               excl.chr = excl.chr,
-                                              ref_build = ref_build)
+                                              ref_build = ref_build,
+                                              cnv.file = x$cnv.file,
+                                              snv.file = x$snv.file)
 
       log.file.data.cohort <- merge(log.file.data.cohort, log.file.data.single, all=TRUE)
 
