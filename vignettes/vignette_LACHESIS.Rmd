@@ -9,6 +9,10 @@ output:
   rmarkdown::html_document:
     highlight: pygments
     toc: true
+    toc_float:
+      toc_collapsed: true
+    toc_depth: 3
+    number_sections: false
     fig_width: 5
   bibliography: library.bib
   vignette: >
@@ -49,9 +53,7 @@ For older versions of R, please refer to the appropriate [Bioconductor release.]
 Other Bioconductor packages with similar aims are
 [name](link).
 
-# Standard Workflow
-
-## Input Data
+# Input Data
 
 The input for LACHESIS can be specified by vectors or in a tab-delimited **sample-specification file**.
 This file must contain the sample name, path to the SNV file, path to CNV file, and optionally further specifications. 
@@ -65,15 +67,9 @@ A CNV file describes **Copy Number Variations** (CNVs), which are genomic altera
 
 A SNV file describes **Single Nucleotide Variants** (SNVs), which are variations of one nucleotide at a specific location in the genome. The SNV file should be in VCF format (Variant Call Format), a standardized text file format with a **header section** (lines starting with # and ##) and a **data section** where each row represents a variant. 
 
-## Package Structure
+# LACHESIS function
 
-```{r, echo=FALSE, out.width="50%"}
-knitr::include_graphics(system.file("extdata", "package_structure_short.png", package = "LACHESIS"))
-```	
-
-## LACHESIS Main Function
-
-This function utilizes whole genome sequencing data to determine the mutational timing of the Most Recent Common Ancestor (MRCA) and the Early Common Ancestor (ECA). The output includes a folder for each patient ID, which contains the following:
+LACHESIS utilizes whole genome sequencing data to determine the mutational timing of the Most Recent Common Ancestor (MRCA) and the Early Common Ancestor (ECA). The output includes a folder for each patient ID, which contains the following:
 
 #### Datatables (.txt)
 
@@ -90,11 +86,21 @@ Additionally, if the function was applied to a cohort, the following file will b
 
 * **SNV_densities_cohort:** histograms of mean mutation densities and timeline of early tumor evolution
 
-While running LACHESIS main function, further functions will be called that are described below.
+## Package Structure
 
-## LACHESIS Auxillary Functions
+There are two ways to perform analyses using LACHESIS: either by utilizing the sub-functions individually or by calling the wrapper function. All of the functions presented in the main workflow are also invoked within the wrapper function. In addition, the generated data is merged, allowing both cohort analysis and survival analysis to be performed.
 
-### ReadCNV 
+```{r, echo=FALSE, fig.show='hold', out.width="45%"}
+knitr::include_graphics(system.file("extdata", "package_structure_main.png", package = "LACHESIS"))
+
+knitr::include_graphics(system.file("extdata", "package_structure_wrapper.png", package = "LACHESIS"))
+```
+
+# LACHESIS Main Workflow
+
+## Importing data
+
+### Importing Copy number information (readCNV)
 
 The readCNV function converts a user-specified BED file containing copy number information into a standardized format. It performs several quality checks on the input file and returns a clean, structured dataframe. 
 
@@ -125,7 +131,7 @@ The max.cn parameter defines the maximum copy number threshold to include in the
 If total copy number information is available but allele-specific data (A and B alleles) is missing, the function estimates allele counts.
 The total copy number is divided by two, with one allele rounded up and the other rounded down.
 
-#### Example 1
+#### Example: ACESeq
 
 ```{r, message=FALSE, warning=FALSE}
 aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
@@ -133,7 +139,7 @@ cn_data = LACHESIS::readCNV(aceseq_cn)
 head(cn_data, n = 1)
 ```
 
-#### Example 2
+#### Example: ASCAT
 
 ```{r, message=FALSE, warning=FALSE}
 ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "LACHESIS")
@@ -141,7 +147,7 @@ cn_data = LACHESIS::readCNV(ascat_cn)
 head(cn_data, n = 1)
 ```
 
-### ReadVCF  
+### Importing Variant Information (readVCF)  
 
 The readVCF function is used to import a VCF (Variant Call Format) file and extract key genomic information such as read counts and variant allele frequencies (VAF). 
 
@@ -153,7 +159,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 
 * **VCF Source** (*vcf.source*)
 
-Supported tools to generate the VCF file are Mutect2, Strelka2, and DKFZ. This information ensures proper interpretation of the VCF file based on the source-specific conventions.
+Supported tools to generate the VCF file are [Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/360037593851-Mutect2), [Strelka2](https://github.com/Illumina/strelka?tab=readme-ov-file), [Sentieon](https://support.sentieon.com/manual/) and DKFZ. This information ensures proper interpretation of the VCF file based on the source-specific conventions.
 
 * **Minimum Variant Allele Frequency** (*min.vaf*)
 
@@ -175,7 +181,7 @@ The info.af parameter defines the string encoding the allele frequency field in 
 
 The info.dp parameter specifies the string encoding the read depth field in the FORMAT column of the VCF file. It defaults to DP and is only used when vcf.source is set to sentieon. 
 
-#### Example 1
+#### Example: mutect
 
 ```{r, message=FALSE, warning=FALSE}
 mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "LACHESIS")
@@ -183,7 +189,7 @@ m_data = LACHESIS::readVCF(vcf = mutect_vcf, vcf.source = "mutect")
 head(m_data, n = 1)
 ```
 
-#### Example 2
+#### Example: strelka
 
 ```{r, message=FALSE, warning=FALSE}
 strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
@@ -191,7 +197,7 @@ s_data = LACHESIS::readVCF(vcf = strelka_vcf, vcf.source = "strelka")
 head(s_data, n = 1)
 ```
 
-#### Example 3
+#### Example: dkfz
 
 ```{r, message=FALSE, warning=FALSE}
 dkfz_vcf = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -272,7 +278,9 @@ c_data <- LACHESIS::readCNV(aceseq_cn)
 nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 LACHESIS::plotNB(nb)
 ```
- 
+
+## Processing Clonal Mutations 
+
 ### ClonalMutationalCounter
 
 This function counts the number of clonal mutations residing on a single or multiple copies per genomic segment. Segments of equal copy number and B-allele count are merged per chromosome. 
@@ -317,6 +325,8 @@ cl_muts <- LACHESIS::clonalMutationCounter(nb)
 norm_muts <- LACHESIS::normalizeCounts(cl_muts)
 head(norm_muts, n = 1)
 ```
+
+## Inferring Clonal Evolution
 
 ### MRCA
 
@@ -383,7 +393,7 @@ mrca <- LACHESIS::MRCA(norm_muts)
 LACHESIS::plotMutationDensities(mrca)
 ```
 
-### LACHESIS
+## LACHESIS Wrapper Function
 
 This function calls all of the previously mentioned functions and delivers the results to the specified output directory, if provided.
 
@@ -484,20 +494,9 @@ LACHESIS::plotClinicalCorrelations(lachesis)
 
 ## How To Get Help For LACHESIS
 
-All LACHESIS questions should be posted to the 
-**Bioconductor support site**, which serves as a searchable knowledge
-base of questions and answers:
+In case of any questions, feel free to open an issue on [**Github**.](https://github.com/VerenaK90/LACHESIS_shiny/issues) 
 
-<https://support.bioconductor.org>
-
-Posting a question and tagging with "LACHESIS" will automatically send
-an alert to the package authors to respond on the support site.  See
-the first question in the list of [Frequently Asked Questions](#FAQ)
-(FAQ) for information about how to construct an informative post. 
-
-You should **not** email your question to the package authors, as we will
-just reply that the question should be posted to the 
-**Bioconductor support site**.
+Alternatively, questions can be posted to [**Bioconductor support site**](https://support.bioconductor.org), tagging the question with "LACHESIS" will automatically send an alert to the package authors to respond on the support site.  
 
 ## Acknowledgments
 
