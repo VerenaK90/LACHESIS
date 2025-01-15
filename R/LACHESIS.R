@@ -675,3 +675,78 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 
 }
 
+#' Correlate SNV density at ECA/MRCA with clinical parameters such as age, OS, etc.
+#' @description
+#' Takes SNV densities as computed by `LACHESIS` as input and correlates them with clinical data such as age at diagnosis, survival data etc.
+#' @param lachesis output generated from \code{\link{LACHESIS}}
+#' @param suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
+#' @param log.densities plot logarithmic densities. Default `FALSE`
+#' @param output.file optional; the file to which the plot will be stored.
+#' @examples
+#' #an example file with sample annotations and meta data
+#' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+#' input.files = data.table::fread(input.files)
+#'
+#' #cnv and snv files for example tumors
+#' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+#' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+#' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+#'
+#' cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+#' snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+#'
+#' input.files$cnv.file = cnv.file
+#' input.files$snv.file = snv.file
+#'
+#' # Make an axample input file with paths to cnv and snv file along with other meta data
+#' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+#' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+#'
+#' #Exampele with template file with paths to multiple cnv/snv files as an input
+#' lachesis <- LACHESIS(input.files = lachesis_input)
+#' plotClinicalCorrelations(lachesis)
+#' @export
+#' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows points
+#' @importFrom stats cor
+
+plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, suppress.outliers = FALSE, log.densities = FALSE,  output.file = NULL){
+
+  if (is.null(lachesis)) {
+    stop("Error: 'lachesis' dataset must be provided.")
+  }
+
+  # Categorizing according to MRCA
+  categorized.by.MRCA <- lachesis
+  categorized.by.MRCA$`OS.time` <- categorized.by.MRCA$`OS.time`/365
+  categorized.by.MRCA$`EFS.time` <- categorized.by.MRCA$`EFS.time`/365
+  categorized.by.MRCA$MRCA_time_mean <- ifelse(categorized.by.MRCA$MRCA_time_mean < mrca.cutpoint, "low", "high")
+  categorized.by.MRCA$MRCA_time_mean <- factor(categorized.by.MRCA$MRCA_time_mean, levels=c("low", "high"))
+
+
+  survival.fit <- survfit(Surv(`OS.time`, OS) ~ MRCA_time_mean,
+                          data = categorized.by.MRCA)
+
+  survdiff(Surv(`OS.time`, OS) ~ MRCA_time_mean,
+           data = categorized.by.MRCA)
+
+  EFS.fit <- survfit(Surv(`EFS.time`, EFS) ~ MRCA_time_mean,
+                     data = categorized.by.MRCA)
+
+  survdiff(Surv(`EFS.time`, EFS) ~ MRCA_time_mean,
+           data = categorized.by.MRCA)
+
+
+  EFS.fit.plot <- ggsurvplot(EFS.fit, data = categorized.by.MRCA, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
+                  color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
+                  xlab = "Years", ylab = "Event Free Survival", legend.labs = c("Early MRCA", "Late MRCA"))
+
+  survival.fit.plot <- ggsurvplot(survival.fit, data = categorized.by.MRCA, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
+                   color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
+                   xlab = "Years", ylab = "Overall Survival", legend.labs = c("Early MRCA", "Late MRCA"))
+
+  pdf("survival_plot.pdf", width = 6, height = 9)
+  print(EFS.fit.plot)
+  print(survival.fit.plot)
+  dev.off()
+
+}
