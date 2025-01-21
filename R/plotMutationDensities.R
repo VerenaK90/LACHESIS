@@ -23,7 +23,7 @@
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
 
-plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = NULL, mut.col.multi = NULL, mut.border = NULL, mut.show.density = NULL, mut.breaks = NULL, output.file = NULL, ...){
+plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, output.file = NULL, ...){
 
   Seglength <- . <- A <- B <- variable <- value <- lines <- density <- chrom <- TCN <- Seglength <- n_mut_A <- n_mut_B <- n_mut_total <- density_total_mean <- density_A_mean <- density_B_mean <- density_total_lower <- density_total_upper <- density_A_lower <- density_A_upper <- density_B_lower <- density_B_upper <- p_total_to_mrca <- p_A_to_mrca <- p_B_to_mrca <- p_adj_total_to_mrca <- p_adj_A_to_mrca <- p_adj_B_to_mrca <- MRCA_qual <- p_A_to_eca <- p_B_to_eca <- p_adj_A_to_eca <- p_adj_B_to_eca <- A_time <- B_time <- NULL
   if(is.null(mrcaObj)){
@@ -31,19 +31,6 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   }
   if(!is.null(output.file)){
     pdf(output.file, width = 7, height = 6)
-  }
-  # graphical settings:
-  if(is.null(mut.border)){
-    mut.border <- NA
-  }
-  if(is.null(mut.col.zero)){
-    mut.col.zero <- "#4FB12B"
-  }
-  if(is.null(mut.col.multi)){
-    mut.col.multi <- "#176A02"
-  }
-  if(is.null(mut.show.density)){
-    mut.show.density <- T
   }
 
   to.plot <- data.table::melt(mrcaObj, id.vars = c("chrom", "TCN", "A", "B", "Seglength"),

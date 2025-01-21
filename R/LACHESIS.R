@@ -392,7 +392,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
 
-plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.log.densities = FALSE, lach.col.multi = NULL, lach.border = NULL, binwidth = NULL, lach.col.zero = NULL, output.file = NULL, ...){
+plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.log.densities = FALSE, lach.col.multi = "#176A02", lach.border = NULL, binwidth = NULL, lach.col.zero = "#4FB12B", output.file = NULL, ...){
 
   MRCA_time_mean <- ECA_time_mean <- NULL
 
@@ -413,16 +413,6 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
   }
   if(!is.null(output.file)){
     pdf(output.file, width = 8, height = 6)
-  }
-  # graphical settings:
-  if(is.null(lach.border)){
-    lach.border <- NA
-  }
-  if(is.null(lach.col.zero)){
-    lach.col.zero <- "#4FB12B"
-  }
-  if(is.null(lach.col.multi)){
-    lach.col.multi <- "#176A02"
   }
 
   # I. plot histograms
