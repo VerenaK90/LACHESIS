@@ -10,6 +10,7 @@ Authors@R:
 Description: This package contains custom functions used to analyze neuroblastoma evolution from whole genome sequencing data. In particular, it contains modalities to estimate mutation densities at genomic segments, use these to time the origin of the tumor and eventually contains functions that were used to analyze tumor initiation with dynamic models of neuroblastoma evolution. 
 License: `use_mit_license()`, `use_gpl3_license()` or friends to
     pick a license
+VignetteBuilder: knitr, rmarkdown
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
