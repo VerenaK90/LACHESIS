@@ -130,7 +130,7 @@ Additionally, if the function was applied to a cohort, the following files will 
 
 ## Structure
 
-There are two ways to perform analyses using LACHESIS: either by utilizing the sub-functions individually or by calling the wrapper function. All of the functions presented in the main workflow are also invoked within the wrapper function. In addition, the generated data is merged, allowing cohort analysis to be performed.
+There are two ways to perform analyses using LACHESIS: either by utilizing the sub-functions individually or by calling the wrapper function. All of the functions presented in the main workflow are also invoked by the wrapper function. In addition, the wrapper function summarizes results across samples, allowing cohort analysis to be performed.
 
 ```{r, echo=FALSE, fig.show='hold', out.width="45%"}
 knitr::include_graphics(system.file("extdata", "package_structure_main.png", package = "LACHESIS"))
@@ -144,11 +144,11 @@ knitr::include_graphics(system.file("extdata", "package_structure_wrapper.png", 
 
 ### Importing Copy Number Information (readCNV)
 
-The readCNV function converts a user-specified BED file containing copy number information into a standardized format. It performs several quality checks on the input file and returns a clean, structured dataframe. 
+The `readCNV` function converts a user-specified BED file containing copy number information into a standardized format. It performs several quality checks on the input file and returns a clean, structured dataframe. 
 Users can specify column identifiers for chromosomal positions and allele-specific copy number (A and B alleles) using either column names or indices. If no identifiers are provided, the function will attempt to identify the relevant columns using standard nomenclature (e.g., "chrom", "start", "end", etc.). 
 
 #### Handling Missing Allele Information
-If total copy number information is available but the number of A and B alleles is missing, the function estimates allele counts. The total copy number is divided by two, with one allele rounded up and the other rounded down.
+If total copy number information is available but the number of A and B alleles is missing, the function estimates allele counts. To this end, the function assumes the molecular scenario with minimal step count to be the most likely one. For example, a total copy number of 4 is assumed to stem from whole genome duplication, corresponding to a 2:2 configuration; likewise a total copy number of 3 is assumed to stem from chromosomal missegregation, corresponding to a 2:1 configuration. Formally, the total copy number is divided by two, with one allele rounded up and the other rounded down.
 
 #### Input Parameters 
 
@@ -156,7 +156,7 @@ If total copy number information is available but the number of A and B alleles 
 readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL)
 ```
 
-#### Example: ACESeq
+#### Example using output from ACESeq as copy number information
 
 ```{r, message=FALSE, warning=FALSE}
 aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
@@ -164,7 +164,7 @@ cn_data = LACHESIS::readCNV(aceseq_cn)
 head(cn_data, n = 1)
 ```
 
-#### Example: ASCAT
+#### Example using output from ASCAT as copy number information
 
 ```{r, message=FALSE, warning=FALSE}
 ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "LACHESIS")
@@ -174,7 +174,7 @@ head(cn_data, n = 1)
 
 ### Importing Variant Information (readVCF)  
 
-The readVCF function is used to import a VCF file and extract key genomic information such as read counts and VAFs. Supported tools to generate the VCF file are [Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/360037593851-Mutect2), [Strelka2](https://github.com/Illumina/strelka?tab=readme-ov-file), [Sentieon](https://support.sentieon.com/manual/) and DKFZ.
+The `readVCF` function is used to import a VCF file and extract key genomic information such as read counts and VAFs. Supported tools to generate the VCF file are [Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/360037593851-Mutect2), [Strelka2](https://github.com/Illumina/strelka?tab=readme-ov-file), [Sentieon](https://support.sentieon.com/manual/) and the [DKFZ SNV Calling Workflow](https://github.com/DKFZ-ODCF/SNVCallingWorkflow).
 
 #### Input Parameters
 
@@ -182,7 +182,7 @@ The readVCF function is used to import a VCF file and extract key genomic inform
 readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL, info.af = "AF", info.dp = "DP")
 ```
 
-#### Example: mutect
+#### Example: SNV calls obtained with Mutect
 
 ```{r, message=FALSE, warning=FALSE}
 mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "LACHESIS")
@@ -190,7 +190,7 @@ m_data = LACHESIS::readVCF(vcf = mutect_vcf, vcf.source = "mutect")
 head(m_data, n = 1)
 ```
 
-#### Example: strelka
+#### Example: SNV calls obtained with Strelka
 
 ```{r, message=FALSE, warning=FALSE}
 strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
@@ -198,7 +198,7 @@ s_data = LACHESIS::readVCF(vcf = strelka_vcf, vcf.source = "strelka")
 head(s_data, n = 1)
 ```
 
-#### Example: dkfz
+#### Example: SNV calls obtained with the dkfz SNV calling workflow
 
 ```{r, message=FALSE, warning=FALSE}
 dkfz_vcf = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
