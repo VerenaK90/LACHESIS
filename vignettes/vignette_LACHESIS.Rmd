@@ -1,8 +1,8 @@
 ---
-title: "LACHESIS - Analyzing tumor evolution from whole genome sequencing data"
+title: "LACHESIS - Real-time inference of evolutionary dynamics during tumor initiation based on whole genome sequencing data"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 abstract: >
-  Understanding tumor evolution, particularly the temporal order of driver mutations, is increasingly important for improving diagnosis and treatment strategies. A recent study by Körber et al. (Nature Genetics, 2023) identified a bimodal distribution in the timing of the most recent common ancestor (MRCA) in neuroblastomas. This early or late MRCA distinction strongly correlated with clinical outcomes, suggesting its potential as a prognostic biomarker. To facilitate the application of these findings, we developed a package for estimating MRCA timing using the molecular clock of single-strand somatic nucleotide variant (SSNV) accumulation. The package is based on the statistical model introduced by Körber et al. and provides tools for analyzing tumor evolution. This vignette details the functionality of the package and demonstrates its application through typical workflows, enabling users to integrate MRCA timing into their analyses.
+  Understanding tumor evolution, particularly the temporal order of driver mutations, is increasingly important for improving diagnosis and treatment strategies. A recent study by Körber et al. (Nature Genetics, 2023) identified a bimodal distribution in the timing of the most recent common ancestor (MRCA) in neuroblastomas. This early or late MRCA distinction strongly correlated with clinical outcome, suggesting its potential as a prognostic biomarker. To facilitate the application of these findings, we developed LACHESIS, a package to estimate MRCA timing using the molecular clock of somatic single nucleotide variant (SSNV) accumulation. LACHESIS is based on the statistical model introduced by Körber et al. and provides tools for analyzing tumor evolution. This vignette details the functionality of the package and demonstrates its application through typical workflows, enabling users to integrate MRCA timing into their analyses.
   LACHESIS package version: `r packageVersion("LACHESIS")`
 
 output:
@@ -16,7 +16,7 @@ output:
     fig_width: 5
   bibliography: library.bib
   vignette: >
-    %\VignetteIndexEntry{LACHESIS - Analyzing tumor evolution from whole genome sequencing data}
+    %\VignetteIndexEntry{LACHESIS - Real-time inference of evolutionary dynamics during tumor initiation based on whole genome sequencing data}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
     %\usepackage[utf8]{inputenc}
@@ -37,9 +37,17 @@ To install this package, start R (version "4.4") and enter:
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-BiocManager::install("LACHESIS")
+devtools::install_github("VerenaK90/LACHESIS")
 ```
-For older versions of R, please refer to the appropriate [Bioconductor release.](https://bioconductor.org/about/release-announcements/)
+
+# I took this out for now as we are not yet on Bioconductor
+#```{r install, eval=FALSE}
+#if (!require("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+
+#BiocManager::install("LACHESIS")
+#```
+#For older versions of R, please refer to the appropriate [Bioconductor release.](https://bioconductor.org/about/release-announcements/)
 
 # Citation
 
@@ -50,43 +58,75 @@ If you use LACHESIS in published research, please cite:
   *Nat Genet.*, **55**:619-630.
   [10.1038/s41588-023-01332-y](https://www.nature.com/articles/s41588-023-01332-y)*
 
-Other Bioconductor packages with similar aims are
-[name](link).
+# do we need this? seems like there are no other packages with similar names?
+#Other Bioconductor packages with similar aims are
+#[name](link).
 
 # Input Data
 
-The input for LACHESIS can be specified by vectors or in a tab-delimited **sample-specification file**.
-This file must contain the sample name, path to the SNV file, path to CNV file, and optionally further specifications. 
-While executing LACHESIS, a detailed **log file** will be generated, capturing the date, time, and provided input parameters.
+LACHESIS takes sample names, somatic single nucleotide variants and allele-specific copy number information as input. Though not strictly required, you may, ideally, also provide an estimate for the tumor cell purity and ploidy. Sample name, paths to respective variant files,  and optionally further specifications can either be specified by vectors or in a tab-delimited **sample-specification file**. The package can be run on a single sample or on a cohort. A detailed **log file** will be generated, capturing the date, time, and provided input parameters.
 
-#### CNV File
+#### Copy Number Variation (CNV) File
 
-A CNV file describes **Copy Number Variations** (CNVs), which are genomic alterations that result in abnormal copies of one or more genes, caused by duplications, deletions, translocations, and inversions. The CNV file requires columns for the **chromosome number**, **start** and **end position** of the segment, and either the **total copy number** or the **number of A- and B-alleles**. 
+The CNV file is a tab-delimited file that contains segmented copy number information for your sample of interest. The CNV file requires columns for the **chromosome number**, **start** and **end position** of the segment, and either the **total copy number** or the **number of A- and B-alleles**. We encourage you to provide allele-specific copy number information; if this information is not provided, LACHESIS will assume that a given total copy arose by the minimal number of genomic changes (e.g., whole genome duplication, resulting in a 2:2 configuration for a total copy number of 4 or single-chromosomal missegregation, resulting in a 2:1 configuration for a copy number of 3), which may yield wrong results in some cases. 
 
-#### SNV File
+#### Single Nucleotide Variant (SNV) File
 
-A SNV file describes **Single Nucleotide Variants** (SNVs), which are variations of one nucleotide at a specific location in the genome. The SNV file should be in VCF format (Variant Call Format), a standardized text file format with a **header section** (lines starting with # and ##) and a **data section** where each row represents a variant. 
+The SNV file should be in VCF format (Variant Call Format), a standardized text file format with a **header section** (lines starting with # and ##) and a **data section** where each row represents a variant. 
 
-# Package Overview
+# Package Output
 
-LACHESIS utilizes whole genome sequencing data to determine the mutational timing of the MRCA and the ECA. The output includes a folder for each patient ID, which contains the following:
+LACHESIS utilizes whole genome sequencing data to determine the mutational timing of a tumor's most recent common ancestor (MRCA). In addition, it will time the emergence of clonal (and thus early) copy number gains relative to the MRCA. If multiple chromosomal gains preceded the MRCA, LACHESIS tests whether they can be explained by a single aneuploidization event, in an earlier common ancestor (ECA) of the tumor, or whether they resulted from sequential chromosomal missegregations. LACHESIS generates an output folder for each patient ID, which contains the following information:
 
 #### Datatables (.txt)
 
-* **MRCA_densities_ID:** chromosomal location, total and subclonal copy numbers (A and B), segment length, mutation counts, mutation densities with confidence intervals, probabilities of segments tracing back to the MRCA or ECA, and inferred evolutionary timing for A and B subclones.
-* **SNV_timing_per_segment_ID:** purity, ploidy, and the estimated mean, lower, and upper bounds for the timing of the MRCA and ECA.
+# maybe a table is more appropriate?
+
+* **SNV_timing_per_segment_ID.txt:** purity, ploidy, and the estimated mean, lower, and upper bounds for the timing of the tumor's MRCA and ECA (if detected).
+* **MRCA_densities_ID.txt:** per-segment mutation time, differentiated by minor and major copy number (A and B). For each segment, 
+** *chrom* the chromosomal location
+** *TCN* the total copy number
+** *A* copy number of the major allele
+** *B* copy number of the minor allele
+** *Seglength* the segment length
+** *n_mut_A* the normalized number of mutations per copy with a multiplicity of A 
+** *n_mut_B* the normalized number of mutations per copy with a multiplicity of B
+** *n_mut_total* the normalized number of mutations per copy with a multiplicity of 1 
+** *density_total_mean* mean mutation densities (1/Mb) per copy with a multiplicity of 1 
+** *density_total_lower* lower limit of mutation densities (1/Mb) per copy with a multiplicity of 1 according to a 95% confidence interval
+** *density_total_upper* upper limit of mutation densities (1/Mb) per copy with a multiplicity of 1 according to a 95% confidence interval
+** *density_A_mean* mean mutation densities (1/Mb) per copy with a multiplicity of A 
+** *density_A_lower* lower limit of mutation densities (1/Mb) per copy with a multiplicity of A according to a 95% confidence interval 
+** *density_A_upper* upper limit of mutation densities (1/Mb) per copy with a multiplicity of B according to a 95% confidence interval
+** *density_B_mean* mean mutation densities (1/Mb) per copy with a multiplicity of B
+** *density_B_lower* lower limit of mutation densities (1/Mb) per copy with a multiplicity of B
+** *density_B_upper* upper limit of mutation densities (1/Mb) per copy with a multiplicity of B
+** *p_total_to_mrca* probability that the mutation density per copy with a multiplicity of 1 agrees with the mean mutation density at the MRCA 
+** *p_A_to_mrca* probability that the mutation density per copy with a multiplicity of A agrees with the mean mutation density at the MRCA 
+** *p_B_to_mrca* probability that the mutation density per copy with a multiplicity of B agrees with the mean mutation density at the MRCA 
+** *p_adj_total_to_mrca* Holm-corrected probability that the mutation density per copy with a multiplicity of 1 agrees with the mean mutation density at the MRCA 
+** *p_adj_A_to_mrca* Holm-corrected probability that the mutation density per copy with a multiplicity of A agrees with the mean mutation density at the MRCA
+** *p_adj_B_to_mrca* Holm-corrected probability that the mutation density per copy with a multiplicity of B agrees with the mean mutation density at the MRCA
+** *MRCA_qual* Quality control - PASS if `p_adj_to_mrca >= 0.01`
+** *p_A_to_eca* probability that the mutation density per copy with a multiplicity of A agrees with the mean mutation density at the ECA 
+** *p_B_to_eca* probability that the mutation density per copy with a multiplicity of B agrees with the mean mutation density at the ECA 
+** *p_adj_A_to_eca* Holm-corrected probability that the mutation density per copy with a multiplicity of A agrees with the mean mutation density at the ECA
+** *p_adj_B_to_eca* Holm-corrected probability that the mutation density per copy with a multiplicity of B agrees with the mean mutation density at the ECA
+** *A_time* Time point at which the copy number change of the major allele occurred (can be `ECA`, `MRCA`, or, if `A=1`, NA) 
+** *B_time* Time point at which the copy number change of the major allele occurred (can be `ECA`, `MRCA`, or, if `B=1`, NA) 
+
 
 #### Graphs (.pdf)
 
-* **SNV_densities:** histograms of mean mutation densities and timeline of early tumor evolution
-* **VAF_histogram_strat:** plot of measured copy numbers along the genome and variant allele frequency (VAF) histograms of SNVs stratified by copy number and minor/major allele count
-* **VAF_histogram:** plot of frequency distribution of variant allele frequencies
+* **SNV_densities.pdf:** histograms of normalized, mean single-copy and multi-copy mutation densities and timeline of early tumor evolution
+* **VAF_histogram_strat.pdf:** measured copy numbers along the genome and variant allele frequency (VAF) histograms of SNVs stratified by copy number and minor/major allele count
+* **VAF_histogram:** variant allele frequency histogram and density distribution of all SNVs
 
 Additionally, if the function was applied to a cohort, the following files will be included:
 
-* **SNV_densities_cohort:** histograms of mean mutation densities and cumulative distribution of mean mutation densities with 95% confidence intervals
-* **lachesis_clin.par:** correlation between SNV densities computed by LACHESIS and clinical parameters (age, survival,...)
-* **survival_plots:** will be added 
+* **SNV_densities_cohort.pdf:** histograms and cumulative distributions (with 95% confidence intervals) of mean mutation densities per segment at MRCA and ECA
+* **lachesis_clin.par.pdf:** correlation between SNV densities computed by LACHESIS and clinical parameters (age, survival,...)
+* **survival_plots.pdf:** will be added 
 
 ## Structure
 
