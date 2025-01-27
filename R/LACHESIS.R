@@ -709,19 +709,30 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows points
 #' @importFrom stats cor
 
-plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, suppress.outliers = FALSE, log.densities = FALSE,  output.file = NULL){
+plotSurvival <- function(lachesis = NULL, input.files = NULL, mrca.cutpoint = NULL, output.dir = NULL, suppress.outliers = FALSE, log.densities = FALSE,  output.file = NULL){
 
   if (is.null(lachesis)) {
     stop("Error: 'lachesis' dataset must be provided.")
   }
 
+  if (is.null(input.files)) {
+    stop("Error: Missing input file!")
+  }
+
+  input.files <- data.table::fread(input.files, sep = "\t", stringsAsFactors = FALSE)
+  survival.information <- lachesis
+
+  survival.information[, c("TMM", "Stage", "Triploidy", "17q.gain", "17.gain", "7q.gain",
+                           "7.gain", "11q.deletion", "1p.deletion", "1q.gain", "1.gain")
+                       := input.files[, .(`TMM`, `Stage`, `Triploidy`, `17q.gain`, `17.gain`, `7q.gain`,
+                                          `7.gain`, `11q.deletion`, `1p.deletion`, `1q.gain`, `1.gain`)]]
+
   # Categorizing according to MRCA
-  categorized.by.MRCA <- lachesis
+  categorized.by.MRCA <- survival.information
   categorized.by.MRCA$`OS.time` <- categorized.by.MRCA$`OS.time`/365
   categorized.by.MRCA$`EFS.time` <- categorized.by.MRCA$`EFS.time`/365
   categorized.by.MRCA$MRCA_time_mean <- ifelse(categorized.by.MRCA$MRCA_time_mean < mrca.cutpoint, "low", "high")
   categorized.by.MRCA$MRCA_time_mean <- factor(categorized.by.MRCA$MRCA_time_mean, levels=c("low", "high"))
-
 
   survival.fit <- survfit(Surv(`OS.time`, OS) ~ MRCA_time_mean,
                           data = categorized.by.MRCA)
@@ -737,16 +748,68 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
 
 
   EFS.fit.plot <- ggsurvplot(EFS.fit, data = categorized.by.MRCA, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
-                  color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
-                  xlab = "Years", ylab = "Event Free Survival", legend.labs = c("Early MRCA", "Late MRCA"))
+                             color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
+                             xlab = "Years", ylab = "Event Free Survival", legend.labs = c("Early MRCA", "Late MRCA"))
 
   survival.fit.plot <- ggsurvplot(survival.fit, data = categorized.by.MRCA, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
-                   color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
-                   xlab = "Years", ylab = "Overall Survival", legend.labs = c("Early MRCA", "Late MRCA"))
+                                  color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
+                                  xlab = "Years", ylab = "Overall Survival", legend.labs = c("Early MRCA", "Late MRCA"))
 
-  pdf("survival_plot.pdf", width = 6, height = 9)
-  print(EFS.fit.plot)
-  print(survival.fit.plot)
+  # Enrichment test
+
+  categorized.by.MRCA$Age.binary <- ifelse(categorized.by.MRCA$Age/30 < 18, "< 18", ">= 18")
+  categorized.by.MRCA$Stage.binary <- ifelse(categorized.by.MRCA$Stage=="4", "4", "< 4")
+
+  p.value.table <- data.frame(Parameter = c("TMM", "Age.binary"),#, "ALK", "17q.gain", "17.gain", "7q.gain", "7.gain", "1p.deletion", "1.gain", "1q.gain",
+                              #"11q.deletion", "Age.binary",  "Stage.binary", "Triploidy"),
+                              p.value = Inf,
+                              odds.ratio = Inf,
+                              odds.ratio.l = Inf,
+                              odds.ratio.u = Inf)
+
+
+
+  for(i in 1:nrow(p.value.table)){
+    cont.table <- table(categorized.by.MRCA$MRCA_time_mean, categorized.by.MRCA[[as.character(p.value.table$Parameter[i])]])
+
+    all_combinations <- expand.grid(time = unique(categorized.by.MRCA$MRCA_time_mean),
+                                   Parameter = unique(categorized.by.MRCA[[as.character(p.value.table$Parameter[i])]]))
+
+    cont.table <- table(factor(categorized.by.MRCA$MRCA_time_mean, levels = unique(categorized.by.MRCA$MRCA_time_mean)),
+                        factor(categorized.by.MRCA[[as.character(p.value.table$Parameter[i])]], levels = unique(categorized.by.MRCA[[as.character(p.value.table$Parameter[i])]])))
+
+    cont.table <- as.matrix(cont.table)
+    View(cont.table)
+
+      out <- fisher.test(cont.table)
+
+      p.value.table[i, "p.value"] <- out$p.value
+      p.value.table[i, "odds.ratio"] <- out$estimate
+      p.value.table[i, "odds.ratio.l"] <- out$conf.int[1]
+      p.value.table[i, "odds.ratio.u"] <- out$conf.int[2]
+  }
+
+  to.plot <- p.value.table
+  to.plot <- to.plot[to.plot$p.value < 0.05,]
+  to.plot$Parameter <- factor(to.plot$Parameter, levels=c("TMM", "Age.binary"))
+                                                          #, "Stage.binary", "Triploidy", "7.gain", "17.gain", "7q.gain", "1p.deletion", "1.gain", "1q.gain", "11q.deletion", "17q.gain"))
+  p.value.plot <- ggplot(to.plot, aes(y=odds.ratio, ymin=odds.ratio.l, ymax=odds.ratio.u, x=Parameter)) + coord_flip() +
+    geom_pointrange() + geom_hline(yintercept = 1, linetype=2) + scale_y_log10() + annotation_logticks(sides = "b") + labs(y = "Odds Ratio")
+
+
+  # Plotting results
+  EFS.plot <- EFS.fit.plot$plot
+  survival.plot <- survival.fit.plot$plot
+
+  pdf("survival_plot.pdf", width = 12, height = 6)
+  gridExtra::grid.arrange(EFS.plot, survival.plot, ncol = 2)
   dev.off()
 
-}
+  pdf("p_value_plot.pdf", width = 10, height = 8)
+  print(p.value.plot)
+  dev.off()
+
+  }
+
+
+
