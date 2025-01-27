@@ -59,7 +59,7 @@ If you use LACHESIS in published research, please cite:
   [10.1038/s41588-023-01332-y](https://www.nature.com/articles/s41588-023-01332-y)*
 
 
-<!-- Other R Packages with similar aims are [Butte](https://github.com/SunPathLab/Butte), .... -->
+<!-- Other R/ Bioconductor Packages with similar aims are  .... -->
 
 # Input Data
 
@@ -836,16 +836,47 @@ knitr::kable(lachesis_output, col.names = c("Column Name", "Definition"), align 
 strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
+head(lachesis, n=1)
 ```
 
 #### Example with tab-delimited sample-specification file
-<!-- Error cannot open the connection -->
-<!-- ```{r, message=FALSE, warning=FALSE} -->
-<!-- input <- system.file("extdata", "Sample_template.txt", package = "LACHESIS") -->
-<!-- lachesis <- LACHESIS::LACHESIS(input.files = input) -->
 
-<!-- head(lachesis_input, n=1) -->
+```{r, message=FALSE, warning=FALSE}
+lachesis_input <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+```
+
+```{r, echo=FALSE}
+input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+input.files = data.table::fread(input.files)
+
+#cnv and snv files for example tumors
+nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+
+cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+
+input.files$cnv.file = cnv.file
+input.files$snv.file = snv.file
+
+# Make an axample input file with paths to cnv and snv file along with other meta data
+lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+```
+
+<!-- ```{r} -->
+<!-- #contents of the template -->
+<!-- lachesis_input |> data.table::fread() |> head() -->
 <!-- ``` -->
+
+
+```{r, message=FALSE, warning=FALSE}
+lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
+head(lachesis, n=1)
+```
+
+
 
 ### Plotting Cohort Analysis (plotLACHESIS)
 
@@ -878,13 +909,35 @@ kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
-<!-- Error cannot open the connection -->
-<!-- ```{r, message=FALSE, warning=FALSE, fig.cap="Figure 4: Cumulative distribution of SSNV densities in ECA (dark green) and MRCA (light green)"} -->
-<!-- input.files = system.file("extdata","Sample_template.txt", package = "LACHESIS") -->
-<!-- lachesis <- LACHESIS::LACHESIS(input.files = input.files) -->
 
-<!-- LACHESIS::plotLachesis(lachesis) -->
-<!-- ``` -->
+```{r, message=FALSE, warning=FALSE}
+lachesis_input <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+```
+
+```{r, echo=FALSE}
+input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+input.files = data.table::fread(input.files)
+
+#cnv and snv files for example tumors
+nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+
+cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+
+input.files$cnv.file = cnv.file
+input.files$snv.file = snv.file
+
+# Make an axample input file with paths to cnv and snv file along with other meta data
+lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+```
+
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 4: Cumulative distribution of SSNV densities in ECA (dark green) and MRCA (light green)"}
+lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
+LACHESIS::plotLachesis(lachesis)
+```
 
 ### Plotting Clinical Correlations (plotClinicalCorrelations)
 
@@ -928,7 +981,7 @@ kable(plotclin_input, col.names = c("Input", "Definition"), escape = FALSE)
 
 # How To Get Help 
 
-In case of any questions, feel free to open an issue on [**Github**.](https://github.com/VerenaK90/LACHESIS_shiny/issues).
+In case of any questions, feel free to open an issue on [**Github**](https://github.com/VerenaK90/LACHESIS_shiny/issues).
 
 <!-- Alternatively, questions can be posted to [**Bioconductor support site**](https://support.bioconductor.org), tagging the question with "LACHESIS" will automatically send an alert to the package authors to respond on the support site.   -->
 
