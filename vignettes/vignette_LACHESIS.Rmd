@@ -227,8 +227,8 @@ library(knitr)
 readvcf_input <- data.frame(
   Column1 = c("*vcf*", "*ignore.XY*", "*vcf.source*", "*min.vaf*", "*min.depth*", "*t.sample*", "*info.af*", "*info.dp*"),
   Column2 = c(
-    "file path to the copy number information.",
-    "ignoring allosomes when set to TRUE, retaining all chromosomes when set to FALSE",
+    "file path to the variant information.",
+    "allosomes will be ignored when set to TRUE, all chromosomes will be retained when set to FALSE",
     "tool used for generating vcf file: strelka, mutect, dkfz or sentieon",
     "vaf threshold for removing variants",
     "minimum required depth for a variant to be considered",
@@ -243,6 +243,7 @@ kable(readvcf_input, col.names = c("Input", "Definition"), escape = FALSE)
 
 #### Output
 
+A `data.table` containing the following information:
 
 ```{r, echo=FALSE}
 library(knitr)
@@ -304,18 +305,18 @@ library(knitr)
 plotvaf_input <- data.frame(
   Column1 = c("*vaf*", "*vafbreak*", "*t_sample*", "*showcounts*", "*showdensity*", "*col*", "*srtcounts*", "*output.file*"),
   Column2 = c(
-    "output from readVCF function: Datatable with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf [(vaf)](#output-1)",
+    "output from readVCF function: [(vaf)](#output-1)",
     "interval size [(hist() - breaks)](https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/hist)",
     "tumor sample name",
-    "showing count per break on the histogram when set to TRUE",
-    "showing additional density plot when set to TRUE",
+    "count per break on the histogram will be displayed when set to TRUE",
+    "additional density plot will be shown when set to TRUE",
     "color to be used to fill the bars",
     "text angle if *showcounts = TRUE*",
-    "saving the plot to this directory and naming it accordingly"
+    "directory where the plot will be saved, including its filename"
   )
 )
 
-kable(plotvaf_input, col.names = c("Output", "Definition"), escape = FALSE)
+kable(plotvaf_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
@@ -341,8 +342,8 @@ library(knitr)
 nb_import_input <- data.frame(
   Column1 = c("*cnv*", "*snv*", "*purity*", "*ploidy*"),
   Column2 = c(
-    "output from readCNV function: Datatable with Chr, Start, End, A, B and TCN columns [(cnv)](#output)",
-    "output from readVCF function: Datatable with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf [(snv)](#output-1)",
+    "output from readCNV function: [(cnv)](#output)",
+    "output from readVCF function: [(snv)](#output-1)",
     "the tumor cell content",
     "the average copy number in the tumor sample"
   )
@@ -431,7 +432,7 @@ plotnb_input <- data.frame(
     "the minimum copy number to be included in the analysis",
     "the maximum copy number to be included in the analysis",
     "the tumor sample name",
-    "saving the plot to this directory and naming it accordingly"
+    "directory where the plot will be saved, including its filename"
   )
 )
 
@@ -752,15 +753,15 @@ library(knitr)
 plotmrca_input <- data.frame(
   Column1 = c("*mrcaObj*", "*samp.name*", "*min.seg.size*", "*fill.zero*", "*fill.multi*", "*l.col*", "*show.den*", "*bins*", "*output.file*"),
   Column2 = c(
-    "output from normalizeCounts function: normalized clonal SNV counts stratified  [(countObj)](#output-4)",
+    "output from normalizeCounts function: normalized clonal SNV counts stratified [(countObj)](#output-4)",
     "the tumor sample name",
     "the minimal segment length to be included in the quantification", 
     "color to be used to fill the bars (single copies)",
     "color to be used to fill the bars (multiple copies)",
     "the color of the border around the bars",
-    "if TRUE showing the density distribution of mutation densities on single copies in the histogram of mutation densities on multiple copies",
-    "interval size (hist() - breaks)[https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/hist]",
-    "saving the plot to this directory and naming it accordingly"
+    "if TRUE the density distribution of mutation densities on single copies in the histogram of mutation densities on multiple copies will be shown",
+    "interval size [(hist() - breaks)](https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/hist)",
+    "directory where the plot will be saved, including its filename"
   )
 )
 
@@ -783,7 +784,8 @@ LACHESIS::plotMutationDensities(mrca)
 
 # LACHESIS Wrapper Function
 
-This function calls all of the previously mentioned functions and saves the results to the specified output directory. Input can be specified as vectors or in a tab-delimited **sample-specification file**
+This function calls all of the previously mentioned functions, and saves the results to the specified output directory. In addition, for every patient a datatable with mean, lower and upper bounds of mutation density at MRCA and ECA (if detected) is generated. These data tables will be combined into a single table, enabling comprehensive cohort analysis.
+Input can be specified as vectors or in a tab-delimited **sample-specification file**
 
 #### Input 
 
@@ -805,21 +807,20 @@ library(knitr)
 
 lachesis_output <- data.frame(
   Column1 = c(
-    "Sample_ID", "MRCA_time_mean", "MRCA_time_lower"/ "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower"/ "ECA_time_upper", "Ploidy", "Purity", "Age", "OS.time", "OS", "EFS.time", "EFS"
-  ),
+    "Sample_ID", "MRCA_time_mean", "MRCA_time_lower/ MRCA_time_upper", "ECA_time_mean", "ECA_time_lower/ ECA_time_upper", "Ploidy", "Purity", "Age", "OS.time", "OS", "EFS.time", "EFS"),
   Column2 = c(
     "the tumor sample ID",
-    ".",
-    ".",
-    ".",
-    ".",
+    "lower and upper bounds of mutation density at MRCA as calculated in [MRCA function](#estimating-mutation-densities-at-ecamrca-mrca)",
+    "mean mutation density at MRCA as calculated in [MRCA function](#estimating-mutation-densities-at-ecamrca-mrca)",
+    "mean mutation density at ECA as calculated in [MRCA function](#estimating-mutation-densities-at-ecamrca-mrca)",
+    "lower and upper bounds of mutation density at ECA as calculated in [MRCA function](#estimating-mutation-densities-at-ecamrca-mrca)",
     "user-specified average copy number in the tumor sample",
     "user-specified tumor cell content",
     "user-specified age at diagnosis",
     "user-specified overall survival time",
     "user-specified overall survival indicator variable",
     "user-specified eventfree survival time",
-    "user-specified eventfree survival indicator variable",
+    "user-specified eventfree survival indicator variable"
     ),
   stringsAsFactors = FALSE
 )
@@ -838,12 +839,12 @@ lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files =
 ```
 
 #### Example with tab-delimited sample-specification file
-
+<!-- Error cannot open the connection -->
 <!-- ```{r, message=FALSE, warning=FALSE} -->
-<!-- lachesis_input = system.file("extdata", "Sample_template.txt", package = "LACHESIS") -->
-<!-- lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input) -->
+<!-- input <- system.file("extdata", "Sample_template.txt", package = "LACHESIS") -->
+<!-- lachesis <- LACHESIS::LACHESIS(input.files = input) -->
 
-<!-- head(lachesis, n=1) -->
+<!-- head(lachesis_input, n=1) -->
 <!-- ``` -->
 
 ### Plotting Cohort Analysis (plotLACHESIS)
@@ -869,7 +870,7 @@ plotlachesis_input <- data.frame(
     "the color of the border around the bars",
     "the binwidth in the histogram",
     "color to be used to fill the bars (single copies)",
-    "saving the plot to this directory and naming it accordingly"
+    "directory where the plot will be saved, including its filename"
   )
 )
 
@@ -877,9 +878,9 @@ kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
-
+<!-- Error cannot open the connection -->
 <!-- ```{r, message=FALSE, warning=FALSE, fig.cap="Figure 4: Cumulative distribution of SSNV densities in ECA (dark green) and MRCA (light green)"} -->
-<!-- input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS") -->
+<!-- input.files = system.file("extdata","Sample_template.txt", package = "LACHESIS") -->
 <!-- lachesis <- LACHESIS::LACHESIS(input.files = input.files) -->
 
 <!-- LACHESIS::plotLachesis(lachesis) -->
@@ -905,7 +906,7 @@ plotclin_input <- data.frame(
     "the clinical parameter used for correlation, i.e. age",
     "plotting outliers (defined as the 2.5% tumors with lowest and highest densities) if set to TRUE",
     "plotting logarithmic densities if set to TRUE", 
-    "saving the plot to this directory and naming it accordingly"
+    "directory where the plot will be saved, including its filename"
   )
 )
 
