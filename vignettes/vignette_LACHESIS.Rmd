@@ -624,7 +624,7 @@ library(knitr)
 mrca_input <- data.frame(
   Column1 = c("*normObj*", "*min.seg.size*", "*fp.mean*", "*fp.sd*", "*excl.chr*"),
   Column2 = c(
-    "output from normalizeCounts function: normalized clonal SNV counts stratified  [(countObj)](#output-4)",
+    "output from normalizeCounts function: normalized clonal SNV counts stratified  [(normObj)](#output-4)",
     "the minimal segment length to be included in the quantification", 
     "the average false positive rate of clonal mutations (e.g. due to incomplete tissue sampling)",
     "the standard deviation of the false positive rate of clonal mutations (e.g. due to incomplete tissue sampling",
@@ -753,7 +753,7 @@ library(knitr)
 plotmrca_input <- data.frame(
   Column1 = c("*mrcaObj*", "*samp.name*", "*min.seg.size*", "*fill.zero*", "*fill.multi*", "*l.col*", "*show.den*", "*bins*", "*output.file*"),
   Column2 = c(
-    "output from normalizeCounts function: normalized clonal SNV counts stratified [(countObj)](#output-4)",
+    "output from mrca function [(mrcaObj)](#output-5)",
     "the tumor sample name",
     "the minimal segment length to be included in the quantification", 
     "color to be used to fill the bars (single copies)",
@@ -894,7 +894,7 @@ library(knitr)
 plotlachesis_input <- data.frame(
   Column1 = c("*lachesis*", "*suppress.outliers*", "*log.densities*", "*fill.multi*", "*l.col*", "*bin.width*", "*fill.zero*", "*output.file*"),
   Column2 = c(
-    "output from LACHESIS function: [(countObj)](#output-5)",
+    "output from LACHESIS function [(lachesis)](#output-6)",
     "plotting outliers (defined as the 2.5% tumors with lowest and highest densities) if set to TRUE",
     "plotting logarithmic densities if set to TRUE", 
     "color to be used to fill the bars (multiple copies)",
@@ -955,7 +955,7 @@ library(knitr)
 plotclin_input <- data.frame(
   Column1 = c("*lachesis*", "*clin.par*", "*suppress.outliers*", "*log.densities*", "*output.file*"),
   Column2 = c(
-    "output from LACHESIS function: [(countObj)](#output-5)",
+    "output from LACHESIS function [(lachesis)](#output-6)",
     "the clinical parameter used for correlation, i.e. age",
     "plotting outliers (defined as the 2.5% tumors with lowest and highest densities) if set to TRUE",
     "plotting logarithmic densities if set to TRUE", 
@@ -968,12 +968,12 @@ kable(plotclin_input, col.names = c("Input", "Definition"), escape = FALSE)
 
 #### Example 1
 
-<!-- ```{r, message=FALSE, warning=FALSE, fig.cap="Figure 5: Correlation between age at diagnosis and SNV densities at ECA and MRCA"} -->
-<!-- input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS") -->
-<!-- lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input) -->
-<!-- LACHESIS::plotClinicalCorrelations(lachesis) -->
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 5: Correlation between age at diagnosis and SNV densities at ECA and MRCA"}
+input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
+LACHESIS::plotClinicalCorrelations(lachesis)
 
-<!-- ``` -->
+```
 
 ### Plotting Survival Analysis (plotSurvival)
 
