@@ -679,37 +679,16 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 #' @description
 #' Takes SNV densities as computed by `LACHESIS` as input and correlates them with clinical data such as age at diagnosis, survival data etc.
 #' @param lachesis output generated from \code{\link{LACHESIS}}
-#' @param suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
-#' @param log.densities plot logarithmic densities. Default `FALSE`
-#' @param output.file optional; the file to which the plot will be stored.
+#' @param input.files output generated from \code{\link{LACHESIS}}
+#' @param mrca.cutpoint output generated from \code{\link{LACHESIS}}
+#' @param output.dir optional; the file to which the plot will be stored.
 #' @examples
-#' #an example file with sample annotations and meta data
-#' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
-#' input.files = data.table::fread(input.files)
 #'
-#' #cnv and snv files for example tumors
-#' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
-#' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
-#' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
-#'
-#' cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file = c(nbe11[2], nbe15[2], nbe63[2])
-#'
-#' input.files$cnv.file = cnv.file
-#' input.files$snv.file = snv.file
-#'
-#' # Make an axample input file with paths to cnv and snv file along with other meta data
-#' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
-#' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
-#'
-#' #Exampele with template file with paths to multiple cnv/snv files as an input
-#' lachesis <- LACHESIS(input.files = lachesis_input)
-#' plotClinicalCorrelations(lachesis)
 #' @export
-#' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows points
-#' @importFrom stats cor
+#' @importFrom
+#' @importFrom
 
-plotSurvival <- function(lachesis = NULL, input.files = NULL, mrca.cutpoint = NULL, output.dir = NULL, suppress.outliers = FALSE, log.densities = FALSE,  output.file = NULL){
+plotSurvival <- function(lachesis = NULL, input.files = NULL, mrca.cutpoint = NULL, output.dir = NULL){
 
   if (is.null(lachesis)) {
     stop("Error: 'lachesis' dataset must be provided.")
@@ -726,6 +705,19 @@ plotSurvival <- function(lachesis = NULL, input.files = NULL, mrca.cutpoint = NU
                            "7.gain", "11q.deletion", "1p.deletion", "1q.gain", "1.gain")
                        := input.files[, .(`TMM`, `Stage`, `Triploidy`, `17q.gain`, `17.gain`, `7q.gain`,
                                           `7.gain`, `11q.deletion`, `1p.deletion`, `1q.gain`, `1.gain`)]]
+  if(is.null(mrca.cutpoint)){
+    mrca.cutpoint <- survminer::surv_cutpoint(
+      survival.information,
+      time = "OS.time",
+      event = "OS",
+      variables = c("MRCA_time_mean")
+    )
+
+    fwrite(summary(mrca.cutpoint), file = "cutpoint_output.txt", sep = "\t")
+
+    mrca.cutpoint <- mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"]
+  }
+
 
   # Categorizing according to MRCA
   categorized.by.MRCA <- survival.information
@@ -760,8 +752,8 @@ plotSurvival <- function(lachesis = NULL, input.files = NULL, mrca.cutpoint = NU
   categorized.by.MRCA$Age.binary <- ifelse(categorized.by.MRCA$Age/30 < 18, "< 18", ">= 18")
   categorized.by.MRCA$Stage.binary <- ifelse(categorized.by.MRCA$Stage=="4", "4", "< 4")
 
-  p.value.table <- data.frame(Parameter = c("TMM", "Age.binary"),#, "ALK", "17q.gain", "17.gain", "7q.gain", "7.gain", "1p.deletion", "1.gain", "1q.gain",
-                              #"11q.deletion", "Age.binary",  "Stage.binary", "Triploidy"),
+  p.value.table <- data.frame(Parameter = c("TMM", "Age.binary", "17q.gain", "17.gain", "7q.gain", "7.gain", "1p.deletion", "1.gain", "1q.gain",
+                                            "11q.deletion", "Age.binary",  "Stage.binary", "Triploidy"), #, "ALK",
                               p.value = Inf,
                               odds.ratio = Inf,
                               odds.ratio.l = Inf,
@@ -779,7 +771,6 @@ plotSurvival <- function(lachesis = NULL, input.files = NULL, mrca.cutpoint = NU
                         factor(categorized.by.MRCA[[as.character(p.value.table$Parameter[i])]], levels = unique(categorized.by.MRCA[[as.character(p.value.table$Parameter[i])]])))
 
     cont.table <- as.matrix(cont.table)
-    View(cont.table)
 
       out <- fisher.test(cont.table)
 
@@ -791,10 +782,152 @@ plotSurvival <- function(lachesis = NULL, input.files = NULL, mrca.cutpoint = NU
 
   to.plot <- p.value.table
   to.plot <- to.plot[to.plot$p.value < 0.05,]
-  to.plot$Parameter <- factor(to.plot$Parameter, levels=c("TMM", "Age.binary"))
-                                                          #, "Stage.binary", "Triploidy", "7.gain", "17.gain", "7q.gain", "1p.deletion", "1.gain", "1q.gain", "11q.deletion", "17q.gain"))
+  to.plot$Parameter <- factor(to.plot$Parameter, levels=c("TMM", "Age.binary","Stage.binary", "Triploidy", "7.gain", "17.gain", "7q.gain", "1p.deletion", "1.gain", "1q.gain", "11q.deletion", "17q.gain"))
+
   p.value.plot <- ggplot(to.plot, aes(y=odds.ratio, ymin=odds.ratio.l, ymax=odds.ratio.u, x=Parameter)) + coord_flip() +
     geom_pointrange() + geom_hline(yintercept = 1, linetype=2) + scale_y_log10() + annotation_logticks(sides = "b") + labs(y = "Odds Ratio")
+
+
+  # Cox proportional hazards model
+
+  categorized.by.MRCA$ECA.exists <- as.character(as.logical(categorized.by.MRCA$ECA.exists))
+  categorized.by.MRCA$NB2004.binary <- replace(categorized.by.MRCA$NB2004, categorized.by.MRCA$NB2004 %in% c("MRG", "observation"),
+                                                      "observation/MRG")
+  categorized.by.MRCA$NB2004 <- factor(categorized.by.MRCA$NB2004, levels=c("observation", "MRG", "HR"))
+  categorized.by.MRCA$NB2004.binary <- factor(categorized.by.MRCA$NB2004.binary, levels=c("observation/MRG", "HR"))
+  categorized.by.MRCA$`MYCN.(current.disease.episode)` <- factor(categorized.by.MRCA$`MYCN.(current.disease.episode)`,
+                                                                        levels=c("normal", "amp"))
+  ## I. univariate Cox regression
+  covariates <- c("MRCA_time_mean", "TMM", "Stage.binary", "Age.binary")
+
+  univ_formulas <- sapply(covariates,
+                          function(x) as.formula(paste('Surv(categorized.by.MRCA$`OS.time`, categorized.by.MRCA$OS)~', x)))
+
+  univ_models <- lapply( univ_formulas, function(x){coxph(x, data = categorized.by.MRCA)})
+
+  ### Extract result
+  univ_results <- lapply(univ_models,
+                         function(x){
+                           x <- summary(x)
+                           p.value<-signif(x$wald["pvalue"], digits=2)
+                           wald.test<-signif(x$wald["test"], digits=2)
+                           beta<-signif(x$coef[1], digits=2);#coefficient beta
+                           HR <-signif(x$coef[2], digits=2);#exp(beta)
+                           HR.confint.lower <- signif(x$conf.int[,"lower .95"], 2)
+                           HR.confint.upper <- signif(x$conf.int[,"upper .95"],2)
+                           HR <- paste0(HR, " (",
+                                        HR.confint.lower, "-", HR.confint.upper, ")")
+                           res<-c(beta, HR, wald.test, p.value)
+                           names(res)<-c("beta", "HR (95% CI for HR)", "wald.test",
+                                         "p.value")
+                           return(res)
+                         })
+  univ_results <- t(as.data.frame(univ_results, check.names = FALSE))
+  as.data.frame(univ_results)
+
+  ## II. Multivariate analysis
+  ### check assumptions:
+  ### - proportional hazards: ratio of hazard should be constant over time between groups
+
+  lapply(univ_models, cox.zph)
+
+  for(i in 1:length(univ_models)){
+    test.ph <- cox.zph(univ_models[[i]])
+    ph.test.plot <- ggcoxzph(test.ph)
+  }
+
+  ### - linear relationship between covariates and log hazard h(t)
+
+  ### not an issue for categorial variables and we only have categorial variables
+
+  ### - influential observations (outliers)
+
+  ### plots the estimated changes in the regression coefficient after deleting each observation
+
+  cox.diagnostics.plots <- lapply(univ_models, function(model) {
+    ggcoxdiagnostics(model, type = "dfbeta", linear.predictions = FALSE)
+  })
+
+  ### collinearity of covariates
+
+  ### add interaction terms to table
+  categorized.by.MRCA$NB2004.MRCA.time <- factor(as.numeric(categorized.by.MRCA$NB2004.binary)*
+                                                          as.numeric(categorized.by.MRCA$MRCA_time_mean))
+
+  categorized.by.MRCA$NB2004.TMM <- factor(as.numeric(categorized.by.MRCA$NB2004.binary)*
+                                                    as.numeric(categorized.by.MRCA$TMM))
+
+  categorized.by.MRCA$TMM.MRCA.time <- factor(as.numeric(categorized.by.MRCA$TMM)*
+                                                       as.numeric(categorized.by.MRCA$MRCA_time_mean))
+
+  surv_object <- Surv(time=categorized.by.MRCA$`OS.time`, event=categorized.by.MRCA$OS)
+
+  ## adapting models
+  fit.coxph <- coxph(surv_object ~ MRCA_time_mean,
+                     data = categorized.by.MRCA)
+  summary(fit.coxph)
+
+  fit.coxph <- coxph(surv_object ~ MRCA_time_mean + TMM,
+                     data = categorized.by.MRCA)
+  summary(fit.coxph)
+  cox.zph(fit.coxph)
+
+  fit.coxph <- coxph(surv_object ~ MRCA_time_mean + Stage.binary,
+                     data = categorized.by.MRCA)
+  summary(fit.coxph)
+  cox.zph(fit.coxph)
+
+  fit.coxph <- coxph(surv_object ~ MRCA_time_mean + Age.binary,
+                     data = categorized.by.MRCA)
+  summary(fit.coxph)
+  cox.zph(fit.coxph)
+
+  fit.coxph <- coxph(surv_object ~ MRCA_time_mean + TMM + Stage.binary + Age.binary,
+                     data = categorized.by.MRCA)
+  summary(fit.coxph)
+  cox.zph(fit.coxph)
+
+  fit.coxph_MRCA_TMM_Stage_Age.OS <- coxph(surv_object ~ MRCA_time_mean + TMM + Stage.binary + Age.binary,
+                                               data = categorized.by.MRCA)
+
+  cox.zph(fit.coxph_MRCA_TMM_Stage_Age.OS)
+  print(ggcoxzph(cox.zph(fit.coxph_MRCA_TMM_Stage_Age.OS)))
+
+  summary(fit.coxph_MRCA_TMM_Stage_Age.OS)
+
+
+  ## same for EFS
+
+  efs.surv_object <- Surv(time=categorized.by.MRCA$`EFS.time`, event=categorized.by.MRCA$EFS)
+
+  fit.coxph <- coxph(efs.surv_object ~ MRCA_time_mean ,
+                     data = categorized.by.MRCA)
+  summary(fit.coxph)
+  cox.zph(fit.coxph)
+
+  fit.coxph <- coxph(efs.surv_object ~ MRCA_time_mean + TMM,
+                     data = categorized.by.MRCA)
+  summary(fit.coxph)
+  cox.zph(fit.coxph)
+
+  fit.coxph <- coxph(efs.surv_object ~ MRCA_time_mean + Stage.binary,
+                     data = categorized.by.MRCA)
+  summary(fit.coxph)
+  cox.zph(fit.coxph)
+
+
+  fit.coxph <- coxph(efs.surv_object ~ MRCA_time_mean + Age.binary,
+                     data = categorized.by.MRCA)
+  summary(fit.coxph)
+  cox.zph(fit.coxph)
+
+
+  fit.coxph_MRCA_TMM_Stage_Age.EFS <- coxph(efs.surv_object ~ MRCA_time_mean + TMM + Stage.binary + Age.binary,
+                                                data = categorized.by.MRCA)
+
+  summary(fit.coxph_MRCA_TMM_Stage_Age.EFS)
+  cox.zph(fit.coxph_MRCA_TMM_Stage_Age.EFS)
+  print(ggcoxzph(cox.zph(fit.coxph_MRCA_TMM_Stage_Age.EFS)))
 
 
   # Plotting results
@@ -807,6 +940,21 @@ plotSurvival <- function(lachesis = NULL, input.files = NULL, mrca.cutpoint = NU
 
   pdf("p_value_plot.pdf", width = 10, height = 8)
   print(p.value.plot)
+  dev.off()
+
+  pdf("proportional_hazard_test.pdf", width = 10, height = 8)
+  print(ph.test.plot)
+  dev.off()
+
+  pdf("cox_diagnostics_plot.pdf", width = 10, height = 8)
+  print(cox.diagnostics.plots)
+  dev.off()
+
+  EFS.cox <- ggforest(fit.coxph_MRCA_TMM_Stage_Age.EFS, data = categorized.by.MRCA, main = "EFS")
+  OS.cox <- ggforest(fit.coxph_MRCA_TMM_Stage_Age.OS, data = categorized.by.MRCA, main="OS")
+
+  pdf("Multi_variate_cox_regression.pdf", width = 12, height=6)
+  gridExtra::grid.arrange(EFS.cox, OS.cox, ncol = 2)
   dev.off()
 
   }
