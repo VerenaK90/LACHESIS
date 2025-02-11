@@ -22,9 +22,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
   if(any(is.null(cnv), is.null(snv))){
     stop("Missing snv and cnv inputs!")
   }
-  if(any(is.null(purity), is.null(ploidy))){
-    stop("Missing purity and ploidy inputs!")
-  }
 
   colnames(cnv)[1:3] <- c("chrom", "start", "end")
   data.table::setDT(x = cnv, key = c("chrom", "start", "end"))
@@ -43,6 +40,14 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
     warning("Removed ", nrow(sv[is.na(start)]), " variants with no copy number overlaps")
     sv <- sv[!is.na(start)]
   }
+
+  if(any(is.null(purity), is.null(ploidy))){
+    warning("Estimating purity and ploidy as not provided")
+    sv[, purity := (2 * t_vaf)/ (1 + (2 * t_vaf) - (t_vaf * TCN))]
+
+    purity <- median(sv$purity, na.rm = TRUE)
+    ploidy <- mean(sv$TCN, na.rm = TRUE)
+    }
 
   #Make columns more intuitive
   colnames(sv)[which(colnames(sv) == "i.start")] <- "snv_start"
