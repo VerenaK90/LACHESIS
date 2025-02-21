@@ -60,9 +60,15 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' @description
 #' Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.
 #' @param nb output generated from \code{\link{nbImport}}
-#' @param ref_build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
+#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @param min.cn maximum copy number to be included in the plotting. Defaults to 2.
 #' @param max.cn maximum copy number to be included in the plotting. Defaults to 4.
+#' @param nb.col.abline optional, the color code for the abline.
+#' @param nb.col.cn.2 optional, the color code if tcn = 2.
+#' @param nb.col.cn optional, the color code if other copy numbers.
+#' @param nb.col.hist optional, the color code for histograms.
+#' @param nb.border, optional, the line color.
+#' @param nb.breaks optional; the number of bins in the histogram.
 #' @param samp.name Sample name. Optional. Default NULL
 #' @param output.file optional, will save the plot.
 #' @examples
@@ -75,7 +81,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' @export
 #' @importFrom graphics abline axis box grid hist mtext par rect text title
 
-plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.name = NULL, output.file = NULL){
+plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, ...){
 
   chrom <- start <- t_vaf <- NULL
 
@@ -96,9 +102,9 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
   segs <- attr(nb, "cnv")
   segs <- segs[order(chrom, start)]
   colnames(segs)[1:3] <- c("Chromosome", "Start_Position", "End_Position")
-  segs <- .transformSegments(segmentedData = segs, build = ref_build)
+  segs <- .transformSegments(segmentedData = segs, build = ref.build)
 
-  contig_lens <- cumsum(.getContigLens(build = ref_build))
+  contig_lens <- cumsum(.getContigLens(build = ref.build))
 
   #n_copies <- length(min.cn:max.cn)
   n_copy_combs <- nrow(unique(nb[TCN >= min.cn & TCN <= max.cn,TCN, B]))
@@ -108,8 +114,8 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
   graphics::layout(mat = lo_mat, heights = c(3, 2, 2))
   par(mar = c(3, 4, 4, 3))
   plot(NA, ylim = c(0, max.cn), xlim = c(0, max(contig_lens)), axes = FALSE, xlab = NA, ylab = NA)
-  abline(h = 1:max.cn, v = contig_lens, lty = 2, col = "gray70", lwd = 0.4)
-  rect(xleft = segs$Start_Position_updated, ybottom = segs$TCN-0.1, xright = segs$End_Position_updated, ytop = segs$TCN+0.1, col = ifelse(segs$TCN == 2, "#7f8c8d", "#16a085"), border = NA, lty = 3)
+  abline(h = 1:max.cn, v = contig_lens, lty = 2, col = nb.col.abline, lwd = 0.4)
+  rect(xleft = segs$Start_Position_updated, ybottom = segs$TCN-0.1, xright = segs$End_Position_updated, ytop = segs$TCN+0.1, col = ifelse(segs$TCN == 2, nb.col.cn.2, nb.col.cn), border = nb.border, lty = 3)
   axis(side = 1, at = contig_lens, labels = 1:24, line = -0.5)
   axis(side = 2, at = 0:max.cn, labels = 0:max.cn, las = 2)
   mtext(text = "Total CN", side = 2, line = 2, cex = 0.9)
@@ -128,13 +134,13 @@ plotNB <- function(nb = NULL, ref_build = "hg19", min.cn = 2, max.cn = 4, samp.n
       B <- names(nb.)[b]
       if(nrow(tcn) == 0){
         par(mar = c(3, 4, 3, 1))
-        plot(NA, xlim = c(0, 1), ylim = c(0, 50), xlab = NA, ylab = NA, col = "#34495e", main = NA, frame.plot = FALSE)
+        plot(NA, xlim = c(0, 1), ylim = c(0, 50), xlab = NA, ylab = NA, col = nb.col.hist, main = NA, frame.plot = FALSE)
         title(main = paste0("Total CN:", ploidy), cex.main = 1.2)
         mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
         mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
       }else{
         par(mar = c(3, 4, 3, 1))
-        hist(tcn[,t_vaf], breaks = 100, xlim = c(0, 1), xlab = NA, ylab = NA,  border = NA, col = "#34495e", main = NA)
+        hist(tcn[,t_vaf], breaks = nb.breaks, xlim = c(0, 1), xlab = NA, ylab = NA,  border = nb.border, col = nb.col.hist, main = NA)
         title(main = paste0("CN:", as.numeric(ploidy), " (", as.numeric(ploidy) - as.numeric(B), ":", as.numeric(B), ")"), cex.main = 1.2)
         mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
         mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
