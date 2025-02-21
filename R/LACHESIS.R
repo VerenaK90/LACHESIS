@@ -149,7 +149,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                  fp.mean = double(),
                                                  fp.sd = double(),
                                                  excl.chr = numeric(),
-                                                 ref_build = character(),
+                                                 ref.build = character(),
                                                  cnv.file = character(),
                                                  snv.file = character())
   if(!is.null(input.files)){
@@ -304,7 +304,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                       fp.mean = fp.mean,
                                                       fp.sd = fp.sd,
                                                       excl.chr = excl.chr,
-                                                      ref_build = ref_build,
+                                                      ref.build = ref.build,
                                                       cnv.file = x$cnv.file,
                                                       snv.file = x$snv.file)
 
