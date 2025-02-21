@@ -43,3 +43,5 @@ unsrturl.bst
 .cloud
 .icloud
 .Rbuildignore
+/doc/
+/Meta/
