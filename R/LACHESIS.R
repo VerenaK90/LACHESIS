@@ -34,7 +34,7 @@
 #' @param fp.mean optional, the average false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param fp.sd optional, the standard deviation of the false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
-#' @param ref_build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
+#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @param ... further arguments and parameters passed to `plotMutationDensities`.
 #' @examples
 #' #an example file with sample annotations and meta data
@@ -75,7 +75,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
                      ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, min.depth = 30,
                      vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
-                     ref_build = "hg19", ...){
+                     ref.build = "hg19", ...){
 
 
   ID <- cnv.file <- snv.file <- fwrite <- NULL
@@ -149,7 +149,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                  fp.mean = double(),
                                                  fp.sd = double(),
                                                  excl.chr = numeric(),
-                                                 ref_build = character(),
+                                                 ref.build = character(),
                                                  cnv.file = character(),
                                                  snv.file = character())
   if(!is.null(input.files)){
@@ -236,7 +236,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"))
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn)
+        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, min.cn = min.cn, max.cn = max.cn)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -304,7 +304,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                       fp.mean = fp.mean,
                                                       fp.sd = fp.sd,
                                                       excl.chr = excl.chr,
-                                                      ref_build = ref_build,
+                                                      ref.build = ref.build,
                                                       cnv.file = x$cnv.file,
                                                       snv.file = x$snv.file)
 
@@ -377,7 +377,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"))
-        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref_build = ref_build, min.cn = min.cn, max.cn = max.cn)
+        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, min.cn = min.cn, max.cn = max.cn)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
