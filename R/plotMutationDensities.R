@@ -4,11 +4,11 @@
 #' @param mrcaObj output generated from \code{\link{MRCA}}
 #' @param samp.name sample name, optional
 #' @param min.seg.size minimal segment size to plot
-#' @param fill.zero optional, the color code for densities of mutations present on single copies.
-#' @param fill.multi  optional, the color code for densities of mutations present on multiple copies.
-#' @param l.col, optional, the line color
-#' @param show.den optional; if `TRUE`, the density distribution of mutation densities on single copies is shown in the histogram of mutation densities on multiple copies.
-#' @param bins optional; the number of bins in the histogram.
+#' @param mut.col.zero optional, the color code for densities of mutations present on single copies.
+#' @param mut.col.multi  optional, the color code for densities of mutations present on multiple copies.
+#' @param mut.border optional, the line color
+#' @param mut.show.density optional; if `TRUE`, the density distribution of mutation densities on single copies is shown in the histogram of mutation densities on multiple copies.
+#' @param mut.breaks optional; the number of bins in the histogram.
 #' @param output.file optional; will save the plot.
 #' @examples
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -23,7 +23,7 @@
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
 
-plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, fill.zero = NULL, fill.multi = NULL, l.col = NULL, show.den = NULL, bins = NULL, output.file = NULL, ...){
+plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, output.file = NULL, ...){
 
   Seglength <- . <- A <- B <- variable <- value <- lines <- density <- chrom <- TCN <- Seglength <- n_mut_A <- n_mut_B <- n_mut_total <- density_total_mean <- density_A_mean <- density_B_mean <- density_total_lower <- density_total_upper <- density_A_lower <- density_A_upper <- density_B_lower <- density_B_upper <- p_total_to_mrca <- p_A_to_mrca <- p_B_to_mrca <- p_adj_total_to_mrca <- p_adj_A_to_mrca <- p_adj_B_to_mrca <- MRCA_qual <- p_A_to_eca <- p_B_to_eca <- p_adj_A_to_eca <- p_adj_B_to_eca <- A_time <- B_time <- NULL
   if(is.null(mrcaObj)){
@@ -31,19 +31,6 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   }
   if(!is.null(output.file)){
     pdf(output.file, width = 7, height = 6)
-  }
-  # graphical settings:
-  if(is.null(l.col)){
-    l.col <- NA
-  }
-  if(is.null(fill.zero)){
-    fill.zero <- "#4FB12B"
-  }
-  if(is.null(fill.multi)){
-    fill.multi <- "#176A02"
-  }
-  if(is.null(show.den)){
-    show.den <- T
   }
 
   to.plot <- data.table::melt(mrcaObj, id.vars = c("chrom", "TCN", "A", "B", "Seglength"),
@@ -54,8 +41,8 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
                        !(variable == "density_total_A" & A == 1) &
                        !(variable == "density_total_B" & B == 1),]
 
-  if(is.null(bins)){
-    bins = 20
+  if(is.null(mut.breaks)){
+    mut.breaks = 20
   }
 
   lo_mat <- matrix(data = c(1, 2, 3, 3), nrow = 2, ncol=2, byrow = TRUE)
@@ -64,7 +51,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   par(mar = c(3, 4, 3, 1))
 
   hist(to.plot[variable == "density_total_mean",value], xlim = c(0, 1.05 * max(to.plot[,value])),
-       breaks = bins, col = fill.zero, border = l.col, main = NA,
+       breaks = mut.breaks, col = mut.col.zero, border = mut.border, main = NA,
        xlab = NA, ylab = NA)
 
   title(main = paste("Single-copy SNV densities"), cex.main = 1.2)
@@ -77,7 +64,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
     temp_d = density(to.plot[variable == "density_total_mean",value])
     temp_hist <- hist(to.plot[(variable == "density_A_mean" & A > 1) |
                                 (variable == "density_B_mean" & B > 1 & A != B), value],
-                      breaks = bins, plot = FALSE)
+                      breaks = mut.breaks, plot = FALSE)
     temp_hist_y <- max(temp_hist$counts, na.rm = TRUE)
     temp_hist_x <- max(temp_hist$breaks, na.rm = TRUE)
 
@@ -86,11 +73,11 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
                    (variable == "density_B_mean" & B > 1 & A != B),value],
          xlim = c(0, max(c(temp_hist_x, max(temp_d$x, na.rm = TRUE)))),
          ylim = c(0, max(c(temp_hist_y, max(temp_d$y, na.rm = TRUE)))),
-         breaks = bins, col = fill.multi, border = l.col, main = NA,
+         breaks = mut.breaks, col = mut.col.multi, border = mut.border, main = NA,
          xlab = NA, ylab = NA)
 
     # add density of MRCA
-    if(show.den == TRUE & nrow(to.plot[variable == "density_total_mean"])>1){
+    if(mut.show.density == TRUE & nrow(to.plot[variable == "density_total_mean"])>1){
       lines(density(to.plot[variable == "density_total_mean",value]), lty = 2)
     }
 
@@ -117,12 +104,12 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
   # ECA:
   polygon(c(attr(mrcaObj, "ECA_time_lower"), rep(attr(mrcaObj, "ECA_time_upper"),2),attr(mrcaObj, "ECA_time_lower")), c(rep(y.min, 2), rep(y.max,2)),
-          col = fill.multi, border = NA)
+          col = mut.col.multi, border = NA)
   abline(v = attr(mrcaObj, "ECA_time_mean"), lty = 2)
 
   #MRCA:
   polygon(c(attr(mrcaObj, "MRCA_time_lower"), rep(attr(mrcaObj, "MRCA_time_upper"),2),attr(mrcaObj, "MRCA_time_lower")), c(rep(y.min, 2), rep(y.max,2)),
-          col = fill.zero, border = NA)
+          col = mut.col.zero, border = NA)
   abline(v = attr(mrcaObj, "MRCA_time_mean"), lty = 2)
 
   signs <- c("ECA" = 19, "MRCA" = 17, "ECA/MRCA" = 15, "not mapped to ECA or MRCA" = 1)
