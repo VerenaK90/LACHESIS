@@ -111,6 +111,47 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                              EFS.time = numeric(),
                                              EFS = numeric())
 
+  # Initializing datatable for logfile
+  col.class <- fread(input.files)
+  if (is.numeric(col.class$cnv.chr.col)) {
+    col.class <- numeric()
+  } else if (is.character(col.class$cnv.chr.col)) {
+    col.class <- character()
+  }
+
+  log.file.data.cohort <- data.table::data.table(Sample_ID = character(),
+                                                 package.version = character(),
+                                                 vcf.tumor.ids = character(),
+                                                 vcf.source = character(),
+                                                 ploidy = numeric(),
+                                                 purity = numeric(),
+                                                 age = numeric(),
+                                                 cnv.chr.col = col.class,
+                                                 cnv.start.col = col.class,
+                                                 cnv.end.col = col.class,
+                                                 cnv.A.col = col.class,
+                                                 cnv.B.col = col.class,
+                                                 cnv.tcn.col = col.class,
+                                                 OS.time = numeric(),
+                                                 OS = numeric(),
+                                                 EFS.time = numeric(),
+                                                 EFS = numeric(),
+                                                 output.dir = character(),
+                                                 ignore.XY = logical(),
+                                                 min.cn = numeric(),
+                                                 max.cn = numeric(),
+                                                 merge.tolerance = numeric(),
+                                                 min.vaf = numeric(),
+                                                 min.depth = numeric(),
+                                                 vcf.info.af = numeric(),
+                                                 vcf.info.dp = numeric(),
+                                                 min.seg.size = numeric(),
+                                                 fp.mean = double(),
+                                                 fp.sd = double(),
+                                                 excl.chr = numeric(),
+                                                 ref_build = character(),
+                                                 cnv.file = character(),
+                                                 snv.file = character())
   if(!is.null(input.files)){
 
     sample.specs <- data.table::fread(input.files, sep = "\t", stringsAsFactors = FALSE)
@@ -172,6 +213,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$vcf.tumor.id, min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
 
+
       nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
 
       if(nrow(nb)==0){
@@ -216,7 +258,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                    EFS.time = x$EFS.time,
                                                    EFS = x$EFS)
 
-      cohort.densities <- merge(cohort.densities, this.tumor.density, all=T)
+      cohort.densities <- merge(cohort.densities, this.tumor.density, all=TRUE)
 
       # output the result for this sample
       if(!is.null(output.dir)){
@@ -229,6 +271,45 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       if(!is.null(output.dir)){
         plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), ...)
       }
+
+      # collecting data for log file
+      package.version <- as.character(packageVersion("LACHESIS"))
+      log.file.data.single <- data.table::data.table(Sample_ID = x$ID,
+                                                      package.version = package.version,
+                                                      vcf.tumor.ids = x$vcf.tumor.ids,
+                                                      vcf.source = x$vcf.source,
+                                                      ploidy = x$ploidy,
+                                                      purity = x$purity,
+                                                      cnv.chr.col = x$cnv.chr.col,
+                                                      cnv.start.col = x$cnv.start.col,
+                                                      cnv.end.col = x$cnv.end.col,
+                                                      cnv.A.col = x$cnv.A.col,
+                                                      cnv.B.col = x$cnv.B.col,
+                                                      cnv.tcn.col = x$cnv.tcn.col,
+                                                      age = x$Age,
+                                                      OS.time = x$OS.time,
+                                                      OS = x$OS,
+                                                      EFS.time = x$EFS.time,
+                                                      EFS = x$EFS,
+                                                      output.dir = output.dir,
+                                                      ignore.XY = ignore.XY,
+                                                      min.cn = min.cn,
+                                                      max.cn = max.cn,
+                                                      merge.tolerance = merge.tolerance,
+                                                      min.vaf = min.vaf,
+                                                      min.depth = min.depth,
+                                                      vcf.info.af = vcf.info.af,
+                                                      vcf.info.dp = vcf.info.dp,
+                                                      min.seg.size = min.seg.size,
+                                                      fp.mean = fp.mean,
+                                                      fp.sd = fp.sd,
+                                                      excl.chr = excl.chr,
+                                                      ref_build = ref_build,
+                                                      cnv.file = x$cnv.file,
+                                                      snv.file = x$snv.file)
+
+      log.file.data.cohort <- merge(log.file.data.cohort, log.file.data.single, all=TRUE)
+
     }
     rm(sample.specs.spl)
   }else{
@@ -349,6 +430,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
   if(!is.null(output.dir)){
     plotLachesis(cohort.densities, output.file = paste(output.dir, "SNV_densities_cohort.pdf", sep="/"), ...)
+  }
+
+  # save log file as tsv
+  if(!is.null(output.dir)){
+    timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
+    output.file <- paste0(output.dir, "/LACHESIS_logfile_", timestamp, ".tsv")
+    fwrite(log.file.data.cohort, output.file, sep = "\t")
   }
 
   return(cohort.densities)
@@ -654,7 +742,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 
     par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
-    to.plot[,plot(ECA_time_mean, get(clin.par), xlab = NA, ylab = NA, xlim = c(0, 1.05*max(ECA_time_mean, na.rm=T)),
+    to.plot[,plot(ECA_time_mean, get(clin.par), xlab = NA, ylab = NA, xlim = c(0, 1.05*max(ECA_time_mean, na.rm=TRUE)),
                   ylim = c(0, 1.05*max(get(clin.par))), cex.axis = 0.7, log = ifelse(log.densities, "x", ""))]
     title(main = "SNV densities at ECA vs age", cex.main = 1)
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.8)
