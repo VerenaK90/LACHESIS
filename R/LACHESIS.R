@@ -52,11 +52,11 @@
 #' input.files$cnv.file = cnv.file
 #' input.files$snv.file = snv.file
 #'
-#' # Make an axample input file with paths to cnv and snv file along with other meta data
+#' # Make an example input file with paths to cnv and snv file along with other meta data
 #' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
-#' #Exampele with template file with paths to multiple cnv/snv files as an input
+#' #Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
 #'
 #' #Example with a single sample input
@@ -597,11 +597,11 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 #' input.files$cnv.file = cnv.file
 #' input.files$snv.file = snv.file
 #'
-#' # Make an axample input file with paths to cnv and snv file along with other meta data
+#' # Make an example input file with paths to cnv and snv file along with other meta data
 #' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
-#' #Exampele with template file with paths to multiple cnv/snv files as an input
+#' #Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
 #' plotClinicalCorrelations(lachesis)
 #' @export
@@ -675,17 +675,41 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 
 }
 
-#' Correlate SNV density at ECA/MRCA with clinical parameters such as age, OS, etc.
+#' Correlate SNV density timing at MRCA with Survival
 #' @description
-#' Takes SNV densities as computed by `LACHESIS` as input and correlates them with clinical data such as age at diagnosis, survival data etc.
+#' Takes SNV density timing as computed by `LACHESIS` as input and correlates it with overall and event-free survival
 #' @param lachesis output generated from \code{\link{LACHESIS}}
-#' @param mrca.cutpoint output generated from \code{\link{LACHESIS}}
-#' @param output.dir optional; the file to which the plot will be stored.
+#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be inferred if not specified by user
+#' @param output.dir the directory to which the plot will be stored.
 #' @examples
+#' # an example file with sample annotations and meta data
+#' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+#' input.files = data.table::fread(input.files)
+#'
+#' # cnv and snv files for example tumors
+#' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+#' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+#' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+#'
+#' cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+#' snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+#'
+#' input.files$cnv.file = cnv.file
+#' input.files$snv.file = snv.file
+#'
+#' # Make an example input file with paths to cnv and snv file along with other meta data
+#' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+#' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+#'
+#' # Example with template file with paths to multiple cnv/snv files as an input
+#' lachesis <- LACHESIS(input.files = lachesis_input)
+#' plotSurvival(lachesis)
 #'
 #' @export
-#' @importFrom
-#' @importFrom
+#' @import ggplot2
+#' @import survival
+#' @import survminer
+#' @import gridExtra
 
 plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL){
 
@@ -714,36 +738,35 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
       variables = c("MRCA_time_mean")
     )
 
-    fwrite(summary(mrca.cutpoint), file = "cutpoint_output.txt", sep = "\t")
-
-    mrca_cutpoint <- mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"]
+    data.table::fwrite(summary(mrca.cutpoint), file = "cutpoint_output.txt", sep = "\t")
+    mrca_cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"])
   }
 
   # Categorizing according to MRCA
   lachesis.categorized <- lachesis
   lachesis.categorized$`OS.time` <- lachesis.categorized$`OS.time`/365
   lachesis.categorized$`EFS.time` <- lachesis.categorized$`EFS.time`/365
-  lachesis.categorized$MRCA_timing <- ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "early", "late")
+  lachesis.categorized$MRCA_timing <- ifelse(lachesis.categorized$MRCA_time_mean < mrca_cutpoint, "early", "late")
   lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing, levels=c("early", "late"))
 
-  survival.fit <- survfit(Surv(`OS.time`, OS) ~ MRCA_timing,
+  # Survival analysis
+  survival.fit <- survival::survfit(Surv(`OS.time`, OS) ~ MRCA_timing,
                           data = lachesis.categorized)
 
-  survdiff(Surv(`OS.time`, OS) ~ MRCA_timing,
+  survival::survdiff(Surv(`OS.time`, OS) ~ MRCA_timing,
            data = lachesis.categorized)
 
   EFS.fit <- survfit(Surv(`EFS.time`, EFS) ~ MRCA_timing,
                      data = lachesis.categorized)
 
-  survdiff(Surv(`EFS.time`, EFS) ~ MRCA_timing,
+  survival::survdiff(Surv(`EFS.time`, EFS) ~ MRCA_timing,
            data = lachesis.categorized)
 
-
-  EFS.fit.plot <- ggsurvplot(EFS.fit, data = lachesis.categorized, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
+  EFS.fit.plot <- survminer::ggsurvplot(EFS.fit, data = lachesis.categorized, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
                              color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
                              xlab = "Years", ylab = "Event Free Survival", legend.labs = c("Early MRCA", "Late MRCA"), break.x.by = 5)
 
-  survival.fit.plot <- ggsurvplot(survival.fit, data = lachesis.categorized, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
+  survival.fit.plot <- survminer::ggsurvplot(survival.fit, data = lachesis.categorized, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
                                   color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
                                   xlab = "Years", ylab = "Overall Survival", legend.labs = c("Early MRCA", "Late MRCA"), break.x.by = 5)
 
@@ -756,11 +779,10 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
 
   # Printing pdf
   pdf(paste0(output.dir, "/Stratified_OS_EFS.pdf"), width = 12, height = 8)
-  grid.arrange(EFS.plot, OS.plot, EFS.table, OS.table,
+  gridExtra::grid.arrange(EFS.plot, OS.plot, EFS.table, OS.table,
                ncol = 2, nrow = 2,
                widths = c(1, 1),
                heights = c(3, 1))
   dev.off()
-
 }
 
