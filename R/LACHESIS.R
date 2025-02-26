@@ -739,14 +739,14 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
     )
 
     data.table::fwrite(summary(mrca.cutpoint), file = paste0(output.dir, "/cutpoint_output.txt"), sep = "\t")
-    mrca_cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"])
+    mrca.cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"])
   }
 
   # Categorizing according to MRCA
   lachesis.categorized <- lachesis
   lachesis.categorized$`OS.time` <- lachesis.categorized$`OS.time`/365
   lachesis.categorized$`EFS.time` <- lachesis.categorized$`EFS.time`/365
-  lachesis.categorized$MRCA_timing <- ifelse(lachesis.categorized$MRCA_time_mean < mrca_cutpoint, "early", "late")
+  lachesis.categorized$MRCA_timing <- ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "early", "late")
   lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing, levels=c("early", "late"))
 
   # Survival analysis
