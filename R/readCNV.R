@@ -35,7 +35,6 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   if(is.null(cn.info) || is.na(cn.info)){
     stop("Error: missing cn.info! Please provide path to file with copy number information.")
   }
-  estimate.alleles <- FALSE # will be set to TRUE if allele info is not provided, see below
 
   ## Read cn.info and assume column index if not provided
   format.cnv <- .format_cnv_data(cn.info = cn.info, chr.col = chr.col, start.col = start.col, end.col = end.col, A.col = A.col, B.col = B.col, tcn.col = tcn.col)
@@ -47,6 +46,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   A.col <- format.cnv$A.col
   B.col <- format.cnv$B.col
   tcn.col <- format.cnv$tcn.col
+  estimate.alleles <- format.cnv$estimate.alleles
 
   message("********** Read in ", nrow(cn.info), " segments with copy number information on ", length(unique(cn.info[[chr.col]])), " chromosomes.")
 
@@ -154,10 +154,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
 .format_cnv_data <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL){
   cn.info <- data.table::fread(file = cn.info, sep = "\t", header = TRUE)
-
+  estimate.alleles <- FALSE # will be set to TRUE if allele info is not provided, see below
 
   if(is.null(chr.col) || is.na(chr.col)){
-    chr.col <- colnames(cn.info)[grepl("chr", colnames(cn.info), ignore.case = T)] # try to match with standard nomenclature
+    chr.col <- colnames(cn.info)[grepl("chr", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
     chr.col <- ifelse(length(chr.col) > 0, chr.col, 1)
     warning("No chromosome identifier provided, assuming ", chr.col)
   }else if(is.character(chr.col)){
@@ -277,7 +277,9 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: 'arg' should be string or numeric.")
   }
 
-  if(!(is.character(cn.info[[chr.col]]) | is.numeric(cn.info[[chr.col]]))){
+  cn.info[[chr.col]] <- as.character(cn.info[[chr.col]])
+
+  if(!is.character(cn.info[[chr.col]])){
     stop("Error: chromosome information must be string or numeric.")
   }else if(!(is.character(cn.info[[tcn.col]]) | is.numeric(cn.info[[tcn.col]]))){
     stop("Error: total copy number must be string or numeric.")
@@ -287,7 +289,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     stop("Error: end position must be numeric.")
   }
 
-  return(list(cn.info = cn.info, chr.col = chr.col, start.col = start.col, end.col = end.col, A.col = A.col, B.col = B.col, tcn.col = tcn.col))
+  return(list(cn.info = cn.info, chr.col = chr.col, start.col = start.col, end.col = end.col, A.col = A.col, B.col = B.col, tcn.col = tcn.col, estimate.alleles = estimate.alleles))
 }
 
 .estimate_alleles <- function(cn.info, tcn.col){
