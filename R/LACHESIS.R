@@ -738,7 +738,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
       variables = c("MRCA_time_mean")
     )
 
-    data.table::fwrite(summary(mrca.cutpoint), file = "cutpoint_output.txt", sep = "\t")
+    data.table::fwrite(summary(mrca.cutpoint), file = paste0(output.dir, "/cutpoint_output.txt"), sep = "\t")
     mrca_cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"])
   }
 
