@@ -112,12 +112,15 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                              EFS = numeric())
 
   # Initializing datatable for logfile
-  col.class <- fread(input.files)
-  if (is.numeric(col.class$cnv.chr.col)) {
-    col.class <- numeric()
-  } else if (is.character(col.class$cnv.chr.col)) {
-    col.class <- character()
-  }
+  if(!is.null(input.files)){
+    col.class <- fread(input.files)
+    if (is.null(col.class$cnv.chr.col) || is.na(col.class$cnv.chr.col)) {
+      col.class <- NA
+    } else if (is.numeric(col.class$cnv.chr.col)) {
+      col.class <- as.numeric(col.class$cnv.chr.col)
+    } else if (is.character(col.class$cnv.chr.col)) {
+      col.class <- as.character(col.class$cnv.chr.col)
+    }
 
   log.file.data.cohort <- data.table::data.table(Sample_ID = character(),
                                                  package.version = character(),
@@ -152,7 +155,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                  ref.build = character(),
                                                  cnv.file = character(),
                                                  snv.file = character())
-  if(!is.null(input.files)){
 
     sample.specs <- data.table::fread(input.files, sep = "\t", stringsAsFactors = FALSE)
 
@@ -434,7 +436,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
   }
 
   # save log file as tsv
-  if(!is.null(output.dir)){
+  if (!is.null(output.dir) && !is.null(input.files)) {
     timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
     output.file <- paste0(output.dir, "/LACHESIS_logfile_", timestamp, ".tsv")
     fwrite(log.file.data.cohort, output.file, sep = "\t")
