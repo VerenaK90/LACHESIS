@@ -212,9 +212,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      tcn.col = x$cnv.tcn.col, tumor.id = x$ID, merge.tolerance = merge.tolerance,
                      max.cn = max.cn, ignore.XY = ignore.XY)
 
-      snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$vcf.tumor.ids, min.depth = min.depth,
+      snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$vcf.tumor.id, min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
-      vaf.p1 <- plotVAFdistr(snv)
+      
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
 
@@ -237,8 +237,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         next
       }
       if(!is.null(output.dir)){
-        plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"))
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, min.cn = min.cn, max.cn = max.cn)
+        plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), ...)
+        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, ...)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -354,7 +354,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = vcf.tumor.ids[i], min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
-      vaf.p <- plotVAFdistr(snv)
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i])
 
@@ -378,8 +377,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         next
       }
       if(!is.null(output.dir)){
-        plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"))
-        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, min.cn = min.cn, max.cn = max.cn)
+        plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), ...)
+        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, ...)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -432,7 +431,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
   # plot the distribution of Mutation densities at ECA and MRCA
 
   if(!is.null(output.dir)){
-    plotLachesis(cohort.densities, output.file = paste(output.dir, "SNV_densities_cohort.pdf", sep="/"))
+    plotLachesis(cohort.densities, output.file = paste(output.dir, "SNV_densities_cohort.pdf", sep="/"), ...)
   }
 
   # save log file as tsv
@@ -450,11 +449,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 #' @description
 #' Visualizes results from \code{\link{LACHESIS}}. Top plot, histograms of mean mutation densities; bottom plots, cumulative distribution of mean mutation densities with 95% confidence intervals.
 #' @param lachesis output generated from \code{\link{LACHESIS}}
-#' @param suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
-#' @param log.densities plot logarithmic densities. Default `FALSE`
-#' @param fill.zero optional, the color code for MRCA.
-#' @param fill.multi optional, the color code for ECA.
-#' @param l.col, optional, the line color
+#' @param lach.suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
+#' @param lach.log.densities plot logarithmic densities. Default `FALSE`
+#' @param lach.col.zero optional, the color code for MRCA.
+#' @param lach.col.multi optional, the color code for ECA.
+#' @param lach.border, optional, the line color
 #' @param binwidth optional; the bin-width in the histogram.
 #' @param output.file optional; the file to which the plot will be stored.
 #' @examples
@@ -483,7 +482,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
 
-plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densities = FALSE, fill.multi = NULL, l.col = NULL, binwidth = NULL, fill.zero = NULL, output.file = NULL){
+plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.log.densities = FALSE, lach.col.multi = "#176A02", lach.border = NULL, binwidth = NULL, lach.col.zero = "#4FB12B", output.file = NULL, ...){
 
   MRCA_time_mean <- ECA_time_mean <- NULL
 
@@ -505,27 +504,17 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   if(!is.null(output.file)){
     pdf(output.file, width = 8, height = 6)
   }
-  # graphical settings:
-  if(is.null(l.col)){
-    l.col <- NA
-  }
-  if(is.null(fill.zero)){
-    fill.zero <- "#4FB12B"
-  }
-  if(is.null(fill.multi)){
-    fill.multi <- "#176A02"
-  }
 
   # I. plot histograms
   to.plot <- lachesis
 
-  if(suppress.outliers){
+  if(lach.suppress.outliers){
     to.plot <- to.plot[MRCA_time_mean < quantile(MRCA_time_mean, 0.975) &
               MRCA_time_mean > quantile(MRCA_time_mean, 0.025),]
   }
 
   if(is.null(binwidth)){
-    if(log.densities){
+    if(lach.log.densities){
       binwidth = (max(log10(to.plot$MRCA_time_mean)) - min(log10(to.plot$MRCA_time_mean)))/20
     }else{
       binwidth = (max(to.plot$MRCA_time_mean) - min(to.plot$MRCA_time_mean))/20
@@ -538,14 +527,14 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 
   par(mar = c(3, 4, 3, 1))
 
-  if(log.densities){
+  if(lach.log.densities){
 
     min.x <- floor(min(to.plot[,log10(MRCA_time_mean)]))
     max.x <- ceiling(max(to.plot[,log10(MRCA_time_mean)]))
 
     hist(to.plot[,log10(MRCA_time_mean)], xlim = c(min.x, max.x),
          breaks = 20,
-         col = fill.zero, border = l.col, main = NA,
+         col = lach.col.zero, border = lach.border, main = NA,
          xlab = NA, ylab = NA, axes = FALSE)
 
     Axis(side = 1, at = seq(min.x, max.x, length.out = 10),
@@ -554,7 +543,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 
   }else{
     hist(to.plot[,MRCA_time_mean], xlim = c(0, 1.05 * max(to.plot[,MRCA_time_mean])),
-         breaks = seq(0, max(to.plot[,MRCA_time_mean])*1.05, binwidth), col = fill.zero, border = l.col, main = NA,
+         breaks = seq(0, max(to.plot[,MRCA_time_mean])*1.05, binwidth), col = lach.col.zero, border = lach.border, main = NA,
          xlab = NA, ylab = NA)
   }
 
@@ -583,7 +572,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 
   polygon(c(to.plot$x.lower, rev(to.plot$x.upper)),
           c(to.plot$y.lower, rev(to.plot$y.upper))/nrow(lachesis),
-          col = fill.zero, border = NA)
+          col = lach.col.zero, border = NA)
 
   plot.ecdf(lachesis$MRCA_time_mean, col = "black", add=TRUE, verticals = TRUE)
 
@@ -600,20 +589,20 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 
   to.plot <- lachesis
 
-  if(suppress.outliers){
+  if(lach.suppress.outliers){
     to.plot <- to.plot[MRCA_time_mean < quantile(MRCA_time_mean, 0.975) &
                          MRCA_time_mean > quantile(MRCA_time_mean, 0.025),]
   }
 
   par(mar = c(3, 4, 3, 1))
 
-  if(log.densities){
+  if(lach.log.densities){
     min.x <- floor(min(to.plot[,log10(ECA_time_mean)], na.rm = TRUE))
     max.x <- ceiling(max(to.plot[,log10(ECA_time_mean)], na.rm = TRUE))
 
     hist(to.plot[,log10(ECA_time_mean)], xlim = c(min.x, max.x),
          breaks = 20,
-         col = fill.zero, border = l.col, main = NA,
+         col = lach.col.zero, border = lach.border, main = NA,
          xlab = NA, ylab = NA, axes = FALSE)
 
     Axis(side = 1, at = seq(min.x, max.x, length.out = 10),
@@ -622,7 +611,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
   }else{
     binwidth = (max(to.plot$ECA_time_mean, na.rm = TRUE) - min(to.plot$ECA_time_mean, na.rm = TRUE))/20
     hist(to.plot[,ECA_time_mean], xlim = c(0, 1.05 * max(to.plot[,ECA_time_mean], na.rm = TRUE)),
-         breaks = seq(0, max(to.plot[,ECA_time_mean], na.rm = TRUE)*1.05, binwidth), col = fill.multi, border = l.col, main = NA,
+         breaks = seq(0, max(to.plot[,ECA_time_mean], na.rm = TRUE)*1.05, binwidth), col = lach.col.multi, border = lach.border, main = NA,
          xlab = NA, ylab = NA)
   }
 
@@ -651,7 +640,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 
   polygon(c(to.plot$x.lower, rev(to.plot$x.upper)),
           c(to.plot$y.lower, rev(to.plot$y.upper))/nrow(lachesis[!is.na(ECA_time_mean),]),
-          col = fill.multi, border = NA)
+          col = lach.col.multi, border = NA)
   plot.ecdf(lachesis$ECA_time_mean, col = "black", add = TRUE, verticals = TRUE)
 
   title(main = paste("SNV densities at ECA"), cex.main = 1)
@@ -668,8 +657,8 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 #' Takes SNV densities as computed by `LACHESIS` as input and correlates them with clinical data such as age at diagnosis, survival data etc.
 #' @param lachesis output generated from \code{\link{LACHESIS}}
 #' @param clin.par the clinical parameter used for correlation. Default `Age`.
-#' @param suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
-#' @param log.densities plot logarithmic densities. Default `FALSE`
+#' @param clin.suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
+#' @param clin.log.densities plot logarithmic densities. Default `FALSE`
 #' @param output.file optional; the file to which the plot will be stored.
 #' @examples
 #' #an example file with sample annotations and meta data
@@ -698,7 +687,7 @@ plotLachesis <- function(lachesis = NULL, suppress.outliers = FALSE, log.densiti
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows points
 #' @importFrom stats cor
 
-plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress.outliers = FALSE, log.densities = FALSE,  output.file = NULL){
+plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE,  output.file = NULL, ...){
 
   ECA_time_mean <- NULL
 
@@ -725,7 +714,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 
   to.plot <- lachesis
 
-  if(suppress.outliers){
+  if(clin.suppress.outliers){
     to.plot <- to.plot[MRCA_time_mean < quantile(MRCA_time_mean, 0.975) &
                          MRCA_time_mean > quantile(MRCA_time_mean, 0.025),]
   }
@@ -735,7 +724,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
     par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
     to.plot[,plot(MRCA_time_mean, get(clin.par), xlab = NA, ylab = NA, xlim = c(0, 1.05*max(MRCA_time_mean)),
-                  ylim = c(0, 1.05*max(get(clin.par))), cex.axis = 0.7, log = ifelse(log.densities, "x", ""))]
+                  ylim = c(0, 1.05*max(get(clin.par))), cex.axis = 0.7, log = ifelse(clin.log.densities, "x", ""))]
     title(main = "SNV densities at MRCA vs age", cex.main = 1)
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.8)
     mtext(text = clin.par, side = 2, line = 1.8, cex = 0.8)
@@ -746,7 +735,8 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
     par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
     to.plot[,plot(ECA_time_mean, get(clin.par), xlab = NA, ylab = NA, xlim = c(0, 1.05*max(ECA_time_mean, na.rm=TRUE)),
-                  ylim = c(0, 1.05*max(get(clin.par))), cex.axis = 0.7, log = ifelse(log.densities, "x", ""))]
+                  ylim = c(0, 1.05*max(get(clin.par))), cex.axis = 0.7, log = ifelse(clin.log.densities, "x", ""))]
+
     title(main = "SNV densities at ECA vs age", cex.main = 1)
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.8)
     mtext(text = clin.par, side = 2, line = 1.8, cex = 0.8)
