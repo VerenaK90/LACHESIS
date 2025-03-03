@@ -677,10 +677,12 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 
 #' Correlate SNV density timing at MRCA with Survival
 #' @description
-#' Takes SNV density timing as computed by `LACHESIS` as input and correlates it with overall and event-free survival
+#' Takes SNV density timing as computed by `LACHESIS` as input and compares survival between tumors with high and low SNV densities
 #' @param lachesis output generated from \code{\link{LACHESIS}}
-#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be inferred if not specified by user
+#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be computationally inferred to maximize survival differences if not specified by user
 #' @param output.dir the directory to which the plot will be stored.
+#' @param surv.time column name containing survival time; defaults to `OS.time`.
+#' @param surv.event column name containing event; defaults to `OS`.
 #' @examples
 #' # an example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -703,7 +705,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
-#' plotSurvival(lachesis)
+#' plotSurvival(lachesis, surv.time = 'EFS.time', surv.event = 'EFS')
 #'
 #' @export
 #' @import ggplot2
@@ -711,7 +713,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 #' @import survminer
 #' @import gridExtra
 
-plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL){
+plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS'){
 
   if (is.null(lachesis)) {
     stop("Error: 'lachesis' dataset must be provided.")
@@ -722,67 +724,79 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
     lachesis <- lachesis[!is.na(MRCA_time_mean),]
   }
 
+  if(!surv.time %in% colnames(lachesis)){
+    stop("Error: please provide a valid column name for `surv.time`.")
+  }
+
+  if(!surv.event %in% colnames(lachesis)){
+    stop("Error: please provide a valid column name for `surv.event`.")
+  }
+
+  if(any(is.na(lachesis[,..surv.time]))){
+    warning("Removing ", sum(is.na(lachesis[,surv.time])), " samples with missing survival time.")
+    lachesis <- lachesis[!is.na(get(surv.time)), .SD]
+  }
+
+  if(any(is.na(lachesis[,..surv.event]))){
+    warning("Removing ", sum(is.na(lachesis[,surv.event])), " samples with missing survival time.")
+    lachesis <- lachesis[!is.na(get(surv.event)), .SD]
+  }
+
   if(nrow(lachesis)==0){
     warning("No sample with MRCA density estimate provided. Returning zero.")
     return(NULL)
   }
 
-  lachesis <- lachesis[, .(Sample_ID, MRCA_time_mean, OS.time, OS, EFS.time, EFS)]
+  if(all(lachesis[,..surv.event]==0)){
+    warning("No survival events in cohort Returning zero.")
+    return(NULL)
+  }
 
   # Calculating MRCA cutpoint
   if(is.null(mrca.cutpoint)){
     mrca.cutpoint <- survminer::surv_cutpoint(
       lachesis,
-      time = "OS.time",
-      event = "OS",
+      time = surv.time,
+      event = surv.event,
       variables = c("MRCA_time_mean")
     )
 
-    data.table::fwrite(summary(mrca.cutpoint), file = paste0(output.dir, "/cutpoint_output.txt"), sep = "\t")
+    if(!is.null(output.dir)){
+      data.table::fwrite(summary(mrca.cutpoint), file = paste0(output.dir, "/cutpoint_output.txt"), sep = "\t")
+    }
     mrca.cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"])
   }
 
   # Categorizing according to MRCA
   lachesis.categorized <- lachesis
-  lachesis.categorized$`OS.time` <- lachesis.categorized$`OS.time`/365
-  lachesis.categorized$`EFS.time` <- lachesis.categorized$`EFS.time`/365
   lachesis.categorized$MRCA_timing <- ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "early", "late")
   lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing, levels=c("early", "late"))
 
   # Survival analysis
-  survival.fit <- survival::survfit(Surv(`OS.time`, OS) ~ MRCA_timing,
+
+  survival.fit <- survival::survfit(Surv(time = unlist(lachesis[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
                           data = lachesis.categorized)
 
-  survival::survdiff(Surv(`OS.time`, OS) ~ MRCA_timing,
+  survival::survdiff(Surv(time = unlist(lachesis[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
            data = lachesis.categorized)
 
-  EFS.fit <- survfit(Surv(`EFS.time`, EFS) ~ MRCA_timing,
-                     data = lachesis.categorized)
+  survival.fit.plot <- survminer::ggsurvplot_df(surv_summary(survival.fit, data = lachesis.categorized), risk.table = TRUE, pval = TRUE, conf.int = TRUE,
+                                  color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"),
+                                  xlab = "Time", ylab = "Survival", legend.labs = c("Early MRCA", "Late MRCA"))
 
-  survival::survdiff(Surv(`EFS.time`, EFS) ~ MRCA_timing,
-           data = lachesis.categorized)
+  survival.fit.risk.table <- survminer::ggrisktable(survival.fit, data = lachesis.categorized)
 
-  EFS.fit.plot <- survminer::ggsurvplot(EFS.fit, data = lachesis.categorized, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
-                             color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
-                             xlab = "Years", ylab = "Event Free Survival", legend.labs = c("Early MRCA", "Late MRCA"), break.x.by = 5)
-
-  survival.fit.plot <- survminer::ggsurvplot(survival.fit, data = lachesis.categorized, risk.table = TRUE, pval = TRUE, conf.int = TRUE,
-                                  color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"), xlim=c(0,10),
-                                  xlab = "Years", ylab = "Overall Survival", legend.labs = c("Early MRCA", "Late MRCA"), break.x.by = 5)
-
-  # Extracting graphs and tables
-  EFS.plot <- EFS.fit.plot$plot + ggtitle("Event Free Survival Analysis") + scale_x_continuous(breaks = c(0,5,10))
-  OS.plot <- survival.fit.plot$plot + ggtitle("Overall Survival Analysis")
-
-  EFS.table <- EFS.fit.plot$table  + scale_x_continuous(breaks = c(0,5,10))
-  OS.table <- survival.fit.plot$table
 
   # Printing pdf
-  pdf(paste0(output.dir, "/Stratified_OS_EFS.pdf"), width = 12, height = 8)
-  gridExtra::grid.arrange(EFS.plot, OS.plot, EFS.table, OS.table,
-               ncol = 2, nrow = 2,
-               widths = c(1, 1),
+  if(!is.null(output.dir)){
+    pdf(paste0(output.dir, "/Stratified_OS_EFS.pdf"), width = 12, height = 8)
+  }
+  gridExtra::grid.arrange(survival.fit.plot, survival.fit.risk.table,
+               ncol = 1, nrow = 2,
+               widths = c(1),
                heights = c(3, 1))
-  dev.off()
+  if(!is.null(output.dir)){
+    dev.off()
+  }
 }
 
