@@ -114,12 +114,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
   # Initializing datatable for logfile
   if(!is.null(input.files)){
     col.class <- fread(input.files)
-    if (is.null(col.class$cnv.chr.col) || is.na(col.class$cnv.chr.col)) {
+    if (is.null(col.class$cnv.chr.col)) {
       col.class <- NA
     } else if (is.numeric(col.class$cnv.chr.col)) {
-      col.class <- as.numeric(col.class$cnv.chr.col)
+      col.class <- numeric()
     } else if (is.character(col.class$cnv.chr.col)) {
-      col.class <- as.character(col.class$cnv.chr.col)
+      col.class <- character()
     }
 
   log.file.data.cohort <- data.table::data.table(Sample_ID = character(),
@@ -214,7 +214,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$vcf.tumor.id, min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
-      
+
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
 
