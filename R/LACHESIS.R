@@ -683,6 +683,9 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 #' @param output.dir the directory to which the plot will be stored.
 #' @param surv.time column name containing survival time; defaults to `OS.time`.
 #' @param surv.event column name containing event; defaults to `OS`.
+#' @param surv.time.breaks numeric value controlling time axis breaks; defaults to `NULL`.
+#' @param surv.time.scale numeric value to divide survival time by (e.g., 365 for years, 30 for months); defaults to `1`.
+#' @param surv.palette color palette to be used. Allowed values include "hue" for the default hue color scale; "grey" for grey color palettes; brewer palettes e.g. "RdBu", "Blues", ...; or custom color palette e.g. c("blue", "red")
 #' @examples
 #' # an example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -713,7 +716,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 #' @import survminer
 #' @import gridExtra
 
-plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS'){
+plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1){
 
   if (is.null(lachesis)) {
     stop("Error: 'lachesis' dataset must be provided.")
@@ -769,27 +772,29 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
 
   # Categorizing according to MRCA
   lachesis.categorized <- lachesis
+  lachesis.categorized[[surv.time]] <- as.numeric(lachesis.categorized[[surv.time]])/surv.time.scale
   lachesis.categorized$MRCA_timing <- ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "early", "late")
   lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing, levels=c("early", "late"))
 
   # Survival analysis
-
-  survival.fit <- survival::survfit(Surv(time = unlist(lachesis[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
+  survival.fit <- survival::survfit(Surv(time = unlist(lachesis.categorized[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
                           data = lachesis.categorized)
-
-  survival::survdiff(Surv(time = unlist(lachesis[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
+  survival.diff <- survival::survdiff(Surv(time = unlist(lachesis.categorized[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
            data = lachesis.categorized)
 
-  survival.fit.plot <- survminer::ggsurvplot_df(surv_summary(survival.fit, data = lachesis.categorized), risk.table = TRUE, pval = TRUE, conf.int = TRUE,
-                                  color = "strata", censor.shape = 124, palette = c("dodgerblue", "dodgerblue4"),
-                                  xlab = "Time", ylab = "Survival", legend.labs = c("Early MRCA", "Late MRCA"))
+  p_value <- 1 - pchisq(survival.diff$chisq, length(survival.diff$n) - 1)
+  p.value.pos <- max(survival.fit$time) * (1/6)
 
-  survival.fit.risk.table <- survminer::ggrisktable(survival.fit, data = lachesis.categorized)
+  survival.fit.plot <- survminer::ggsurvplot_df(surv_summary(survival.fit, data = lachesis.categorized), conf.int = TRUE,
+                                  color = "strata", censor.shape = 124, palette = surv.palette,
+                                  xlab = "Time", ylab = "Survival", legend.labs = c("Early MRCA", "Late MRCA"), break.time.by = surv.time.breaks) +
+    annotate("text", x = p.value.pos, y = 0.2, label = paste0("p = ", ifelse(p_value > 0 & p_value < 0.0001, "< 0.0001", formatC(p_value, format = "f", digits = 4))), size = 5)
 
+  survival.fit.risk.table <- survminer::ggrisktable(survival.fit, data = lachesis.categorized, legend.labs = c("Early MRCA", "Late MRCA"), break.time.by = surv.time.breaks)
 
   # Printing pdf
   if(!is.null(output.dir)){
-    pdf(paste0(output.dir, "/Stratified_OS_EFS.pdf"), width = 12, height = 8)
+    pdf(paste0(output.dir, "/Stratified_", surv.event, ".pdf"), width = 9, height = 8)
   }
   gridExtra::grid.arrange(survival.fit.plot, survival.fit.risk.table,
                ncol = 1, nrow = 2,
