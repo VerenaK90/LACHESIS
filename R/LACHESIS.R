@@ -684,7 +684,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", suppress
 #' @param surv.time column name containing survival time; defaults to `OS.time`.
 #' @param surv.event column name containing event; defaults to `OS`.
 #' @param surv.time.breaks numeric value controlling time axis breaks; defaults to `NULL`.
-#' @param surv.time.scale numeric value to divide survival time by (e.g., 365 for years, 30 for months); defaults to `1`.
+#' @param surv.time.scale numeric value to divide survival time by (e.g., 365 for converting days into years, 30 for months); defaults to `1`.
 #' @param surv.palette color palette to be used. Allowed values include "hue" for the default hue color scale; "grey" for grey color palettes; brewer palettes e.g. "RdBu", "Blues", ...; or custom color palette e.g. c("blue", "red").
 #' @param surv.title main title.
 #' @param surv.ylab y-axis label, defaults to `Survival`.
