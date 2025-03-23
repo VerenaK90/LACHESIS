@@ -52,11 +52,11 @@
 #' input.files$cnv.file = cnv.file
 #' input.files$snv.file = snv.file
 #'
-#' # Make an axample input file with paths to cnv and snv file along with other meta data
+#' # Make an example input file with paths to cnv and snv file along with other meta data
 #' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
-#' #Exampele with template file with paths to multiple cnv/snv files as an input
+#' #Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
 #'
 #' #Example with a single sample input
@@ -674,11 +674,11 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
 #' input.files$cnv.file = cnv.file
 #' input.files$snv.file = snv.file
 #'
-#' # Make an axample input file with paths to cnv and snv file along with other meta data
+#' # Make an example input file with paths to cnv and snv file along with other meta data
 #' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
-#' #Exampele with template file with paths to multiple cnv/snv files as an input
+#' #Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
 #' plotClinicalCorrelations(lachesis)
 #' @export
@@ -751,5 +751,136 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.sup
     dev.off()
   }
 
+}
+
+#' Correlate SNV density timing at MRCA with Survival
+#' @description
+#' Takes SNV density timing as computed by `LACHESIS` as input and compares survival between tumors with high and low SNV densities
+#' @param lachesis output generated from \code{\link{LACHESIS}}
+#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be computationally inferred to maximize survival differences if not specified by user
+#' @param output.dir the directory to which the plot will be stored.
+#' @param surv.time column name containing survival time; defaults to `OS.time`.
+#' @param surv.event column name containing event; defaults to `OS`.
+#' @param surv.time.breaks numeric value controlling time axis breaks; defaults to `NULL`.
+#' @param surv.time.scale numeric value to divide survival time by (e.g., 365 for converting days into years, 30 for months); defaults to `1`.
+#' @param surv.palette color palette to be used. Allowed values include "hue" for the default hue color scale; "grey" for grey color palettes; brewer palettes e.g. "RdBu", "Blues", ...; or custom color palette e.g. c("blue", "red").
+#' @param surv.title main title.
+#' @param surv.ylab y-axis label, defaults to `Survival`.
+#' @examples
+#' # an example file with sample annotations and meta data
+#' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+#' input.files = data.table::fread(input.files)
+#'
+#' # cnv and snv files for example tumors
+#' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+#' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+#' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+#'
+#' cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+#' snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+#'
+#' input.files$cnv.file = cnv.file
+#' input.files$snv.file = snv.file
+#'
+#' # Make an example input file with paths to cnv and snv file along with other meta data
+#' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+#' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+#'
+#' # Example with template file with paths to multiple cnv/snv files as an input
+#' lachesis <- LACHESIS(input.files = lachesis_input)
+#' plotSurvival(lachesis, surv.time = 'EFS.time', surv.event = 'EFS')
+#'
+#' @export
+#' @import ggplot2
+#' @import survival
+#' @import survminer
+#' @import gridExtra
+
+plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival"){
+
+  if (is.null(lachesis)) {
+    stop("Error: 'lachesis' dataset must be provided.")
+  }
+
+  if(any(is.na(lachesis$MRCA_time_mean))){
+    warning("Removing ", sum(is.na(lachesis$MRCA_time_mean)), " samples with missing MRCA density estimate.")
+    lachesis <- lachesis[!is.na(MRCA_time_mean),]
+  }
+
+  if(!surv.time %in% colnames(lachesis)){
+    stop("Error: please provide a valid column name for `surv.time`.")
+  }
+
+  if(!surv.event %in% colnames(lachesis)){
+    stop("Error: please provide a valid column name for `surv.event`.")
+  }
+
+  if(any(is.na(lachesis[,..surv.time]))){
+    warning("Removing ", sum(is.na(lachesis[,surv.time])), " samples with missing survival time.")
+    lachesis <- lachesis[!is.na(get(surv.time)), .SD]
+  }
+
+  if(any(is.na(lachesis[,..surv.event]))){
+    warning("Removing ", sum(is.na(lachesis[,surv.event])), " samples with missing survival time.")
+    lachesis <- lachesis[!is.na(get(surv.event)), .SD]
+  }
+
+  if(nrow(lachesis)==0){
+    warning("No sample with MRCA density estimate provided. Returning zero.")
+    return(NULL)
+  }
+
+  if(all(lachesis[,..surv.event]==0)){
+    warning("No survival events in cohort Returning zero.")
+    return(NULL)
+  }
+
+  # Calculating MRCA cutpoint
+  if(is.null(mrca.cutpoint)){
+    mrca.cutpoint <- survminer::surv_cutpoint(
+      lachesis,
+      time = surv.time,
+      event = surv.event,
+      variables = c("MRCA_time_mean")
+    )
+
+    if(!is.null(output.dir)){
+      data.table::fwrite(summary(mrca.cutpoint), file = paste0(output.dir, "/cutpoint_output.txt"), sep = "\t")
+    }
+    mrca.cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"])
+  }
+
+  # Categorizing according to MRCA
+  lachesis.categorized <- lachesis
+  lachesis.categorized[[surv.time]] <- as.numeric(lachesis.categorized[[surv.time]])/surv.time.scale
+  lachesis.categorized$MRCA_timing <- ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "early", "late")
+  lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing, levels=c("early", "late"))
+
+  # Survival analysis
+  survival.fit <- survival::survfit(Surv(time = unlist(lachesis.categorized[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
+                          data = lachesis.categorized)
+  survival.diff <- survival::survdiff(Surv(time = unlist(lachesis.categorized[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
+           data = lachesis.categorized)
+
+  p_value <- 1 - pchisq(survival.diff$chisq, length(survival.diff$n) - 1)
+  p.value.pos <- max(survival.fit$time) * (1/6)
+
+  survival.fit.plot <- survminer::ggsurvplot_df(surv_summary(survival.fit, data = lachesis.categorized), title = surv.title, conf.int = TRUE, color = "strata", censor.shape = 124,
+                                                palette = surv.palette, xlab = "Time", ylab = surv.ylab, legend.labs = c("Early MRCA", "Late MRCA"), break.time.by = surv.time.breaks) +
+    annotate("text", x = p.value.pos, y = 0.2, label = paste0("p = ", ifelse(p_value > 0 & p_value < 0.0001, "< 0.0001", formatC(p_value, format = "f", digits = 4))), size = 5)
+
+  survival.fit.risk.table <- survminer::ggrisktable(survival.fit, data = lachesis.categorized, legend.labs = c("Early MRCA", "Late MRCA"), break.time.by = surv.time.breaks)
+
+  # Printing pdf
+  if(!is.null(output.dir)){
+    pdf(paste0(output.dir, "/Stratified_", surv.event, ".pdf"), width = 9, height = 8)
+  }
+  gridExtra::grid.arrange(survival.fit.plot, survival.fit.risk.table,
+               ncol = 1, nrow = 2,
+               widths = c(1),
+               heights = c(3, 1))
+  if(!is.null(output.dir)){
+    dev.off()
+  }
 }
 
