@@ -116,7 +116,10 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
   plot(NA, ylim = c(0, max.cn), xlim = c(0, max(contig_lens)), axes = FALSE, xlab = NA, ylab = NA)
   abline(h = 1:max.cn, v = contig_lens, lty = 2, col = nb.col.abline, lwd = 0.4)
   rect(xleft = segs$Start_Position_updated, ybottom = segs$TCN-0.1, xright = segs$End_Position_updated, ytop = segs$TCN+0.1, col = ifelse(segs$TCN == 2, nb.col.cn.2, nb.col.cn), border = nb.border, lty = 3)
-  axis(side = 1, at = contig_lens, labels = 1:24, line = -0.5)
+  contig_lens_mid <- c(contig_lens[1] / 2,
+                  (contig_lens[-length(contig_lens)] + contig_lens[-1]) / 2)
+  axis(side = 1, at = c(0, contig_lens), labels = FALSE, pos = 0)
+  axis(side = 1, at = contig_lens_mid, labels = c(1:22, "X", "Y"), tick = FALSE, line = -0.5, cex.axis = 0.9)
   axis(side = 2, at = 0:max.cn, labels = 0:max.cn, las = 2)
   mtext(text = "Total CN", side = 2, line = 2, cex = 0.9)
   mtext(text = "Chromosome", side = 1, line = 2, cex = 0.9)
