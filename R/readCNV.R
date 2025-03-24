@@ -91,7 +91,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
 
   ## check chromosome format and amend if not 'chr1', 'chr2', etc.
-  if(grepl("chr", cn.info[1, ..chr.col])){
+  if (grepl("chr", cn.info[[chr.col]][1])){
     message("********** Change chromosome names to 1, 2, 3, ...")
     cn.info[[chr.col]] <- gsub(pattern = "chr", replacement = "", x = cn.info[[chr.col]])
   }
