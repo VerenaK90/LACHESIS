@@ -57,27 +57,45 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 
     message("Importing VCF..")
     v <- vcfR::read.vcfR(file = vcf, verbose = FALSE)
+    message("Total variants         : ", nrow(v@fix))
 
-    message("Total variants        : ", nrow(v@gt))
-    v <- v[vcfR::is.biallelic(x = v)] #Only keep bialleleic variants
+    v <- v[v@fix[, "FILTER"] == "PASS", ] #Only keep variants that passed the filter
+    if(nrow(v@fix) == 0){
+      stop("No variants passed filtering!")
+    }
+    message("Variants passing filter: ", nrow(v@fix))
+
+    v <- v[vcfR::is.biallelic(x = v)] #Only keep biallelic variants
     if(nrow(v) == 0){
       stop("No bi-allelic variants found!")
     }
-    message("Bi-allelic variants   : ", nrow(v@gt))
+    message("Bi-allelic variants    : ", nrow(v@fix))
+
     v <- v[!vcfR::is.indel(v)] #Remove INDELS (only SNVs)
     if(nrow(v) == 0){
       stop("No single nucelotide variants found!")
     }
-    message("single nucl. variants : ", nrow(v@gt))
+    message("single nucl. variants  : ", nrow(v@fix))
 
-    #convert tumor FORMAT to a data.frame
-    tum_format <- v@gt[,t.sample]
-    format_df <- as.data.frame(data.table::tstrsplit(tum_format, split = ":"))
-    colnames(format_df) <- unlist(data.table::tstrsplit(x = v@gt[1,"FORMAT"], split = ":"))
+    #convert vcf data to a data.frame
+    if ("FORMAT" %in% colnames(v@gt)) {
+      tum_format <- v@gt[, t.sample]
+      vcf_df <- as.data.frame(data.table::tstrsplit(tum_format, split = ":"))
+      colnames(vcf_df) <- unlist(data.table::tstrsplit(x = v@gt[1, "FORMAT"], split = ":"))
+    } else if ("INFO" %in% colnames(v@fix)) {
+      info_column <- v@fix[, "INFO"]
+      vcf_df <- as.data.frame(data.table::tstrsplit(info_column, split = ";", type.convert = TRUE))
+      colnames(vcf_df) <- sapply(vcf_df[1, ], function(x) strsplit(x, "=")[[1]][1])
+      vcf_df <- as.data.frame(lapply(vcf_df, function(col) {
+        sapply(col, function(x) ifelse(grepl("=", x), sub(".*?=", "", x), NA))
+      }), stringsAsFactors = FALSE)
+    } else {
+      stop("Error: Please provide vcf file with FORMAT or INFO column.")
+    }
 
     #Make a df of all necessary columns
     dt <- data.table::data.table(chrom = vcfR::getCHROM(v), pos = vcfR::getPOS(v), ref = vcfR::getREF(v), alt = vcfR::getALT(v))
-    dt <- cbind(dt, format_df)
+    dt <- cbind(dt, vcf_df)
 
     #Parse FORMAT field and get vaf, etc
     dt <- .get_depth_dt(d = dt, source = vcf.source)
@@ -91,12 +109,12 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
   #Only analyze primary contigs (either with or without the chr prefix)
   primary_contigs <- c(1:22, c("X", "Y"))
   dt <- dt[chrom %in% primary_contigs]
-  message("Primary contig vars.  : ", nrow(dt))
+  message("Primary contig vars.   : ", nrow(dt))
 
   #Remove X and Y contigs
   if(ignore.XY){
     dt <- dt[!chrom %in% c("chrX", "chrY", "X", "Y")]
-    message("Autosomal variants    : ", nrow(dt))
+    message("Autosomal variants     : ", nrow(dt))
   }
 
   #Filter for VAF and depth. Return only necessary columns
@@ -214,3 +232,4 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
   colnames(v) = c("chrom", "pos", "ref", "alt", "t_ref_count", "t_alt_count", "t_depth", "t_vaf")
   v
 }
+
