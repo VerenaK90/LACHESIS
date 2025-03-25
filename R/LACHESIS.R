@@ -62,7 +62,15 @@
 #' #Example with a single sample input
 #' strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
+#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = c("PASS", "LowEVS"))
+#'
+#' #Example with multiple sample and data frame input
+#' nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#' nbe11_cn = read.delim(system.file("extdata", "NBE11/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
+#' nbe15_vcf = system.file("extdata","NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#' nbe15_cn = read.delim(system.file("extdata", "NBE15/NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
+#' lachesis <- LACHESIS(ids = c("NBE11", "NBE15"), cnv.files = list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf), vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51), cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3), cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37))
+#'
 #' @seealso \code{\link{MRCA}} \code{\link{clonalMutationCounter}} \code{\link{normalizeCounts}}
 #' @import tidyr
 #' @return a data.table
@@ -85,8 +93,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
   }else if(is.null(input.files)){
     if(any(is.null(cnv.files), is.null(snv.files))){
       stop("Missing snv and cnv inputs!")
-    }else if(length(cnv.files) != length(snv.files)){
-      stop("Please provide snv and cnv input for every sample!")
     }
   }
 
@@ -347,13 +353,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         next
       }
 
-      cnv <- readCNV(cn.info = cnv.files[i], chr.col = cnv.chr.col[i], start.col = cnv.start.col[i],
+      cnv <- readCNV(cn.info = cnv.files[[i]], chr.col = cnv.chr.col[i], start.col = cnv.start.col[i],
                      end.col = cnv.end.col[i], A.col = cnv.A.col[i], B.col = cnv.B.col[i],
                      tcn.col = cnv.tcn.col[i], tumor.id = ids[i], merge.tolerance = merge.tolerance,
                      max.cn = max.cn, ignore.XY = ignore.XY)
 
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = vcf.tumor.ids[i], min.depth = min.depth,
-                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
+                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, ...)
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i])
 

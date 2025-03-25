@@ -32,7 +32,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
   . <- Alt <- Chr <- Chromosome <- ECA_time_mean <- End_position <- ID <- MRCA_time_mean <- Ref <- Start <- Start_Position <- TCN <- chrom <- cnv.file <- end <- start <- t_alt_count <-t_depth <- t_ref_count <- t_vaf <- NULL
 
   ## Check input format
-  if(is.null(cn.info) || is.na(cn.info)){
+  if(is.null(cn.info)){
     stop("Error: missing cn.info! Please provide path to file with copy number information.")
   }
 
@@ -153,7 +153,15 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 }
 
 .format_cnv_data <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL){
-  cn.info <- data.table::fread(file = cn.info, sep = "\t", header = TRUE)
+
+  if (is.data.frame(cn.info) || is.data.table(cn.info)) {
+    cn.info <- data.table::as.data.table(cn.info)
+  } else if (is.character(cn.info)) {
+    cn.info <- data.table::fread(file = cn.info, sep = "\t", header = TRUE)
+  } else {
+    stop("Please provide a must be a file path, data.frame, or data.table for copy number information.")
+  }
+
   estimate.alleles <- FALSE # will be set to TRUE if allele info is not provided, see below
 
   if(is.null(chr.col) || is.na(chr.col)){
