@@ -21,7 +21,7 @@
 #' @return a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf
 #' @export
 
-readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL, info.af = "AF", info.dp = "DP"){
+readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL, info.af = "AF", info.dp = "DP", filter.value = "PASS", ...){
 
   chrom <- t_vaf <- t_depth <- . <- pos <- ref <- alt <- t_ref_count <- t_alt_count <- NULL
 
@@ -59,7 +59,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     v <- vcfR::read.vcfR(file = vcf, verbose = FALSE)
     message("Total variants         : ", nrow(v@fix))
 
-    v <- v[v@fix[, "FILTER"] == "PASS", ] #Only keep variants that passed the filter
+    v <- v[v@fix[, "FILTER"] == filter.value, ] #Only keep variants that contain the specified filter value
     if(nrow(v@fix) == 0){
       stop("No variants passed filtering!")
     }
