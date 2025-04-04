@@ -122,6 +122,7 @@ If total copy number information is available but the number of A and B alleles 
 ```
 readCNV(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL)
 ```
+
 ```{r, echo=FALSE}
 library(knitr)
 
@@ -262,11 +263,12 @@ head(d_data, n = 1)
 
 The `plotVAFdistr` function generates a VAF histogram of somatic SNVs. If `showdensity` is set to `TRUE`, an additional density plot is displayed.
 
-#### Input Parameters 
+#### Input  
 
 ```
 plotVAFdistr(vaf = NULL, vaf.interval = 0.05, t_sample = NULL, vaf.show.counts = FALSE, vaf.show.density = TRUE, vaf.col = "#34495e", vaf.border = "#bdc3c7", srtcounts = 45, output.file = NULL)
 ```
+
 ```{r, echo=FALSE}
 library(knitr)
 
@@ -419,6 +421,7 @@ This function counts the number of clonal mutations residing on a single or mult
 ```
 clonalMutationCounter(nbObj = NULL, min.cn = 1, max.cn = 4, chromosomes = c(1:22)) 
 ```
+
 ```{r, echo=FALSE}
 library(knitr)
 
@@ -476,9 +479,10 @@ This function translates the clonal mutation counts obtained with `clonalMutatio
 
 #### 
 
-```
+```{r, eval=FALSE}
 normalizeCounts(countObj)
 ```
+
 ```{r, echo=FALSE}
 library(knitr)
 
@@ -645,6 +649,7 @@ This function visualizes the results of the MRCA analysis. The top plot presents
 ```
 plotMutationDensities(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, output.file = NULL)
 ```
+
 ```{r, echo=FALSE}
 library(knitr)
 
@@ -696,6 +701,7 @@ LACHESIS(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.files = NULL,
                       min.depth = 30, vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, 
                       fp.sd = 0, excl.chr = NULL, ref_build = "hg19", ...)
 ```
+
 #### Output
 
 A `data.table` containing the following information:
@@ -792,7 +798,7 @@ The function `plotLACHESIS` plots cumulative distributions of SSNV densities at 
 
 #### Input 
 
-``` 
+```
 plotLachesis(lachesis = NULL, lach.suppress.outliers = FALSE, lach.log.densities = FALSE, lach.col.multi = "#176A02", lach.border = NULL, binwidth = NULL, lach.col.zero = "#4FB12B", output.file = NULL)
 ```
 
@@ -855,7 +861,7 @@ This function takes SNV densities as input and correlates them with clinical dat
 
 ```
 plotClinicalCorrelations(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE,  output.file = NULL)
-````
+```
 
 ```{r, echo=FALSE}
 library(knitr)
@@ -883,46 +889,46 @@ lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 LACHESIS::plotClinicalCorrelations(lachesis)
 ```
 
-<!-- ### Plotting Survival (plotSurvival) -->
+### Plotting Survival (plotSurvival)
 
-<!-- The function `plotSurvival` plots correlation between SNV density timing at MRCA with Survival -->
+The function `plotSurvival` plots correlation between SNV density timing at MRCA with Survival
 
-<!-- #### Input  -->
+#### Input
 
-<!-- ```  -->
-<!-- plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival") -->
-<!-- ``` -->
+```
+plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
+```
 
-<!-- ```{r, echo=FALSE} -->
-<!-- library(knitr) -->
+```{r, echo=FALSE}
+library(knitr)
 
-<!-- plotlachesis_input <- data.frame( -->
-<!--   Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*surv.time*", "*surv.event*", "*surv.palette*", "*surv.time.breaks*", "*surv.time.scale*", "*surv.title*", "*surv.ylab*"), -->
-<!--   Column2 = c( -->
-<!--     "output from LACHESIS function [(lachesis)](#output-6)", -->
-<!--     "value based on SNV_densities_cohort.pdf observation, will be computationally inferred to maximize survival differences if not specified by user", -->
-<!--     "the directory to which the plot will be stored",  -->
-<!--     "column name containing survival time", -->
-<!--     "column name containing event", -->
-<!--     "numeric value controlling time axis breaks", -->
-<!--     "numeric value to divide survival time by (e.g., 365 for converting days into years, 30 for months)", -->
-<!--     "color palette to be used", -->
-<!--     "main title", -->
-<!--     "y-axis label" -->
-<!--   ) -->
-<!-- ) -->
+plotlachesis_input <- data.frame(
+  Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*surv.time*", "*surv.event*", "*surv.palette*", "*surv.time.breaks*", "*surv.time.scale*", "*surv.title*", "*surv.ylab*"),
+  Column2 = c(
+    "output from LACHESIS function [(lachesis)](#output-6)",
+    "value based on SNV_densities_cohort.pdf observation, will be computationally inferred to maximize survival differences if not specified by user",
+    "the directory to which the plot will be stored",
+    "column name containing survival time",
+    "column name containing event",
+    "numeric value controlling time axis breaks",
+    "numeric value to divide survival time by (e.g., 365 for converting days into years, 30 for months)",
+    "color palette to be used",
+    "main title",
+    "y-axis label"
+  )
+)
 
-<!-- kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE) -->
-<!-- ``` -->
+kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
+```
 
-<!-- #### Example -->
+#### Example
 
-<!-- ```{r, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"} -->
-<!-- input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS") -->
-<!-- lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input) -->
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"}
+input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
-<!-- LACHESIS::plotSurvival(lachesis, surv.time = 'EFS.time', surv.event = 'EFS') -->
-<!-- ``` -->
+LACHESIS::plotSurvival(lachesis, surv.time = 'EFS.time', surv.event = 'EFS')
+```
 
 # Warning Messages
 
