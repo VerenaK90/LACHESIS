@@ -200,17 +200,20 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         stop("Please provide sample identifiers.")
       }
       if(is.null(x$vcf.source)){
-        x$vcf.source <- x$ID
-      }else if(any(is.na(x$vcf.source))){
-        warning("No column identifier provided for sample ", which(is.na(x$vcf.source)), "; will be inferred.")
-        x$vcf.source[is.na(x$vcf.source)] <- x$id[is.na(x$vcf.source)]
+        stop("Please provide vcf source.")
+      }
+      if(is.null(x$vcf.tumor.ids)){
+        x$vcf.tumor.ids <- x$ID
+      }else if(any(is.na(x$vcf.tumor.ids))){
+        warning("No column identifier provided for sample ", which(is.na(x$vcf.tumor.ids)), "; will be inferred.")
+        x$vcf.tumor.ids[is.na(x$vcf.tumor.ids)] <- x$id[is.na(x$vcf.tumor.ids)]
       }
       message("Computing SNV density for sample ", x$ID)
 
       if(!is.null(output.dir)){
         dir.create(paste(output.dir, x$ID, sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
       }else{
-        warning("No output directory specified. Per-sample output will be discarded.")
+        warning("No output directory specified. LACHESIS output will be discarded.")
       }
 
       cnv <- readCNV(cn.info = x$cnv.file, chr.col = x$cnv.chr.col, start.col = x$cnv.start.col,
@@ -341,7 +344,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       if(!is.null(output.dir)){
         dir.create(paste(output.dir, ids[i], sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
       }else{
-        warning("No output directory specified. Per-sample output will be discarded.")
+        warning("No output directory specified. LACHESIS output will be discarded.")
       }
 
       if(is.na(cnv.files)[i]){
@@ -829,7 +832,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
   }
 
   if(any(is.na(lachesis[,..surv.event]))){
-    warning("Removing ", sum(is.na(lachesis[,surv.event])), " samples with missing survival time.")
+    warning("Removing ", sum(is.na(lachesis[,surv.event])), " samples with missing survival event.")
     lachesis <- lachesis[!is.na(get(surv.event)), .SD]
   }
 
