@@ -11,6 +11,7 @@
 #' @param vaf.border Default "#bdc3c7"
 #' @param srtcounts Text angle if `vaf.show.counts` is TRUE. Default 45
 #' @param output.file optional, will save the plot.
+#' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka", ignore.XY = FALSE)

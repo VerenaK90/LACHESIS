@@ -10,9 +10,10 @@
 #' @param min.depth Minimum required depth for a variant to be considered. Default 30.
 #' @param info.af The string encoding the allele frequency field in the FORMAT column. Defaults to `AF`and will be ignored if `vcf.source` != `sentieon`.
 #' @param info.dp The string encoding the read depth field in the FORMAT column. Defaults to `DP`and will be ignored if `vcf.source` != `sentieon`.
+#' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS
 #' @examples
 #' mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "LACHESIS")
-#' m_data = readVCF(vcf = mutect_vcf, vcf.source = "mutect")
+#' m_data = readVCF(vcf = mutect_vcf, vcf.source = "mutect", filter.value = ".")
 #' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka")
 #' dkfz_vcf = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -21,7 +22,7 @@
 #' @return a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf
 #' @export
 
-readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL, info.af = "AF", info.dp = "DP", filter.value = "PASS", ...){
+readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL, info.af = "AF", info.dp = "DP", filter.value = "PASS"){
 
   chrom <- t_vaf <- t_depth <- . <- pos <- ref <- alt <- t_ref_count <- t_alt_count <- NULL
 
@@ -59,7 +60,12 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     v <- vcfR::read.vcfR(file = vcf, verbose = FALSE)
     message("Total variants         : ", nrow(v@fix))
 
-    v <- v[v@fix[, "FILTER"] == filter.value, ] #Only keep variants that contain the specified filter value
+    if (filter.value == ".") { #vcfR converts "." to NA
+      v <- v[is.na(getFILTER(v)), ]
+    } else {
+      v <- v[getFILTER(v) == filter.value, ]
+    }
+
     if(nrow(v@fix) == 0){
       stop("No variants passed filtering!")
     }
@@ -83,7 +89,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
       vcf_df <- as.data.frame(data.table::tstrsplit(tum_format, split = ":"))
       colnames(vcf_df) <- unlist(data.table::tstrsplit(x = v@gt[1, "FORMAT"], split = ":"))
     } else if ("INFO" %in% colnames(v@fix)) {
-      info_column <- v@fix[, "INFO"]
+      info_column <- vcfR::getINFO(v)
       vcf_df <- as.data.frame(data.table::tstrsplit(info_column, split = ";", type.convert = TRUE))
       colnames(vcf_df) <- sapply(vcf_df[1, ], function(x) strsplit(x, "=")[[1]][1])
       vcf_df <- as.data.frame(lapply(vcf_df, function(col) {

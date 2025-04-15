@@ -155,11 +155,16 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 .format_cnv_data <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL){
 
   if (is.data.frame(cn.info) || is.data.table(cn.info)) {
-    cn.info <- data.table::as.data.table(cn.info)
+    cn.info <- data.table::setDT(cn.info)
+    print("datatable")
   } else if (is.character(cn.info)) {
-    cn.info <- data.table::fread(file = cn.info, sep = "\t", header = TRUE)
+    if (!file.exists(cn.info)) {
+      stop(paste("Please provide a valid CNV file path.", cn.info, "does not exist."))
+    } else {
+      cn.info <- data.table::fread(file = cn.info, sep = "\t", header = TRUE)
+    }
   } else {
-    stop("Please provide a must be a file path, data.frame, or data.table for copy number information.")
+    stop("Please provide a file path, data.frame, or data.table for copy number information.")
   }
 
   estimate.alleles <- FALSE # will be set to TRUE if allele info is not provided, see below

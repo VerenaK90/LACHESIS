@@ -71,6 +71,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' @param nb.breaks optional; the number of bins in the histogram.
 #' @param samp.name Sample name. Optional. Default NULL
 #' @param output.file optional, will save the plot.
+#' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' snvs = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")

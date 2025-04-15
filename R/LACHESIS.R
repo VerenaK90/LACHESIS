@@ -35,7 +35,8 @@
 #' @param fp.sd optional, the standard deviation of the false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
-#' @param ... further arguments and parameters passed to `plotMutationDensities`.
+#' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS
+#' @param ... further arguments and parameters passed to LACHESIS functions.
 #' @examples
 #' #an example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -62,7 +63,7 @@
 #' #Example with a single sample input
 #' strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = c("PASS", "LowEVS"))
+#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
 #'
 #' #Example with multiple sample and data frame input
 #' nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -73,6 +74,7 @@
 #'
 #' @seealso \code{\link{MRCA}} \code{\link{clonalMutationCounter}} \code{\link{normalizeCounts}}
 #' @import tidyr
+#' @importFrom utils packageVersion
 #' @return a data.table
 #' @export
 
@@ -83,7 +85,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
                      ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, min.depth = 30,
                      vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
-                     ref.build = "hg19", ...){
+                     ref.build = "hg19", filter.value = "PASS", ...){
 
 
   ID <- cnv.file <- snv.file <- fwrite <- NULL
@@ -93,6 +95,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
   }else if(is.null(input.files)){
     if(any(is.null(cnv.files), is.null(snv.files))){
       stop("Missing snv and cnv inputs!")
+    }else if (!(is.data.frame(cnv.files) || is.data.table(cnv.files))) {
+      if (length(cnv.files) != length(snv.files)) {
+        stop("Please provide snv and cnv input for every sample!")
+      }
     }
   }
 
@@ -222,7 +228,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      max.cn = max.cn, ignore.XY = ignore.XY)
 
       snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$vcf.tumor.id, min.depth = min.depth,
-                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
+                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
@@ -284,7 +290,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
 
       # collecting data for log file
-      package.version <- as.character(packageVersion("LACHESIS"))
+      package.version <- as.character(utils::packageVersion("LACHESIS"))
       log.file.data.single <- data.table::data.table(Sample_ID = x$ID,
                                                       package.version = package.version,
                                                       vcf.tumor.ids = x$vcf.tumor.ids,
@@ -362,7 +368,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      max.cn = max.cn, ignore.XY = ignore.XY)
 
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = vcf.tumor.ids[i], min.depth = min.depth,
-                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, ...)
+                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i])
 
@@ -465,6 +471,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 #' @param lach.border, optional, the line color
 #' @param binwidth optional; the bin-width in the histogram.
 #' @param output.file optional; the file to which the plot will be stored.
+#' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' #an example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -696,7 +703,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows points
 #' @importFrom stats cor
 
-plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE,  output.file = NULL, ...){
+plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE,  output.file = NULL){
 
   ECA_time_mean <- NULL
 
@@ -806,6 +813,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.sup
 #' @import survival
 #' @import survminer
 #' @import gridExtra
+#' @importFrom stats pchisq
 
 plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival"){
 
@@ -873,7 +881,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
   survival.diff <- survival::survdiff(Surv(time = unlist(lachesis.categorized[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
            data = lachesis.categorized)
 
-  p_value <- 1 - pchisq(survival.diff$chisq, length(survival.diff$n) - 1)
+  p_value <- 1 - stats::pchisq(survival.diff$chisq, length(survival.diff$n) - 1)
   p.value.pos <- max(survival.fit$time) * (1/6)
 
   survival.fit.plot <- survminer::ggsurvplot_df(surv_summary(survival.fit, data = lachesis.categorized), title = surv.title, conf.int = TRUE, color = "strata", censor.shape = 124,
