@@ -14,8 +14,8 @@ output:
     toc_depth: 3
     number_sections: false
     fig_width: 5
-  bibliography: library.bib
-  vignette: >
+bibliography: library.bib
+vignette: >
     %\VignetteIndexEntry{LACHESIS - Real-time inference of evolutionary dynamics during tumor initiation based on whole genome sequencing data}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
@@ -25,7 +25,7 @@ output:
 ```{r setup, echo=FALSE, results="hide"}
 knitr::opts_chunk$set(tidy = FALSE,
                       cache = FALSE,
-                      dev = "png",
+                      dev = "CairoPNG",
                       message = FALSE, error = FALSE, warning = TRUE)
 ```	
 
@@ -47,7 +47,7 @@ devtools::install_github("VerenaK90/LACHESIS")
 
 <!-- BiocManager::install("LACHESIS") -->
 <!-- ``` -->
-<!-- For older versions of R, please refer to the appropriate [Bioconductor release.](https://bioconductor.org/about/release-announcements/) -->
+For older versions of R, please refer to the appropriate [Bioconductor release.](https://bioconductor.org/about/release-announcements/)
 
 # Citation
 
@@ -138,7 +138,7 @@ readcnv_input <- data.frame(
   )
 )
 
-kable(readcnv_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(readcnv_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -207,7 +207,7 @@ readvcf_input <- data.frame(
   )
 )
 
-kable(readvcf_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(readvcf_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -231,22 +231,22 @@ readvcf_output <- data.frame(
   )
 )
 
-kable(readvcf_output, col.names = c("Output", "Definition"), escape = FALSE)
+knitr::kable(readvcf_output, col.names = c("Output", "Definition"), escape = FALSE)
 ```
 
 #### Example: SNV calls obtained with Mutect
 
 ```{r, message=FALSE, warning=FALSE}
 mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "LACHESIS")
-m_data = LACHESIS::readVCF(vcf = mutect_vcf, vcf.source = "mutect")
+m_data = LACHESIS::readVCF(vcf = mutect_vcf, vcf.source = "mutect", filter.value = ".")
 head(m_data, n = 1)
 ```
 
 #### Example: SNV calls obtained with Strelka
 
 ```{r, message=FALSE, warning=FALSE}
-strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
-s_data = LACHESIS::readVCF(vcf = strelka_vcf, vcf.source = "strelka")
+strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
+s_data <- LACHESIS::readVCF(vcf= strelka_vcf, vcf.source = "strelka", filter.value = "LowEVS")
 head(s_data, n = 1)
 ```
 
@@ -287,14 +287,15 @@ plotvaf_input <- data.frame(
   )
 )
 
-kable(plotvaf_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(plotvaf_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
 
 ```{r, message=FALSE, warning=FALSE, fig.cap="Figure 1: VAF distribution of SSNVs"}
-strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
-s_data = LACHESIS::readVCF(vcf = strelka_vcf, vcf.source = "strelka")
+strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
+s_data <- LACHESIS::readVCF(vcf= strelka_vcf, vcf.source = "strelka", filter.value = "LowEVS")
+head(s_data, n = 1)
 LACHESIS::plotVAFdistr(s_data)
 ```
 
@@ -320,7 +321,7 @@ nb_import_input <- data.frame(
   )
 )
 
-kable(nb_import_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(nb_import_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -350,7 +351,7 @@ nb_import_output <- data.frame(
   )
 )
 
-kable(nb_import_output, col.names = c("Output", "Definition"), escape = FALSE)
+knitr::kable(nb_import_output, col.names = c("Output", "Definition"), escape = FALSE)
 ```
 
 #### Example
@@ -396,7 +397,7 @@ plotnb_input <- data.frame(
   )
 )
 
-kable(plotnb_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(plotnb_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
@@ -435,7 +436,7 @@ process_clonal_input <- data.frame(
   )
 )
 
-kable(process_clonal_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(process_clonal_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -458,7 +459,7 @@ process_clonal_output <- data.frame(Column1 = c("*chrom*","*TCN*", "*A*", "*B*",
   )
 )
 
-kable(process_clonal_output, col.names = c("Column name", "Definition"), escape = FALSE)
+knitr::kable(process_clonal_output, col.names = c("Column name", "Definition"), escape = FALSE)
 ```
 
 #### Example
@@ -493,7 +494,7 @@ normalize_counts_input <- data.frame(
   )
 )
 
-kable(normalize_counts_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(normalize_counts_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -525,7 +526,7 @@ normalize_counts_output <- data.frame(Column1 = c("*chrom*","*TCN*", "*A*", "*B*
   )
 )
 
-kable(normalize_counts_output, col.names = c("Column name", "Definition"), escape = FALSE)
+knitr::kable(normalize_counts_output, col.names = c("Column name", "Definition"), escape = FALSE)
 ```
 
 #### Example
@@ -567,7 +568,7 @@ mrca_input <- data.frame(
   )
 )
 
-kable(mrca_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(mrca_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -668,7 +669,7 @@ plotmrca_input <- data.frame(
   )
 )
 
-kable(plotmrca_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(plotmrca_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
@@ -738,7 +739,7 @@ knitr::kable(lachesis_output, col.names = c("Column Name", "Definition"), align 
 ```{r, message=FALSE, warning=FALSE}
 strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = c("PASS", "LowEVS"))
+lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
 head(lachesis, n=1)
 ```
 
@@ -779,17 +780,17 @@ lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 head(lachesis, n=1)
 ```
 
-<!-- #### Example with multiple sample and data frame input -->
+#### Example with multiple sample and data frame input
 
-<!-- ```{r, message=FALSE, warning=FALSE} -->
-<!-- nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS") -->
-<!-- nbe11_cn = read.delim(system.file("extdata", "NBE11/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS"), sep = "\t", header = TRUE) -->
-<!-- nbe15_vcf = system.file("extdata","NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS") -->
-<!-- nbe15_cn = read.delim(system.file("extdata", "NBE15/NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS"), sep = "\t", header = TRUE) -->
+```{r, message=FALSE, warning=FALSE}
+nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+nbe11_cn = read.delim(system.file("extdata", "NBE11/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
+nbe15_vcf = system.file("extdata","NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+nbe15_cn = read.delim(system.file("extdata", "NBE15/NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
 
-<!-- lachesis <- LACHESIS::LACHESIS(ids = c("NBE11", "NBE15"), cnv.files = list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf), vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51), cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3), cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37)) -->
-<!-- head(lachesis, n=1) -->
-<!-- ``` -->
+lachesis <- LACHESIS::LACHESIS(ids = c("NBE11", "NBE15"), cnv.files = list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf), vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51), cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3), cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37))
+head(lachesis, n=1)
+```
 
 
 ### Plotting Cohort Analysis (plotLACHESIS)
@@ -819,7 +820,7 @@ plotlachesis_input <- data.frame(
   )
 )
 
-kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
@@ -877,7 +878,7 @@ plotclin_input <- data.frame(
   )
 )
 
-kable(plotclin_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(plotclin_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example 
@@ -918,7 +919,7 @@ plotlachesis_input <- data.frame(
   )
 )
 
-kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
+knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
