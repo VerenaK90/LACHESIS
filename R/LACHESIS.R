@@ -35,7 +35,8 @@
 #' @param fp.sd optional, the standard deviation of the false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
-#' @param ... further arguments and parameters passed to `plotMutationDensities`.
+#' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS
+#' @param ... further arguments and parameters passed to LACHESIS functions.
 #' @examples
 #' #an example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -62,9 +63,18 @@
 #' #Example with a single sample input
 #' strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
+#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
+#'
+#' #Example with multiple sample and data frame input
+#' nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#' nbe11_cn = read.delim(system.file("extdata", "NBE11/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
+#' nbe15_vcf = system.file("extdata","NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#' nbe15_cn = read.delim(system.file("extdata", "NBE15/NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
+#' lachesis <- LACHESIS(ids = c("NBE11", "NBE15"), cnv.files = list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf), vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51), cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3), cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37))
+#'
 #' @seealso \code{\link{MRCA}} \code{\link{clonalMutationCounter}} \code{\link{normalizeCounts}}
 #' @import tidyr
+#' @importFrom utils packageVersion
 #' @return a data.table
 #' @export
 
@@ -75,7 +85,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
                      ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, min.depth = 30,
                      vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
-                     ref.build = "hg19", ...){
+                     ref.build = "hg19", filter.value = "PASS", ...){
 
 
   ID <- cnv.file <- snv.file <- fwrite <- NULL
@@ -85,8 +95,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
   }else if(is.null(input.files)){
     if(any(is.null(cnv.files), is.null(snv.files))){
       stop("Missing snv and cnv inputs!")
-    }else if(length(cnv.files) != length(snv.files)){
-      stop("Please provide snv and cnv input for every sample!")
+    }else if (!(is.data.frame(cnv.files) || is.data.table(cnv.files))) {
+      if (length(cnv.files) != length(snv.files)) {
+        stop("Please provide snv and cnv input for every sample!")
+      }
     }
   }
 
@@ -194,17 +206,20 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         stop("Please provide sample identifiers.")
       }
       if(is.null(x$vcf.source)){
-        x$vcf.source <- x$ID
-      }else if(any(is.na(x$vcf.source))){
-        warning("No column identifier provided for sample ", which(is.na(x$vcf.source)), "; will be inferred.")
-        x$vcf.source[is.na(x$vcf.source)] <- x$id[is.na(x$vcf.source)]
+        stop("Please provide vcf source.")
+      }
+      if(is.null(x$vcf.tumor.ids)){
+        x$vcf.tumor.ids <- x$ID
+      }else if(any(is.na(x$vcf.tumor.ids))){
+        warning("No column identifier provided for sample ", which(is.na(x$vcf.tumor.ids)), "; will be inferred.")
+        x$vcf.tumor.ids[is.na(x$vcf.tumor.ids)] <- x$id[is.na(x$vcf.tumor.ids)]
       }
       message("Computing SNV density for sample ", x$ID)
 
       if(!is.null(output.dir)){
         dir.create(paste(output.dir, x$ID, sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
       }else{
-        warning("No output directory specified. Per-sample output will be discarded.")
+        warning("No output directory specified. LACHESIS output will be discarded.")
       }
 
       cnv <- readCNV(cn.info = x$cnv.file, chr.col = x$cnv.chr.col, start.col = x$cnv.start.col,
@@ -213,7 +228,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      max.cn = max.cn, ignore.XY = ignore.XY)
 
       snv <- readVCF(vcf = x$snv.file, vcf.source = x$vcf.source, t.sample = x$vcf.tumor.id, min.depth = min.depth,
-                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
+                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
@@ -275,7 +290,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
 
       # collecting data for log file
-      package.version <- as.character(packageVersion("LACHESIS"))
+      package.version <- as.character(utils::packageVersion("LACHESIS"))
       log.file.data.single <- data.table::data.table(Sample_ID = x$ID,
                                                       package.version = package.version,
                                                       vcf.tumor.ids = x$vcf.tumor.ids,
@@ -335,7 +350,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       if(!is.null(output.dir)){
         dir.create(paste(output.dir, ids[i], sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
       }else{
-        warning("No output directory specified. Per-sample output will be discarded.")
+        warning("No output directory specified. LACHESIS output will be discarded.")
       }
 
       if(is.na(cnv.files)[i]){
@@ -347,13 +362,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         next
       }
 
-      cnv <- readCNV(cn.info = cnv.files[i], chr.col = cnv.chr.col[i], start.col = cnv.start.col[i],
+      cnv <- readCNV(cn.info = cnv.files[[i]], chr.col = cnv.chr.col[i], start.col = cnv.start.col[i],
                      end.col = cnv.end.col[i], A.col = cnv.A.col[i], B.col = cnv.B.col[i],
                      tcn.col = cnv.tcn.col[i], tumor.id = ids[i], merge.tolerance = merge.tolerance,
                      max.cn = max.cn, ignore.XY = ignore.XY)
 
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = vcf.tumor.ids[i], min.depth = min.depth,
-                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp)
+                     min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
       nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i])
 
@@ -456,6 +471,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 #' @param lach.border, optional, the line color
 #' @param binwidth optional; the bin-width in the histogram.
 #' @param output.file optional; the file to which the plot will be stored.
+#' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' #an example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -687,7 +703,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows points
 #' @importFrom stats cor
 
-plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE,  output.file = NULL, ...){
+plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE,  output.file = NULL){
 
   ECA_time_mean <- NULL
 
@@ -797,6 +813,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.sup
 #' @import survival
 #' @import survminer
 #' @import gridExtra
+#' @importFrom stats pchisq
 
 plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival"){
 
@@ -823,7 +840,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
   }
 
   if(any(is.na(lachesis[,..surv.event]))){
-    warning("Removing ", sum(is.na(lachesis[,surv.event])), " samples with missing survival time.")
+    warning("Removing ", sum(is.na(lachesis[,surv.event])), " samples with missing survival event.")
     lachesis <- lachesis[!is.na(get(surv.event)), .SD]
   }
 
@@ -864,7 +881,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
   survival.diff <- survival::survdiff(Surv(time = unlist(lachesis.categorized[,..surv.time]), event = unlist(lachesis[,..surv.event])) ~ MRCA_timing,
            data = lachesis.categorized)
 
-  p_value <- 1 - pchisq(survival.diff$chisq, length(survival.diff$n) - 1)
+  p_value <- 1 - stats::pchisq(survival.diff$chisq, length(survival.diff$n) - 1)
   p.value.pos <- max(survival.fit$time) * (1/6)
 
   survival.fit.plot <- survminer::ggsurvplot_df(surv_summary(survival.fit, data = lachesis.categorized), title = surv.title, conf.int = TRUE, color = "strata", censor.shape = 124,
