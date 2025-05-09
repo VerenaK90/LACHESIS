@@ -901,8 +901,6 @@ plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time
 ```
 
 ```{r, echo=FALSE}
-library(knitr)
-
 plotlachesis_input <- data.frame(
   Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*surv.time*", "*surv.event*", "*surv.palette*", "*surv.time.breaks*", "*surv.time.scale*", "*surv.title*", "*surv.ylab*"),
   Column2 = c(
@@ -929,6 +927,34 @@ input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS"
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
 LACHESIS::plotSurvival(lachesis, surv.time = 'EFS.time', surv.event = 'EFS')
+```
+
+# Quality control/ Filtering
+
+## Hypermutants
+
+To exclude hypermutant cases, the tumor mutational burden (TMB) should be below 10 mut/Mb ([Campbell et al](https://pubmed.ncbi.nlm.nih.gov/29056344/)). 
+
+## Ploidy and purity
+
+A minimum tumor purity of 30% is recommended for accurate estimation of variant numbers. Additionally, some pipelines (e.g., AceSeq) may assign a default purity of 1 when it cannot be reliably estimated. Such cases should be excluded from analysis.
+
+To ensure valid results, tumor ploidy should be below the max.cn parameter [(readcnv)](#input). LACHESIS default value is max.cn = 4, therefore we recommend excluding samples with ploidy >4. 
+
+## VAF distribution
+
+The user should verify that the measured clonal peaks align with the expected variant allele frequencies (VAFs), indicated by the dashed lines in the stratified VAF histograms. If the observed VAFs do not match the expected patterns, an alternative purity and ploidy solution if provided by the CNV calling pipeline should be used. Otherwise the sample should not be considered for further analysis. 
+
+#### Positive Example
+
+```{r vaf-plots-positive, echo=FALSE, fig.show='hold', out.width="45%", fig.cap = "Figure 1: Clonal peaks (i.e. ->) correlate with expected VAFs (----)"}
+knitr::include_graphics(system.file("extdata", "VAF_positive_example.png", package = "LACHESIS"))
+```
+
+#### Negative Example
+
+```{r vaf-plots-negative, echo=FALSE, fig.show='hold', out.width="45%", fig.cap = "Figure 2: Clonal peaks cannot be clearly identified, a load of noise (i.e. ->) between the expected VAFs (----)"}
+knitr::include_graphics(system.file("extdata", "VAF_negative_example.png", package = "LACHESIS"))
 ```
 
 # Warning Messages
@@ -1051,10 +1077,9 @@ The column named according to parameter surv.event of LACHESIS wrapper function 
 
 In case of any questions, feel free to open an issue on [**Github**](https://github.com/VerenaK90/LACHESIS_shiny/issues).
 
-# Acknowledgments
+<!-- # Acknowledgments -->
 
-# Funding
-
+<!-- # Funding -->
 
 # Session Info
 
@@ -1062,4 +1087,4 @@ In case of any questions, feel free to open an issue on [**Github**](https://git
 sessionInfo()
 ```
 
-# References
+<!-- # References -->
