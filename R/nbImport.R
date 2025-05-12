@@ -6,9 +6,11 @@
 #' @param purity tumor cell content
 #' @param ploidy average copy number in the tumor sample
 #' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature
+#' @param ID sample name
 #' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
 #' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
+#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @examples
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
@@ -159,7 +161,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' plotNB(nb)
 #' @export
 #' @importFrom graphics abline axis box grid hist mtext par rect text title
-#' @importFrom ggplot2
+#' @import ggplot2
 
 plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE, sig.output.file = NULL, ...){
 
