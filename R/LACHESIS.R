@@ -36,6 +36,10 @@
 #' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS
+#' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature
+#' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
+#' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
+#' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
 #' @param ... further arguments and parameters passed to LACHESIS functions.
 #' @examples
 #' #an example file with sample annotations and meta data
@@ -85,7 +89,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
                      ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, min.depth = 30,
                      vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
-                     ref.build = "hg19", filter.value = "PASS", ...){
+                     ref.build = "hg19", filter.value = "PASS", sig.assign = FALSE, sig.file = NULL, sig.select = NULL, min.p = NULL, ...){
 
 
   ID <- cnv.file <- snv.file <- fwrite <- NULL
@@ -231,7 +235,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
 
-      nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
+      nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy, sig.assign = sig.assign, ID = x$ID, sig.file = sig.file, sig.select = sig.select, min.p = min.p, ref.build = ref.build)
 
       if(nrow(nb)==0){
         warning("Insufficient data for sample ", x$ID)
@@ -253,7 +257,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, ...)
+        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -370,7 +374,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = vcf.tumor.ids[i], min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
-      nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i])
+      nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i], sig.assign = sig.assign, ID = ids[i], sig.file = sig.file, sig.select = sig.select, min.p = min.p, ref.build = ref.build)
 
       if(nrow(nb)==0){
         warning("Insufficient data for sample ", x$ID)
@@ -393,7 +397,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, ...)
+        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)

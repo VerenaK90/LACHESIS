@@ -5,6 +5,10 @@
 #' @param snv SNV data from \code{\link{readVCF}}
 #' @param purity tumor cell content
 #' @param ploidy average copy number in the tumor sample
+#' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature
+#' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
+#' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
+#' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
 #' @examples
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
@@ -12,10 +16,14 @@
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' @seealso \code{\link{plotNB}}
+#' @importFrom Biostrings getSeq
+#' @import BSgenome.Hsapiens.UCSC.hg18
+#' @import BSgenome.Hsapiens.UCSC.hg19
+#' @import BSgenome.Hsapiens.UCSC.hg38
 #' @return a data.table
 #' @export
 
-nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
+nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL, ref.build = hg19){
 
   end <- start <- NULL
 
@@ -28,7 +36,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 
   colnames(cnv)[1:3] <- c("chrom", "start", "end")
   data.table::setDT(x = cnv, key = c("chrom", "start", "end"))
-
   colnames(snv)[1:2] <- c("chrom", "start")
   snv[,end := start]
   data.table::setDT(x = snv, key = c("chrom", "start", "end"))
@@ -44,6 +51,12 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
     sv <- sv[!is.na(start)]
   }
 
+  if(sig.assign == TRUE){
+    t.sample <- attributes(sv)$t.sample
+    sv <- .assign_signatures(sv, sig.file, ID, sig.select, min.p, ref.build)
+    attr(sv, "t.sample") <- t.sample
+  }
+
   #Make columns more intuitive
   colnames(sv)[which(colnames(sv) == "i.start")] <- "snv_start"
   colnames(sv)[which(colnames(sv) == "i.end")] <- "snv_end"
@@ -55,6 +68,69 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
   sv
 }
 
+.assign_signatures <- function(sv = NULL, sig.file = NULL, ID = NULL, sig.select = NULL, min.p = NULL, ref.build = hg19) {
+
+  if (is.null(sv)) {
+    stop("Missing 'sv' input data!")
+  }
+
+  if (is.null(sig.file)) {
+    stop("Missing 'SigAssignment' input data!")
+  }
+
+  sig.data <- fread(sig.file)
+
+  if (!"sequence_context" %in% colnames(sv)) {
+    genome <- switch(ref.build,
+                     "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
+                     "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
+                     "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+    )
+
+    sv[, sequence_context := as.character(getSeq(
+      genome,
+      names = paste0("chr", chrom),
+      start = i.start - 1,
+      end = i.end + 1
+    ))]
+  }
+
+  sv[, Sample := ID]
+  sv[, MutationType := {
+    ctx <- sequence_context
+    mid <- ref
+    alt <- alt
+    paste0(substr(ctx, 1, 1), "[", mid, ">", alt, "]", substr(ctx, 3, 3))
+  }]
+
+  sig.data <- melt(
+    sig.data,
+    id.vars = c("Sample Names", "MutationType"),
+    variable.name = "Signature",
+    value.name = "Probability"
+  )
+
+  sig.data <- sig.data[order(-Probability)]
+  sig.data <- sig.data[, .SD[1], by = .(`Sample Names`, MutationType)]
+  setnames(sig.data, "Sample Names", "Sample")
+
+  if (!is.null(min.p)) {
+    sig.data <- sig.data[Probability >= min.p]
+  }
+
+  View(sig.data)
+  View(sv)
+  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE)
+  sv[is.na(Signature), `:=`(Signature = "NM", Probability = "NM")]
+
+  if (!is.null(sig.select)) {
+    sv <- sv[Signature %in% sig.select]
+  }
+
+  sv[, c("Sample", "MutationType") := NULL]
+
+  return(sv)
+}
 
 #' Plot VAF distribution per copy number
 #' @description
@@ -71,6 +147,8 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' @param nb.breaks optional; the number of bins in the histogram.
 #' @param samp.name Sample name. Optional. Default NULL
 #' @param output.file optional, will save the plot.
+#' @param sig.show plot stratified VAF histogram with assigned mutational signatures.
+#' @param sig.output.file optional, will save the stratified VAF histogram with mutational signatures.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' snvs = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -81,8 +159,9 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL){
 #' plotNB(nb)
 #' @export
 #' @importFrom graphics abline axis box grid hist mtext par rect text title
+#' @importFrom ggplot2
 
-plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, ...){
+plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE, sig.output.file = NULL, ...){
 
   chrom <- start <- t_vaf <- NULL
 
@@ -111,14 +190,14 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
   n_copy_combs <- nrow(unique(nb[TCN >= min.cn & TCN <= max.cn,TCN, B]))
   n_copy_combs <- n_copy_combs + n_copy_combs%%2
   lo_mat <- matrix(data = c(rep(1, n_copy_combs/2), 2:(n_copy_combs/2+1), (n_copy_combs/2 + 2):(n_copy_combs+1)), nrow = 3, byrow = TRUE)
- # lo_mat <- matrix(data = c(rep(1, n_copies), 2:(n_copies+1)), (n_copies + 2), nrow = 3, byrow = TRUE)
+  # lo_mat <- matrix(data = c(rep(1, n_copies), 2:(n_copies+1)), (n_copies + 2), nrow = 3, byrow = TRUE)
   graphics::layout(mat = lo_mat, heights = c(3, 2, 2))
   par(mar = c(3, 4, 4, 3))
   plot(NA, ylim = c(0, max.cn), xlim = c(0, max(contig_lens)), axes = FALSE, xlab = NA, ylab = NA)
   abline(h = 1:max.cn, v = contig_lens, lty = 2, col = nb.col.abline, lwd = 0.4)
   rect(xleft = segs$Start_Position_updated, ybottom = segs$TCN-0.1, xright = segs$End_Position_updated, ytop = segs$TCN+0.1, col = ifelse(segs$TCN == 2, nb.col.cn.2, nb.col.cn), border = nb.border, lty = 3)
   contig_lens_mid <- c(contig_lens[1] / 2,
-                  (contig_lens[-length(contig_lens)] + contig_lens[-1]) / 2)
+                       (contig_lens[-length(contig_lens)] + contig_lens[-1]) / 2)
   axis(side = 1, at = c(0, contig_lens), labels = FALSE, pos = 0)
   axis(side = 1, at = contig_lens_mid, labels = c(1:22, "X", "Y"), tick = FALSE, line = -0.5, cex.axis = 0.9)
   axis(side = 2, at = 0:max.cn, labels = 0:max.cn, las = 2)
@@ -144,7 +223,7 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
         mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
       }else{
         par(mar = c(3, 4, 3, 1))
-        hist(tcn[,t_vaf], breaks = nb.breaks, xlim = c(0, 1), xlab = NA, ylab = NA,  border = nb.border, col = nb.col.hist, main = NA)
+        hist(tcn[,t_vaf], breaks = nb.breaks, xlim = c(0, 1), xlab = NA, ylab = NA, border = nb.border, col = nb.col.hist, main = NA)
         title(main = paste0("CN:", as.numeric(ploidy), " (", as.numeric(ploidy) - as.numeric(B), ":", as.numeric(B), ")"), cex.main = 1.2)
         mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
         mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
@@ -156,6 +235,38 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
   }
 
   if(!is.null(output.file)){
+    dev.off()
+  }
+
+  if (sig.show == TRUE) {
+    pdf(file = sig.output.file, width = 8, height = 6)
+
+    for (cn in seq_along(nb)) {
+      nb. <- split(nb[[cn]], nb[[cn]]$B)
+      ploidy <- names(nb)[cn]
+
+      for (b in seq_along(nb.)) {
+        tcn <- nb.[[b]]
+        B <- names(nb.)[b]
+
+        if (nrow(tcn) > 0) {
+          p <- ggplot(tcn, aes(x = t_vaf, fill = Signature)) +
+            geom_histogram(bins = 100, color = "black", position = "stack") +
+            scale_x_continuous(breaks = seq(0, 1, by = 0.2)) +
+            labs(x = "VAF", y = "No. of SNVs") +
+            ggtitle(paste0("CN:", ploidy, " (", as.numeric(ploidy) - as.numeric(B), ":", B, ")")) +
+            scale_fill_brewer(palette = "Set3") +
+            theme_minimal()
+          if (!is.null(purity)) {
+            expected_vafs <- .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity)
+            p <- p + geom_vline(xintercept = expected_vafs, linetype = "dashed")
+          }
+
+          print(p)
+        }
+      }
+    }
+
     dev.off()
   }
 }
