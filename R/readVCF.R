@@ -125,8 +125,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 
   #Filter for VAF and depth. Return only necessary columns
   message("Filtering for min.depth and VAF..")
-  dt = dt[t_vaf >= min.vaf][t_depth >= min.depth][,.(chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf,
-                                                     sequence_context = if ("sequence_context" %in% names(dt)) sequence_context else NULL)]
+  dt = dt[t_vaf >= min.vaf][t_depth >= min.depth][,.(chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf)]
   data.table::setattr(x = dt, name = 't.sample', value = t.sample) #Add sample name as an attribute
   dt
 }
@@ -217,8 +216,8 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
   . <- Chr <- Start <- Ref <- Alt <- t_ref_count <- t_alt_count <- t_depth <- t_vaf <- NULL
 
   v <- data.table::fread(file = FNAME, fill = TRUE, sep = "\t", header = TRUE, skip = "CHROM")
-  v <- v[,c(1,2,4,5,8,11)]
-  colnames(v) <- c('Chr', 'Start', 'Ref', 'Alt', 'info_t', 'Sequence_context')
+  v <- v[,c(1,2,4,5,8)]
+  colnames(v) <- c('Chr', 'Start', 'Ref', 'Alt', 'info_t')
 
   #Parse depth and vaf info from 6th column (tumor)
   tum_info_dt = lapply(v$info_t, function(info_tum){
@@ -233,10 +232,9 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 
   v <- cbind(v, tum_info_dt)
 
-  v <- v[,.(Chr, Start, Ref, Alt, t_ref_count, t_alt_count, t_depth, t_vaf, Sequence_context)]
+  v <- v[,.(Chr, Start, Ref, Alt, t_ref_count, t_alt_count, t_depth, t_vaf)]
   v[, Chr := as.character(Chr)]
   v[, Start := as.numeric(Start)]
-  colnames(v) = c("chrom", "pos", "ref", "alt", "t_ref_count", "t_alt_count", "t_depth", "t_vaf", "sequence_context")
+  colnames(v) = c("chrom", "pos", "ref", "alt", "t_ref_count", "t_alt_count", "t_depth", "t_vaf")
   v
 }
-

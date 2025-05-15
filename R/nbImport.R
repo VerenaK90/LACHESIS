@@ -10,7 +10,6 @@
 #' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
 #' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
-#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @examples
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
@@ -18,14 +17,11 @@
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' @seealso \code{\link{plotNB}}
-#' @importFrom Biostrings getSeq
-#' @import BSgenome.Hsapiens.UCSC.hg18
-#' @import BSgenome.Hsapiens.UCSC.hg19
-#' @import BSgenome.Hsapiens.UCSC.hg38
 #' @return a data.table
+#' @importFrom RColorBrewer Set3
 #' @export
 
-nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL, ref.build = hg19){
+nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL){
 
   end <- start <- NULL
 
@@ -55,7 +51,9 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
   if(sig.assign == TRUE){
     t.sample <- attributes(sv)$t.sample
-    sv <- .assign_signatures(sv, sig.file, ID, sig.select, min.p, ref.build)
+    assign.result <- .assign_signatures(sv, sig.file, ID, sig.select, min.p)
+    sv <- assign.result$sv
+    sig.colors <- assign.result$sig.colors
     attr(sv, "t.sample") <- t.sample
   }
 
@@ -67,10 +65,11 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
   attr(sv, "cnv") <- cnv
   attr(sv, "purity") <- as.numeric(purity)
   attr(sv, "ploidy") <- as.numeric(ploidy)
+  attr(sv, "sig.colors") <- sig.colors
   sv
 }
 
-.assign_signatures <- function(sv = NULL, sig.file = NULL, ID = NULL, sig.select = NULL, min.p = NULL, ref.build = hg19) {
+.assign_signatures <- function(sv = NULL, sig.file = NULL, ID = NULL, sig.select = NULL, min.p = NULL) {
 
   if (is.null(sv)) {
     stop("Missing 'sv' input data!")
@@ -82,56 +81,48 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
   sig.data <- fread(sig.file)
 
-  if (!"sequence_context" %in% colnames(sv)) {
-    genome <- switch(ref.build,
-                     "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
-                     "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
-                     "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+  setnames(sig.data, c("Sample Names", "Chr", "Pos"), c("Sample", "chrom", "i.start"))
+
+  sbs.cols <- grep("^SBS", names(sig.data), value = TRUE)
+
+  sig.data <- sig.data[, {
+    max.p.sig <- which.max(.SD)
+    list(
+      Signature = sbs.cols[max.p.sig],
+      Probability = .SD[[max.p.sig]]
     )
-
-    sv[, sequence_context := as.character(getSeq(
-      genome,
-      names = paste0("chr", chrom),
-      start = i.start - 1,
-      end = i.end + 1
-    ))]
-  }
-
-  sv[, Sample := ID]
-  sv[, MutationType := {
-    ctx <- sequence_context
-    mid <- ref
-    alt <- alt
-    paste0(substr(ctx, 1, 1), "[", mid, ">", alt, "]", substr(ctx, 3, 3))
-  }]
-
-  sig.data <- melt(
-    sig.data,
-    id.vars = c("Sample Names", "MutationType"),
-    variable.name = "Signature",
-    value.name = "Probability"
-  )
-
-  sig.data <- sig.data[order(-Probability)]
-  sig.data <- sig.data[, .SD[1], by = .(`Sample Names`, MutationType)]
-  setnames(sig.data, "Sample Names", "Sample")
+  }, by = .(Sample, chrom, i.start, MutationType), .SDcols = sbs.cols]
 
   if (!is.null(min.p)) {
     sig.data <- sig.data[Probability >= min.p]
   }
 
-  View(sig.data)
-  View(sv)
-  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE)
-  sv[is.na(Signature), `:=`(Signature = "NM", Probability = "NM")]
+  sv[, Sample := ID]
+
+  sv <- merge(sv, sig.data, by = c("Sample", "chrom", "i.start"), all.x = TRUE)
 
   if (!is.null(sig.select)) {
     sv <- sv[Signature %in% sig.select]
+    sig.number <- length(sig.select)
+    sig.colors <- setNames(.get_sig_colors(sig.number), sig.select)
+  } else {
+    sig.options <- unique(sig.data$Signature)
+    sig.number <- length(sig.options)
+    sig.colors <- setNames(.get_sig_colors(sig.number), sig.options)
   }
 
-  sv[, c("Sample", "MutationType") := NULL]
+  sv[, "Sample" := NULL]
 
-  return(sv)
+  return(list(sv = sv, sig.colors = sig.colors))
+}
+
+.get_sig_colors <- function(n, palette = "Set3", max.colors = 12) {
+  base.colors <- brewer.pal(min(max.colors, n), palette)
+  if (n > max.colors) {
+    colorRampPalette(base.colors)(n)
+  } else {
+    base.colors
+  }
 }
 
 #' Plot VAF distribution per copy number
@@ -179,6 +170,7 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
     pdf(output.file, width = 7, height = 9)
   }
 
+  sig.colors <- attr(nb, "sig.colors")
   purity = attr(nb, "purity")
 
   segs <- attr(nb, "cnv")
@@ -257,7 +249,7 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
             scale_x_continuous(breaks = seq(0, 1, by = 0.2)) +
             labs(x = "VAF", y = "No. of SNVs") +
             ggtitle(paste0("CN:", ploidy, " (", as.numeric(ploidy) - as.numeric(B), ":", B, ")")) +
-            scale_fill_brewer(palette = "Set3") +
+            scale_fill_manual(values = sig.colors) +
             theme_minimal()
           if (!is.null(purity)) {
             expected_vafs <- .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity)

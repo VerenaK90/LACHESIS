@@ -235,7 +235,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
 
-      nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy, sig.assign = sig.assign, ID = x$ID, sig.file = sig.file, sig.select = sig.select, min.p = min.p, ref.build = ref.build)
+      nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy, sig.assign = sig.assign, ID = x$ID, sig.file = sig.file, sig.select = sig.select, min.p = min.p)
 
       if(nrow(nb)==0){
         warning("Insufficient data for sample ", x$ID)
@@ -374,7 +374,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = vcf.tumor.ids[i], min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
-      nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i], sig.assign = sig.assign, ID = ids[i], sig.file = sig.file, sig.select = sig.select, min.p = min.p, ref.build = ref.build)
+      nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i], sig.assign = sig.assign, ID = ids[i], sig.file = sig.file, sig.select = sig.select, min.p = min.p)
 
       if(nrow(nb)==0){
         warning("Insufficient data for sample ", x$ID)
@@ -629,7 +629,18 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
          labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2))
     Axis(side = 2)
   }else{
-    binwidth = (max(to.plot$ECA_time_mean, na.rm = TRUE) - min(to.plot$ECA_time_mean, na.rm = TRUE))/20
+    max_ECA_time_mean <- max(to.plot$ECA_time_mean, na.rm = TRUE)
+    min_ECA_time_mean <- min(to.plot$ECA_time_mean, na.rm = TRUE)
+
+    if (max_ECA_time_mean != min_ECA_time_mean) {
+      binwidth <- (max_ECA_time_mean - min_ECA_time_mean) / 20
+    } else {
+      binwidth <- max_ECA_time_mean / 20
+      if (binwidth == 0 || is.na(binwidth)) {
+        binwidth <- 0.01
+      }
+    }
+
     hist(to.plot[,ECA_time_mean], xlim = c(0, 1.05 * max(to.plot[,ECA_time_mean], na.rm = TRUE)),
          breaks = seq(0, max(to.plot[,ECA_time_mean], na.rm = TRUE)*1.05, binwidth), col = lach.col.multi, border = lach.border, main = NA,
          xlab = NA, ylab = NA)
