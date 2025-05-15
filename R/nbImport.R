@@ -11,14 +11,23 @@
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
 #' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
 #' @examples
+#' # Example using all variants from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
+#'
+#' # Example using variants assosciated with specific SBS mutational signatures from vcf file
+#' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
+#' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+#' c_data <- readCNV(aceseq_cn)
+#' sig.filepath <- system.file("extdata", "NBE15", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
+#' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 #' @seealso \code{\link{plotNB}}
 #' @return a data.table
-#' @importFrom RColorBrewer Set3
+#' @importFrom RColorBrewer brewer.pal
 #' @export
 
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL){
@@ -55,6 +64,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     sv <- assign.result$sv
     sig.colors <- assign.result$sig.colors
     attr(sv, "t.sample") <- t.sample
+    attr(sv, "sig.colors") <- sig.colors
   }
 
   #Make columns more intuitive
@@ -65,7 +75,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
   attr(sv, "cnv") <- cnv
   attr(sv, "purity") <- as.numeric(purity)
   attr(sv, "ploidy") <- as.numeric(ploidy)
-  attr(sv, "sig.colors") <- sig.colors
   sv
 }
 
@@ -96,7 +105,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
   if (!is.null(min.p)) {
     sig.data <- sig.data[Probability >= min.p]
   }
-
+  print(ID)
   sv[, Sample := ID]
 
   sv <- merge(sv, sig.data, by = c("Sample", "chrom", "i.start"), all.x = TRUE)
@@ -144,12 +153,22 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' @param sig.output.file optional, will save the stratified VAF histogram with mutational signatures.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
+#' # Example using all variants from vcf file
 #' snvs = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' plotNB(nb)
+#'
+#' # Example using variants assosciated with specific SBS mutational signatures from vcf file
+#' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
+#' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+#' c_data <- readCNV(aceseq_cn)
+#' sig.filepath <- system.file("extdata", "NBE15", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
+#' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
+#' plotNB(nb, sig.show = TRUE)
 #' @export
 #' @importFrom graphics abline axis box grid hist mtext par rect text title
 #' @import ggplot2
@@ -233,7 +252,6 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
   }
 
   if (sig.show == TRUE) {
-    pdf(file = sig.output.file, width = 8, height = 6)
 
     for (cn in seq_along(nb)) {
       nb. <- split(nb[[cn]], nb[[cn]]$B)
@@ -255,13 +273,16 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
             expected_vafs <- .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity)
             p <- p + geom_vline(xintercept = expected_vafs, linetype = "dashed")
           }
-
-          print(p)
+          if (!is.null(sig.output.file)) {
+            pdf(file = sig.output.file, width = 8, height = 6)
+            print(p)
+            dev.off()
+          } else {
+            print(p)
+          }
         }
       }
     }
-
-    dev.off()
   }
 }
 
