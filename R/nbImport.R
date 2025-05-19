@@ -6,6 +6,7 @@
 #' @param purity tumor cell content
 #' @param ploidy average copy number in the tumor sample
 #' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature
+#' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
 #' @param ID sample name
 #' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
@@ -30,7 +31,7 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @export
 
-nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL){
+nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, assign.method = "sample", ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL){
 
   end <- start <- NULL
 
@@ -60,7 +61,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
   if(sig.assign == TRUE){
     t.sample <- attributes(sv)$t.sample
-    assign.result <- .assign_signatures(sv, sig.file, ID, sig.select, min.p)
+    assign.result <- .assign_signatures(sv, sig.file, assign.method, ID, sig.select, min.p)
     sv <- assign.result$sv
     sig.colors <- assign.result$sig.colors
     attr(sv, "t.sample") <- t.sample
@@ -78,7 +79,8 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
   sv
 }
 
-.assign_signatures <- function(sv = NULL, sig.file = NULL, ID = NULL, sig.select = NULL, min.p = NULL) {
+.assign_signatures <- function(sv = NULL, sig.file = NULL, assign.method = "sample", ID = NULL, sig.select = NULL, min.p = NULL) {
+
 
   if (is.null(sv)) {
     stop("Missing 'sv' input data!")
@@ -94,18 +96,35 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
   sbs.cols <- grep("^SBS", names(sig.data), value = TRUE)
 
-  sig.data <- sig.data[, {
-    max.p.sig <- which.max(.SD)
-    list(
-      Signature = sbs.cols[max.p.sig],
-      Probability = .SD[[max.p.sig]]
-    )
-  }, by = .(Sample, chrom, i.start, MutationType), .SDcols = sbs.cols]
+  if (assign.method == "sample") {
+    sig.data <- sig.data[, {
+      probs <- as.numeric(.SD)
+      if (sum(probs) == 0 || any(is.na(probs))) {
+        Signature <- NA
+        Probability <- NA
+      } else {
+        probs <- probs / sum(probs)
+        sampled.index <- sample(seq_along(probs), 1, prob = probs)
+        Signature <- sbs.cols[sampled.index]
+        Probability <- probs[sampled.index]
+      }
+      list(Signature = Signature, Probability = Probability)
+    }, by = .(Sample, chrom, i.start, MutationType), .SDcols = sbs.cols]
+
+  } else {
+    sig.data <- sig.data[, {
+      max.p.sig <- which.max(.SD)
+      list(
+        Signature = sbs.cols[max.p.sig],
+        Probability = .SD[[max.p.sig]]
+      )
+    }, by = .(Sample, chrom, i.start, MutationType), .SDcols = sbs.cols]
+  }
 
   if (!is.null(min.p)) {
     sig.data <- sig.data[Probability >= min.p]
   }
-  print(ID)
+
   sv[, Sample := ID]
 
   sv <- merge(sv, sig.data, by = c("Sample", "chrom", "i.start"), all.x = TRUE)
