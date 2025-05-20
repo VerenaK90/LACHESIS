@@ -4,10 +4,10 @@
 #' @param mrcaObj output generated from \code{\link{MRCA}}
 #' @param samp.name sample name, optional
 #' @param min.seg.size minimal segment size to plot
-#' @param mut.col.zero optional, the color code for densities of mutations present on single copies.
-#' @param mut.col.multi  optional, the color code for densities of mutations present on multiple copies.
+#' @param mut.col.zero optional, the bar color for densities of mutations present on single copies.
+#' @param mut.col.multi  optional, the bar color for densities of mutations present on multiple copies.
 #' @param mut.border optional, the line color
-#' @param mut.show.density optional; if `TRUE`, the density distribution of mutation densities on single copies is shown in the histogram of mutation densities on multiple copies.
+#' @param mut.show.density optional; if `TRUE`, the density distribution of mutation densities on single copies will be shown in the histogram of mutation densities on multiple copies.
 #' @param mut.breaks optional; the number of bins in the histogram.
 #' @param output.file optional; will save the plot.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.

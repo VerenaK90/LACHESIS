@@ -464,13 +464,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 #' @description
 #' Visualizes results from \code{\link{LACHESIS}}. Top plot, histograms of mean mutation densities; bottom plots, cumulative distribution of mean mutation densities with 95% confidence intervals.
 #' @param lachesis output generated from \code{\link{LACHESIS}}
-#' @param lach.suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
+#' @param lach.suppress.outliers whether outliers (defined as the 2.5% tumors with lowest and highest densities) are to be plot, default `TRUE`.
 #' @param lach.log.densities plot logarithmic densities. Default `FALSE`
-#' @param lach.col.zero optional, the color code for MRCA.
-#' @param lach.col.multi optional, the color code for ECA.
-#' @param lach.border, optional, the line color
-#' @param binwidth optional; the bin-width in the histogram.
-#' @param output.file optional; the file to which the plot will be stored.
+#' @param lach.col.zero optional, bar color for single-copy SSNV densities.
+#' @param lach.col.multi optional, bar color for multi-copy SSNV densities.
+#' @param lach.border, optional, border color for the bars.
+#' @param binwidth optional, the binwidth in the histogram.
+#' @param output.file optional, the file to which the plot will be stored.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' #an example file with sample annotations and meta data
@@ -775,12 +775,12 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.sup
 #' @description
 #' Takes SNV density timing as computed by `LACHESIS` as input and compares survival between tumors with high and low SNV densities
 #' @param lachesis output generated from \code{\link{LACHESIS}}
-#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be computationally inferred to maximize survival differences if not specified by user
+#' @param mrca.cutpoint optional, MRCA density value to be used for survival stratification, will be computationally inferred to maximize survival differences if not specified by user.
 #' @param output.dir the directory to which the plot will be stored.
 #' @param surv.time column name containing survival time; defaults to `OS.time`.
 #' @param surv.event column name containing event; defaults to `OS`.
 #' @param surv.time.breaks numeric value controlling time axis breaks; defaults to `NULL`.
-#' @param surv.time.scale numeric value to divide survival time by (e.g., 365 for converting days into years, 30 for months); defaults to `1`.
+#' @param surv.time.scale numeric value by which survival time is to be divided (e.g., 365 for converting days into years, 30 for months), defaults to `1`.
 #' @param surv.palette color palette to be used. Allowed values include "hue" for the default hue color scale; "grey" for grey color palettes; brewer palettes e.g. "RdBu", "Blues", ...; or custom color palette e.g. c("blue", "red").
 #' @param surv.title main title.
 #' @param surv.ylab y-axis label, defaults to `Survival`.
