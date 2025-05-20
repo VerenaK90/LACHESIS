@@ -1,6 +1,6 @@
-# &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma;
+# &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; (LACHESIS)
 
-&Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; is an R package to infer tumor evolution during malignant tranformation from bulk whole genome sequencing data. It uses single nucleotide variants and (ideally allele-specific) copy number information as input and computes mutation densities at clonal chromosomal gains and at the tumor's most recent common ancestor. Additionally, &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; tests whether there is evidence for an early common ancestor, oncogenic events acquired prior to malignant transformation. &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; also provides modalities to compare tumor evolution across patient collectives, and to correlate evolutionary timings with outcome. Please refer to our [vignette](vignettes/vignette_LACHESIS.Rmd) fur further information. 
+&Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; is an R package to infer tumor evolution during malignant tranformation from bulk whole genome sequencing data. It uses single nucleotide variants and (ideally allele-specific) copy number information as input to compute mutation densities at clonal chromosomal gains and at the tumor's most recent common ancestor. Additionally, &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; tests whether there is evidence for an early common ancestor, oncogenic events acquired prior to malignant transformation. &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; also provides modalities to compare tumor evolution across patient collectives, and to correlate evolutionary timings with outcome. Please refer to our [vignette](vignettes/vignette_LACHESIS.Rmd) fur further information. 
 
 ## Documentation
 
@@ -8,7 +8,6 @@ A [vignette](vignettes/vignette_LACHESIS.Rmd) explaining how to use &Lambda;&Alp
 
 ## Demo 
 
-**needs to be added**
 
 ## System requirements
 
@@ -20,13 +19,14 @@ A [vignette](vignettes/vignette_LACHESIS.Rmd) explaining how to use &Lambda;&Alp
 
 #### OS Requirements
 
-This package is supported for macOS and Linux. The package has been tested on the following systems:
+This package is supported for macOS, Windows and Linux. The package has been tested on the following systems:
 
 MacBook Pro: Sonoma (14.6.1)
+Windows 10, Version 22H2
 
 #### R dependencies
 
-&Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; has been tested on R v4.3.1 and requires installation of the packages data.table (1.15.4), ggplot (3.5.1), tidyr (1.3.1), vcfR (1.15.0).
+&Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; has been tested on R v4.3.1 and v4.4.1 and requires installation of the packages data.table (1.15.4), ggplot (3.5.1), tidyr (1.3.1), vcfR (1.15.0).
 
 ## Version
 
