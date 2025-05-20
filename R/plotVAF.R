@@ -7,10 +7,10 @@
 #' @param t_sample Sample name for tumor. Used for plot title. Default NULL
 #' @param vaf.show.counts Show counter per break on the histogram. Default FALSE
 #' @param vaf.show.density Show additional inset plot of density. Default TRUE
-#' @param vaf.col Default "#34495e"
-#' @param vaf.border Default "#bdc3c7"
+#' @param vaf.col Color to be used to fill the bars, default "#34495e"
+#' @param vaf.border Border color, default "#bdc3c7"
 #' @param srtcounts Text angle if `vaf.show.counts` is TRUE. Default 45
-#' @param output.file optional, will save the plot.
+#' @param output.file Optional, will save the plot.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
