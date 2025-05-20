@@ -48,7 +48,7 @@ The vignette can then be viewed by typing `vignette("Vignette", "LACHESIS")`. Th
 
 ## License
 
-&Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; is run under an **add license**
+&Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; is run under an **GPL (>= 3)** License.
 
 ## Contact
 
