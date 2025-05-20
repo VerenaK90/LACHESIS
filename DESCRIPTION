@@ -1,23 +1,30 @@
 Package: LACHESIS
 Title: Functions used to analyze early tumor evolution from whole genome sequencing data
 Version: 0.0.0.9000
-Authors@R: 
-    person(given = "Verena",
-           family = "Körber",
-           role = c("aut", "cre"),
-           email = "v.koerber@dkfz.de",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+Authors@R: c(
+  person(given = "Verena",
+         family = "Körber",
+         role = c("aut", "cre"),
+         email = "verena.korber@ndcls.ox.ac.uk",
+         comment = c(ORCID = "YOUR-ORCID-ID")),
+  person(given = "Anand",
+         family = "Mayakonda",
+         role = c("aut"),
+         email = "a.mayakonda@kitz-heidelberg.de"),
+  person(given = "Maximilia",
+         family = "Eggle",
+         role = c("aut"),
+         email = "maximilia.eggle@kitz-heidelberg.de"))
 Description: This package contains custom functions used to analyze neuroblastoma evolution from whole genome sequencing data. In particular, it contains modalities to estimate mutation densities at genomic segments, use these to time the origin of the tumor and eventually contains functions that were used to analyze tumor initiation with dynamic models of neuroblastoma evolution. 
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
-VignetteBuilder: knitr, rmarkdown
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a license
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-Depends: 
-    data.table,
-    R (>= 2.10),
-    vcfR,
-    tidyr,
-    stats
-RoxygenNote: 7.3.1
+Depends:
+  R (>= 2.10)
+Imports:
+  data.table, vcfR, tidyr, stats, utils, graphics, grDevices, ggplot2, gridExtra, survival, survminer
+Suggests:
+  Cairo, rmarkdown, knitr, R.utils
+VignetteBuilder: knitr, rmarkdown
+RoxygenNote: 7.3.2
