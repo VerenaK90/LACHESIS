@@ -92,7 +92,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
   sig.data <- fread(sig.file)
 
-  setnames(sig.data, c("Sample Names", "Chr", "Pos"), c("Sample", "chrom", "i.start"))
+  setnames(sig.data, c("Sample Names"), c("Sample"))
 
   sbs.cols <- grep("^SBS", names(sig.data), value = TRUE)
 
