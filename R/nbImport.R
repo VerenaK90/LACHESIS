@@ -109,7 +109,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
         Probability <- probs[sampled.index]
       }
       list(Signature = Signature, Probability = Probability)
-    }, by = .(Sample, chrom, i.start, MutationType), .SDcols = sbs.cols]
+    }, by = .(Sample, MutationType), .SDcols = sbs.cols]
 
   } else {
     sig.data <- sig.data[, {
@@ -118,7 +118,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
         Signature = sbs.cols[max.p.sig],
         Probability = .SD[[max.p.sig]]
       )
-    }, by = .(Sample, chrom, i.start, MutationType), .SDcols = sbs.cols]
+    }, by = .(Sample, MutationType), .SDcols = sbs.cols]
   }
 
   if (!is.null(min.p)) {
