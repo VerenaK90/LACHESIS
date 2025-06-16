@@ -96,38 +96,89 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
   sbs.cols <- grep("^SBS", names(sig.data), value = TRUE)
 
+  if(!"sequence_context" %in% colnames(sv)) {
+
+    genome <- switch(ref.build,
+                     "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
+                     "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
+                     "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+
+      )
+
+    sv.1 <- sv[ref %in% c("A", "G"),]
+    sv.2 <- sv[!ref %in% c("A", "G"),]
+    sv <- rbind(sv.1[, sequence_context := as.character( getSeq(
+      genome,
+      names = paste0("chr", chrom),
+      start = i.start - 1,
+      end = i.end + 1,
+      strand = "-"
+       )), by = .I],
+    sv.2[, sequence_context := as.character( getSeq(
+      genome,
+      names = paste0("chr", chrom),
+      start = i.start - 1,
+      end = i.end + 1,
+      strand = "+"
+    )), by = .I])
+    rm(list(sv.1, sv.2))
+
+  }
+
+  sv[, Sample := ID]
+
+  sv <-sv[, MutationType := {
+    ctx <- sequence_context
+    corrected.alt <- alt
+    corrected.alt[alt=="A" & ref %in% c("A", "G")] <- "T"
+    corrected.alt[alt=="C" & ref %in% c("A", "G")] <- "G"
+    corrected.alt[alt=="G" & ref %in% c("A", "G")] <- "C"
+    corrected.alt[alt=="T" & ref %in% c("A", "G")] <- "A"
+    paste0(substr(ctx,1, 1), "[", substr(ctx,2, 2), ">", corrected.alt, "]", substr(ctx, 3, 3))
+    }]
+
+  sv[, Sample := ID]
+  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE, all.y = FALSE)
+
   if (assign.method == "sample") {
-    sig.data <- sig.data[, {
-      probs <- as.numeric(.SD)
-      if (sum(probs) == 0 || any(is.na(probs))) {
-        Signature <- NA
-        Probability <- NA
+    tmp <- sv[, {
+      probs <- as.numeric(unlist(.SD, use.names = FALSE))
+
+      if (sum(probs, na.rm = TRUE) == 0 || anyNA(probs)) {
+        Signature <- as.character(NA)
+        Probability <- as.numeric(NA)
       } else {
         probs <- probs / sum(probs)
         sampled.index <- sample(seq_along(probs), 1, prob = probs)
         Signature <- sbs.cols[sampled.index]
         Probability <- probs[sampled.index]
       }
+
       list(Signature = Signature, Probability = Probability)
-    }, by = .(Sample, MutationType), .SDcols = sbs.cols]
+    }, .SDcols = sbs.cols, by = 1:nrow(sv),]
+    sv[, `:=`(Signature = tmp$Signature, Probability = tmp$Probability)]
 
   } else {
-    sig.data <- sig.data[, {
-      max.p.sig <- which.max(.SD)
-      list(
-        Signature = sbs.cols[max.p.sig],
-        Probability = .SD[[max.p.sig]]
-      )
-    }, by = .(Sample, MutationType), .SDcols = sbs.cols]
+    sv <- sv[, {
+      if(any(is.na(unlist(.SD, use.names = FALSE)))){
+        list(Signature = as.character(NA),
+        Probability = as.numeric(NA))
+      }else{
+        max.p.sig <- which.max(unlist(.SD, use.names = FALSE))
+        list(
+          Signature = sbs.cols[max.p.sig],
+          Probability = .SD[[max.p.sig]]
+        )
+      }
+    }, .SDcols = sbs.cols, by = 1:nrow(sv)]
   }
+  sv = sv[!is.na(Probability),]
 
   if (!is.null(min.p)) {
-    sig.data <- sig.data[Probability >= min.p]
+    sv <- sv[Probability >= min.p]
   }
 
-  sv[, Sample := ID]
 
-  sv <- merge(sv, sig.data, by = c("Sample", "chrom", "i.start"), all.x = TRUE)
 
   if (!is.null(sig.select)) {
     sv <- sv[Signature %in% sig.select]
@@ -138,6 +189,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     sig.number <- length(sig.options)
     sig.colors <- setNames(.get_sig_colors(sig.number), sig.options)
   }
+
 
   sv[, "Sample" := NULL]
 
