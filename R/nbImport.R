@@ -121,7 +121,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
       end = i.end + 1,
       strand = "+"
     )), by = .I])
-    rm(list(sv.1, sv.2))
+    rm(sv.1, sv.2)
 
   }
 
