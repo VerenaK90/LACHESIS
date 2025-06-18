@@ -4,7 +4,15 @@
 \alias{classifyLACHESIS}
 \title{Classify a tumor's evolutionary duration as "short" or "long" depending on the mutation density at its MRCA}
 \usage{
-classifyLACHESIS(lachesis, mrca.cutpoint = NULL, entity = "neuroblastoma", ...)
+classifyLACHESIS(
+  lachesis,
+  mrca.cutpoint = NULL,
+  entity = "neuroblastoma",
+  infer.cutpoint = FALSE,
+  surv.time = "OS.time",
+  surv.event = "OS",
+  ...
+)
 }
 \arguments{
 \item{lachesis}{output generated from \code{\link{LACHESIS}}}
@@ -12,6 +20,12 @@ classifyLACHESIS(lachesis, mrca.cutpoint = NULL, entity = "neuroblastoma", ...)
 \item{mrca.cutpoint}{optional; value based on SNV_densities_cohort.pdf observation, will be used as inferred from a test data set if not specified by user}
 
 \item{entity}{optional; the tumor entity if classifying according to a pre-defined threshold. Currently, only "neuroblastoma" is supported.}
+
+\item{infer.cutpoint}{logical; should the MRCA cutpoint be inferred from the data?}
+
+\item{surv.time}{column name containing survival time; defaults to \code{OS.time}.}
+
+\item{surv.event}{column name containing event; defaults to \code{OS}.}
 }
 \description{
 Takes SNV density timing as computed by \code{LACHESIS} as input and classifies the tumors in the cohort
