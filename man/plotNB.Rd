@@ -6,34 +6,71 @@
 \usage{
 plotNB(
   nb = NULL,
-  ref_build = "hg19",
+  ref.build = "hg19",
   min.cn = 2,
   max.cn = 4,
+  nb.col.abline = "gray70",
+  nb.col.cn.2 = "#7f8c8d",
+  nb.col.cn = "#16a085",
+  nb.col.hist = "#34495e",
+  nb.border = NA,
+  nb.breaks = 100,
   samp.name = NULL,
-  output.file = NULL
+  output.file = NULL,
+  sig.show = FALSE,
+  sig.output.file = NULL,
+  ...
 )
 }
 \arguments{
 \item{nb}{output generated from \code{\link{nbImport}}}
 
-\item{ref_build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}}
+\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}}
 
 \item{min.cn}{maximum copy number to be included in the plotting. Defaults to 2.}
 
 \item{max.cn}{maximum copy number to be included in the plotting. Defaults to 4.}
 
+\item{nb.col.abline}{optional, the color code for the abline.}
+
+\item{nb.col.cn.2}{optional, the color code if tcn = 2.}
+
+\item{nb.col.cn}{optional, the color code if other copy numbers.}
+
+\item{nb.col.hist}{optional, the color code for histograms.}
+
+\item{nb.border, }{optional, the line color.}
+
+\item{nb.breaks}{optional; the number of bins in the histogram.}
+
 \item{samp.name}{Sample name. Optional. Default NULL}
 
 \item{output.file}{optional, will save the plot.}
+
+\item{sig.show}{plot stratified VAF histogram with assigned mutational signatures.}
+
+\item{sig.output.file}{optional, will save the stratified VAF histogram with mutational signatures.}
+
+\item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
 \description{
 Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.
 }
 \examples{
+# Example using all variants from vcf file
 snvs = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 plotNB(nb)
+
+# Example using variants assosciated with specific SBS mutational signatures from vcf file
+snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
+aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+c_data <- readCNV(aceseq_cn)
+sig.filepath <- system.file("extdata", "NBE15", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
+nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
+plotNB(nb, sig.show = TRUE)
 }

@@ -8,12 +8,13 @@ plotMutationDensities(
   mrcaObj = NULL,
   samp.name = NULL,
   min.seg.size = 10^7,
-  fill.zero = NULL,
-  fill.multi = NULL,
-  l.col = NULL,
-  show.den = NULL,
-  bins = NULL,
-  output.file = NULL
+  mut.col.zero = "#4FB12B",
+  mut.col.multi = "#176A02",
+  mut.border = NULL,
+  mut.show.density = TRUE,
+  mut.breaks = NULL,
+  output.file = NULL,
+  ...
 )
 }
 \arguments{
@@ -23,17 +24,19 @@ plotMutationDensities(
 
 \item{min.seg.size}{minimal segment size to plot}
 
-\item{fill.zero}{optional, the color code for densities of mutations present on single copies.}
+\item{mut.col.zero}{optional, the color code for densities of mutations present on single copies.}
 
-\item{fill.multi}{optional, the color code for densities of mutations present on multiple copies.}
+\item{mut.col.multi}{optional, the color code for densities of mutations present on multiple copies.}
 
-\item{l.col, }{optional, the line color}
+\item{mut.border}{optional, the line color}
 
-\item{show.den}{optional; if \code{TRUE}, the density distribution of mutation densities on single copies is shown in the histogram of mutation densities on multiple copies.}
+\item{mut.show.density}{optional; if \code{TRUE}, the density distribution of mutation densities on single copies is shown in the histogram of mutation densities on multiple copies.}
 
-\item{bins}{optional; the number of bins in the histogram.}
+\item{mut.breaks}{optional; the number of bins in the histogram.}
 
 \item{output.file}{optional; will save the plot.}
+
+\item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
 \description{
 Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95\% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.

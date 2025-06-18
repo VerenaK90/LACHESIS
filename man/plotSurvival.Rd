@@ -2,33 +2,51 @@
 % Please edit documentation in R/LACHESIS.R
 \name{plotSurvival}
 \alias{plotSurvival}
-\title{Correlate SNV density at ECA/MRCA with clinical parameters such as age, OS, etc.}
+\title{Correlate SNV density timing at MRCA with Survival}
 \usage{
 plotSurvival(
   lachesis = NULL,
-  suppress.outliers = FALSE,
-  log.densities = FALSE,
-  output.file = NULL
+  mrca.cutpoint = NULL,
+  output.dir = NULL,
+  surv.time = "OS.time",
+  surv.event = "OS",
+  surv.palette = c("dodgerblue", "dodgerblue4"),
+  surv.time.breaks = NULL,
+  surv.time.scale = 1,
+  surv.title = "Survival probability",
+  surv.ylab = "Survival"
 )
 }
 \arguments{
 \item{lachesis}{output generated from \code{\link{LACHESIS}}}
 
-\item{suppress.outliers}{shall outliers (defined as the 2.5\% tumors with lowest and highest densities) be plotted? Default \code{TRUE}.}
+\item{mrca.cutpoint}{optional; value based on SNV_densities_cohort.pdf observation, will be computationally inferred to maximize survival differences if not specified by user}
 
-\item{log.densities}{plot logarithmic densities. Default \code{FALSE}}
+\item{output.dir}{the directory to which the plot will be stored.}
 
-\item{output.file}{optional; the file to which the plot will be stored.}
+\item{surv.time}{column name containing survival time; defaults to \code{OS.time}.}
+
+\item{surv.event}{column name containing event; defaults to \code{OS}.}
+
+\item{surv.palette}{color palette to be used. Allowed values include "hue" for the default hue color scale; "grey" for grey color palettes; brewer palettes e.g. "RdBu", "Blues", ...; or custom color palette e.g. c("blue", "red").}
+
+\item{surv.time.breaks}{numeric value controlling time axis breaks; defaults to \code{NULL}.}
+
+\item{surv.time.scale}{numeric value to divide survival time by (e.g., 365 for converting days into years, 30 for months); defaults to \code{1}.}
+
+\item{surv.title}{main title.}
+
+\item{surv.ylab}{y-axis label, defaults to \code{Survival}.}
 }
 \description{
-Takes SNV densities as computed by \code{LACHESIS} as input and correlates them with clinical data such as age at diagnosis, survival data etc.
+Takes SNV density timing as computed by \code{LACHESIS} as input and compares survival between tumors with high and low SNV densities
 }
 \examples{
-#an example file with sample annotations and meta data
+# an example file with sample annotations and meta data
 input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 input.files = data.table::fread(input.files)
 
-#cnv and snv files for example tumors
+# cnv and snv files for example tumors
 nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
 nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
 nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
@@ -39,11 +57,12 @@ snv.file = c(nbe11[2], nbe15[2], nbe63[2])
 input.files$cnv.file = cnv.file
 input.files$snv.file = snv.file
 
-# Make an axample input file with paths to cnv and snv file along with other meta data
+# Make an example input file with paths to cnv and snv file along with other meta data
 lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
-#Exampele with template file with paths to multiple cnv/snv files as an input
+# Example with template file with paths to multiple cnv/snv files as an input
 lachesis <- LACHESIS(input.files = lachesis_input)
-plotClinicalCorrelations(lachesis)
+plotSurvival(lachesis, surv.time = 'EFS.time', surv.event = 'EFS')
+
 }

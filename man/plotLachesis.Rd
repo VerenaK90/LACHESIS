@@ -6,31 +6,34 @@
 \usage{
 plotLachesis(
   lachesis = NULL,
-  suppress.outliers = FALSE,
-  log.densities = FALSE,
-  fill.multi = NULL,
-  l.col = NULL,
+  lach.suppress.outliers = FALSE,
+  lach.log.densities = FALSE,
+  lach.col.multi = "#176A02",
+  lach.border = NULL,
   binwidth = NULL,
-  fill.zero = NULL,
-  output.file = NULL
+  lach.col.zero = "#4FB12B",
+  output.file = NULL,
+  ...
 )
 }
 \arguments{
 \item{lachesis}{output generated from \code{\link{LACHESIS}}}
 
-\item{suppress.outliers}{shall outliers (defined as the 2.5\% tumors with lowest and highest densities) be plotted? Default \code{TRUE}.}
+\item{lach.suppress.outliers}{shall outliers (defined as the 2.5\% tumors with lowest and highest densities) be plotted? Default \code{TRUE}.}
 
-\item{log.densities}{plot logarithmic densities. Default \code{FALSE}}
+\item{lach.log.densities}{plot logarithmic densities. Default \code{FALSE}}
 
-\item{fill.multi}{optional, the color code for ECA.}
+\item{lach.col.multi}{optional, the color code for ECA.}
 
-\item{l.col, }{optional, the line color}
+\item{lach.border, }{optional, the line color}
 
 \item{binwidth}{optional; the bin-width in the histogram.}
 
-\item{fill.zero}{optional, the color code for MRCA.}
+\item{lach.col.zero}{optional, the color code for MRCA.}
 
 \item{output.file}{optional; the file to which the plot will be stored.}
+
+\item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
 \description{
 Visualizes results from \code{\link{LACHESIS}}. Top plot, histograms of mean mutation densities; bottom plots, cumulative distribution of mean mutation densities with 95\% confidence intervals.

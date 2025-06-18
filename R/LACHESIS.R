@@ -919,3 +919,103 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
   }
 }
 
+
+#' Classify a tumor's evolutionary duration as "short" or "long" depending on the mutation density at its MRCA
+#' @description
+#' Takes SNV density timing as computed by `LACHESIS` as input and classifies the tumors in the cohort
+#' @param lachesis output generated from \code{\link{LACHESIS}}
+#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be used as inferred from a test data set if not specified by user
+#' @param infer.cutpoint logical; should the MRCA cutpoint be inferred from the data?
+#' @param entity optional; the tumor entity if classifying according to a pre-defined threshold. Currently, only "neuroblastoma" is supported.
+#' @param surv.time column name containing survival time; defaults to `OS.time`.
+#' @param surv.event column name containing event; defaults to `OS`.
+#' @examples
+#' # an example file with sample annotations and meta data
+#' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+#' input.files = data.table::fread(input.files)
+#'
+#' # cnv and snv files for example tumors
+#' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+#' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+#' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+#'
+#' cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+#' snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+#'
+#' input.files$cnv.file = cnv.file
+#' input.files$snv.file = snv.file
+#'
+#' # Make an example input file with paths to cnv and snv file along with other meta data
+#' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+#' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+#'
+#' # Example with template file with paths to multiple cnv/snv files as an input
+#' lachesis <- LACHESIS(input.files = lachesis_input)
+#' classifyLACHESIS(lachesis)
+#'
+#' @export
+#' @import survminer
+
+classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = 'OS.time', surv.event = 'OS', ...){
+
+  if (is.null(lachesis)) {
+    stop("Error: 'lachesis' dataset must be provided.")
+  }
+  entities <- c("neuroblastoma")
+  entity <- match.arg(arg = entity, choices = entities, several.ok = FALSE)
+
+  if(infer.cutpoint == TRUE & sum(!(is.na(lachesis[,..surv.time]))) < 2){
+    stop("Please provide survival time if inferring cutpoint de novo.")
+  }
+
+  if(infer.cutpoint == TRUE & (sum(!(is.na(lachesis[,..surv.event]))) < 2 | sum(lachesis[,..surv.event]!=0, na.rm = T) < 2)){
+    stop("Please provide survival information if inferring cutpoint de novo.")
+  }
+  message("Classifying ", entity, " samples.")
+
+  if( infer.cutpoint==TRUE){
+    message("MRCA cutpoint will be newly inferred.")
+  }else if(is.null(mrca.cutpoint)){
+    message("Samples will be classified according to established MRCA cutpoint for ", entity, ".")
+  }else if(infer.cutpoint==FALSE & is.null(mrca.cutpoint)){
+    message("Please provide cutpoint or set `infer.cutpoint`=`TRUE`")
+  }else if(infer.cutpoint==FALSE){
+    message("MRCA cutpoint taken as ", mrca.cutpoint, ".")
+  }
+
+  # Calculating MRCA cutpoint
+  if(infer.cutpoint){
+    mrca.cutpoint <- survminer::surv_cutpoint(
+      lachesis[!is.na(get(surv.time)), .SD],
+      time = surv.time,
+      event = surv.event,
+      variables = c("MRCA_time_mean")
+    )
+    mrca.cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"])
+  }else if(is.null(mrca.cutpoint)){
+    mrca.cutpoint <- .getCutpoint(entity)
+  }
+
+  # Categorizing according to MRCA
+  lachesis.categorized <- lachesis
+  lachesis.categorized$MRCA_timing <- ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "early", "late")
+  lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing, levels=c("early", "late"))
+
+  attr(lachesis.categorized, "MRCA Cutpoint") <- mrca.cutpoint
+  attr(lachesis.categorized, "Entity") <- entity
+
+  return(lachesis.categorized)
+}
+
+#cutpoint for neuroblastoma
+.getCutpoint <- function(entity = "neuroblastoma"){
+
+  if(entity == 'neuroblastoma'){
+    cut.point = 0.05
+  }else{
+    stop('Available entities: neuroblastoma')
+  }
+
+  cut.point
+
+}

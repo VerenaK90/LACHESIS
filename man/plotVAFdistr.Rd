@@ -6,31 +6,37 @@
 \usage{
 plotVAFdistr(
   vaf = NULL,
-  vafbreak = 0.05,
+  vaf.interval = 0.05,
   t_sample = NULL,
-  showcounts = FALSE,
-  showdensity = TRUE,
-  col = "#34495e",
+  vaf.show.counts = FALSE,
+  vaf.show.density = TRUE,
+  vaf.col = "#34495e",
+  vaf.border = "#bdc3c7",
   srtcounts = 45,
-  output.file = NULL
+  output.file = NULL,
+  ...
 )
 }
 \arguments{
 \item{vaf}{output produced by \code{\link{readVCF}}}
 
-\item{vafbreak}{Interval size. Default 0.05}
+\item{vaf.interval}{Interval size. Default 0.05}
 
 \item{t_sample}{Sample name for tumor. Used for plot title. Default NULL}
 
-\item{showcounts}{Show counter per break on the histogram. Default FALSE}
+\item{vaf.show.counts}{Show counter per break on the histogram. Default FALSE}
 
-\item{showdensity}{Show additional inset plot of density. Default TRUE}
+\item{vaf.show.density}{Show additional inset plot of density. Default TRUE}
 
-\item{col}{Default "#34495e"}
+\item{vaf.col}{Default "#34495e"}
 
-\item{srtcounts}{Text angle if \code{showcounts} is TRUE. Default 45}
+\item{vaf.border}{Default "#bdc3c7"}
+
+\item{srtcounts}{Text angle if \code{vaf.show.counts} is TRUE. Default 45}
 
 \item{output.file}{optional, will save the plot.}
+
+\item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
 \value{
 data.table of frequency table
