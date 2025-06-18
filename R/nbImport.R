@@ -24,7 +24,7 @@
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
-#' sig.filepath <- system.file("extdata", "NBE15", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
+#' sig.filepath <- system.file("extdata", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 #' @seealso \code{\link{plotNB}}
 #' @return a data.table
@@ -92,56 +92,15 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
   sig.data <- fread(sig.file)
 
-  setnames(sig.data, c("Sample Names"), c("Sample"))
+  setnames(sig.data, c("Sample Names", "Chr", "Pos"), c("Sample", "chrom", "i.start"))
 
   sbs.cols <- grep("^SBS", names(sig.data), value = TRUE)
 
-  if(!"sequence_context" %in% colnames(sv)) {
-
-    genome <- switch(ref.build,
-                     "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
-                     "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
-                     "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
-
-      )
-
-    sv.1 <- sv[ref %in% c("A", "G"),]
-    sv.2 <- sv[!ref %in% c("A", "G"),]
-    sv <- rbind(sv.1[, sequence_context := as.character( getSeq(
-      genome,
-      names = paste0("chr", chrom),
-      start = i.start - 1,
-      end = i.end + 1,
-      strand = "-"
-       )), by = .I],
-    sv.2[, sequence_context := as.character( getSeq(
-      genome,
-      names = paste0("chr", chrom),
-      start = i.start - 1,
-      end = i.end + 1,
-      strand = "+"
-    )), by = .I])
-    rm(sv.1, sv.2)
-
-  }
-
-  sv[, Sample := ID]
-
-  sv <-sv[, MutationType := {
-    ctx <- sequence_context
-    corrected.alt <- alt
-    corrected.alt[alt=="A" & ref %in% c("A", "G")] <- "T"
-    corrected.alt[alt=="C" & ref %in% c("A", "G")] <- "G"
-    corrected.alt[alt=="G" & ref %in% c("A", "G")] <- "C"
-    corrected.alt[alt=="T" & ref %in% c("A", "G")] <- "A"
-    paste0(substr(ctx,1, 1), "[", substr(ctx,2, 2), ">", corrected.alt, "]", substr(ctx, 3, 3))
-    }]
-
-  sv[, Sample := ID]
-  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE, all.y = FALSE)
-
   if (assign.method == "sample") {
-    tmp <- sv[, {
+
+    set.seed(42)
+
+    sig.data <- sig.data[, {
       probs <- as.numeric(unlist(.SD, use.names = FALSE))
 
       if (sum(probs, na.rm = TRUE) == 0 || anyNA(probs)) {
@@ -155,30 +114,36 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
       }
 
       list(Signature = Signature, Probability = Probability)
-    }, .SDcols = sbs.cols, by = 1:nrow(sv),]
-    sv[, `:=`(Signature = tmp$Signature, Probability = tmp$Probability)]
+    }, by = .(Sample, chrom, i.start, MutationType), .SDcols = sbs.cols]
 
   } else {
-    sv <- sv[, {
+    sig.data <- sig.data[, {
       if(any(is.na(unlist(.SD, use.names = FALSE)))){
         list(Signature = as.character(NA),
-        Probability = as.numeric(NA))
+             Probability = as.numeric(NA))
       }else{
+        probs <- as.numeric(unlist(.SD, use.names = FALSE))
         max.p.sig <- which.max(unlist(.SD, use.names = FALSE))
         list(
           Signature = sbs.cols[max.p.sig],
-          Probability = .SD[[max.p.sig]]
+          Probability = probs[max.p.sig]
         )
       }
-    }, .SDcols = sbs.cols, by = 1:nrow(sv)]
+    }, by = .(Sample, chrom, i.start, MutationType), .SDcols = sbs.cols]
   }
-  sv = sv[!is.na(Probability),]
+
+  sig.data <- sig.data[!is.na(Probability),]
 
   if (!is.null(min.p)) {
-    sv <- sv[Probability >= min.p]
+    sig.data <- sig.data[Probability >= min.p]
   }
 
+  sv[, Sample := ID]
 
+  sig.data[, chrom := as.character(chrom)]
+  sv[, chrom := as.character(chrom)]
+
+  sv <- merge(sv, sig.data, by = c("Sample", "chrom", "i.start"), all.x = TRUE)
 
   if (!is.null(sig.select)) {
     sv <- sv[Signature %in% sig.select]
@@ -189,7 +154,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     sig.number <- length(sig.options)
     sig.colors <- setNames(.get_sig_colors(sig.number), sig.options)
   }
-
 
   sv[, "Sample" := NULL]
 
@@ -237,7 +201,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
-#' sig.filepath <- system.file("extdata", "NBE15", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
+#' sig.filepath <- system.file("extdata", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 #' plotNB(nb, sig.show = TRUE)
 #' @export
@@ -324,6 +288,10 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
 
   if (sig.show == TRUE) {
 
+    if (!is.null(sig.output.file)) {
+      pdf(file = sig.output.file, width = 8, height = 6)  # <--- open PDF
+    }
+
     for (cn in seq_along(nb)) {
       nb. <- split(nb[[cn]], nb[[cn]]$B)
       ploidy <- names(nb)[cn]
@@ -344,15 +312,13 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
             expected_vafs <- .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity)
             p <- p + geom_vline(xintercept = expected_vafs, linetype = "dashed")
           }
-          if (!is.null(sig.output.file)) {
-            pdf(file = sig.output.file, width = 8, height = 6)
-            print(p)
-            dev.off()
-          } else {
-            print(p)
-          }
+          print(p)
         }
       }
+    }
+
+    if (!is.null(sig.output.file)) {
+      dev.off()
     }
   }
 }
@@ -437,4 +403,3 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
 .expectedClVAF <- function(CN, purity){
   (1:CN)*purity/(purity*CN + 2*(1-purity))
 }
-
