@@ -7,8 +7,8 @@
 plotClinicalCorrelations(
   lachesis = NULL,
   clin.par = "Age",
-  suppress.outliers = FALSE,
-  log.densities = FALSE,
+  clin.suppress.outliers = FALSE,
+  clin.log.densities = FALSE,
   output.file = NULL
 )
 }
@@ -17,9 +17,9 @@ plotClinicalCorrelations(
 
 \item{clin.par}{the clinical parameter used for correlation. Default \code{Age}.}
 
-\item{suppress.outliers}{shall outliers (defined as the 2.5\% tumors with lowest and highest densities) be plotted? Default \code{TRUE}.}
+\item{clin.suppress.outliers}{shall outliers (defined as the 2.5\% tumors with lowest and highest densities) be plotted? Default \code{TRUE}.}
 
-\item{log.densities}{plot logarithmic densities. Default \code{FALSE}}
+\item{clin.log.densities}{plot logarithmic densities. Default \code{FALSE}}
 
 \item{output.file}{optional; the file to which the plot will be stored.}
 }
@@ -42,11 +42,11 @@ snv.file = c(nbe11[2], nbe15[2], nbe63[2])
 input.files$cnv.file = cnv.file
 input.files$snv.file = snv.file
 
-# Make an axample input file with paths to cnv and snv file along with other meta data
+# Make an example input file with paths to cnv and snv file along with other meta data
 lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
-#Exampele with template file with paths to multiple cnv/snv files as an input
+#Example with template file with paths to multiple cnv/snv files as an input
 lachesis <- LACHESIS(input.files = lachesis_input)
 plotClinicalCorrelations(lachesis)
 }

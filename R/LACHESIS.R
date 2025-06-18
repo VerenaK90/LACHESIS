@@ -36,6 +36,11 @@
 #' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS
+#' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature
+#' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
+#' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
+#' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
+#' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
 #' @param ... further arguments and parameters passed to LACHESIS functions.
 #' @examples
 #' #an example file with sample annotations and meta data
@@ -85,7 +90,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
                      ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, min.depth = 30,
                      vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
-                     ref.build = "hg19", filter.value = "PASS", ...){
+                     ref.build = "hg19", filter.value = "PASS", sig.assign = FALSE, sig.file = NULL, assign.method = "sample", sig.select = NULL, min.p = NULL, ...){
 
 
   ID <- cnv.file <- snv.file <- fwrite <- NULL
@@ -231,7 +236,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
 
-      nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy)
+      nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy, sig.assign = sig.assign, assign.method = assign.method, ID = x$ID, sig.file = sig.file, sig.select = sig.select, min.p = min.p)
 
       if(nrow(nb)==0){
         warning("Insufficient data for sample ", x$ID)
@@ -253,7 +258,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, ...)
+        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -370,7 +375,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = vcf.tumor.ids[i], min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
-      nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i])
+      nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i], sig.assign = sig.assign, assign.method = assign.method, ID = ids[i], sig.file = sig.file, sig.select = sig.select, min.p = min.p)
 
       if(nrow(nb)==0){
         warning("Insufficient data for sample ", x$ID)
@@ -393,7 +398,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, ...)
+        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -625,7 +630,18 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
          labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2))
     Axis(side = 2)
   }else{
-    binwidth = (max(to.plot$ECA_time_mean, na.rm = TRUE) - min(to.plot$ECA_time_mean, na.rm = TRUE))/20
+    max_ECA_time_mean <- max(to.plot$ECA_time_mean, na.rm = TRUE)
+    min_ECA_time_mean <- min(to.plot$ECA_time_mean, na.rm = TRUE)
+
+    if (max_ECA_time_mean != min_ECA_time_mean) {
+      binwidth <- (max_ECA_time_mean - min_ECA_time_mean) / 20
+    } else {
+      binwidth <- max_ECA_time_mean / 20
+      if (binwidth == 0 || is.na(binwidth)) {
+        binwidth <- 0.01
+      }
+    }
+
     hist(to.plot[,ECA_time_mean], xlim = c(0, 1.05 * max(to.plot[,ECA_time_mean], na.rm = TRUE)),
          breaks = seq(0, max(to.plot[,ECA_time_mean], na.rm = TRUE)*1.05, binwidth), col = lach.col.multi, border = lach.border, main = NA,
          xlab = NA, ylab = NA)
@@ -903,3 +919,103 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
   }
 }
 
+
+#' Classify a tumor's evolutionary duration as "short" or "long" depending on the mutation density at its MRCA
+#' @description
+#' Takes SNV density timing as computed by `LACHESIS` as input and classifies the tumors in the cohort
+#' @param lachesis output generated from \code{\link{LACHESIS}}
+#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be used as inferred from a test data set if not specified by user
+#' @param infer.cutpoint logical; should the MRCA cutpoint be inferred from the data?
+#' @param entity optional; the tumor entity if classifying according to a pre-defined threshold. Currently, only "neuroblastoma" is supported.
+#' @param surv.time column name containing survival time; defaults to `OS.time`.
+#' @param surv.event column name containing event; defaults to `OS`.
+#' @examples
+#' # an example file with sample annotations and meta data
+#' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+#' input.files = data.table::fread(input.files)
+#'
+#' # cnv and snv files for example tumors
+#' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+#' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+#' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+#'
+#' cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+#' snv.file = c(nbe11[2], nbe15[2], nbe63[2])
+#'
+#' input.files$cnv.file = cnv.file
+#' input.files$snv.file = snv.file
+#'
+#' # Make an example input file with paths to cnv and snv file along with other meta data
+#' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+#' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
+#'
+#' # Example with template file with paths to multiple cnv/snv files as an input
+#' lachesis <- LACHESIS(input.files = lachesis_input)
+#' classifyLACHESIS(lachesis)
+#'
+#' @export
+#' @import survminer
+
+classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = 'OS.time', surv.event = 'OS', ...){
+
+  if (is.null(lachesis)) {
+    stop("Error: 'lachesis' dataset must be provided.")
+  }
+  entities <- c("neuroblastoma")
+  entity <- match.arg(arg = entity, choices = entities, several.ok = FALSE)
+
+  if(infer.cutpoint == TRUE & sum(!(is.na(lachesis[,..surv.time]))) < 2){
+    stop("Please provide survival time if inferring cutpoint de novo.")
+  }
+
+  if(infer.cutpoint == TRUE & (sum(!(is.na(lachesis[,..surv.event]))) < 2 | sum(lachesis[,..surv.event]!=0, na.rm = T) < 2)){
+    stop("Please provide survival information if inferring cutpoint de novo.")
+  }
+  message("Classifying ", entity, " samples.")
+
+  if( infer.cutpoint==TRUE){
+    message("MRCA cutpoint will be newly inferred.")
+  }else if(is.null(mrca.cutpoint)){
+    message("Samples will be classified according to established MRCA cutpoint for ", entity, ".")
+  }else if(infer.cutpoint==FALSE & is.null(mrca.cutpoint)){
+    message("Please provide cutpoint or set `infer.cutpoint`=`TRUE`")
+  }else if(infer.cutpoint==FALSE){
+    message("MRCA cutpoint taken as ", mrca.cutpoint, ".")
+  }
+
+  # Calculating MRCA cutpoint
+  if(infer.cutpoint){
+    mrca.cutpoint <- survminer::surv_cutpoint(
+      lachesis[!is.na(get(surv.time)), .SD],
+      time = surv.time,
+      event = surv.event,
+      variables = c("MRCA_time_mean")
+    )
+    mrca.cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"])
+  }else if(is.null(mrca.cutpoint)){
+    mrca.cutpoint <- .getCutpoint(entity)
+  }
+
+  # Categorizing according to MRCA
+  lachesis.categorized <- lachesis
+  lachesis.categorized$MRCA_timing <- ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "early", "late")
+  lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing, levels=c("early", "late"))
+
+  attr(lachesis.categorized, "MRCA Cutpoint") <- mrca.cutpoint
+  attr(lachesis.categorized, "Entity") <- entity
+
+  return(lachesis.categorized)
+}
+
+#cutpoint for neuroblastoma
+.getCutpoint <- function(entity = "neuroblastoma"){
+
+  if(entity == 'neuroblastoma'){
+    cut.point = 0.05
+  }else{
+    stop('Available entities: neuroblastoma')
+  }
+
+  cut.point
+
+}

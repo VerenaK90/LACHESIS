@@ -12,7 +12,8 @@ readVCF(
   min.depth = 30,
   t.sample = NULL,
   info.af = "AF",
-  info.dp = "DP"
+  info.dp = "DP",
+  filter.value = "PASS"
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ readVCF(
 \item{info.af}{The string encoding the allele frequency field in the FORMAT column. Defaults to \code{AF}and will be ignored if \code{vcf.source} != \code{sentieon}.}
 
 \item{info.dp}{The string encoding the read depth field in the FORMAT column. Defaults to \code{DP}and will be ignored if \code{vcf.source} != \code{sentieon}.}
+
+\item{filter.value}{The FILTER column value for variants that passed the filtering, defaults to PASS}
 }
 \value{
 a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf
@@ -40,7 +43,7 @@ Import a VCF file and extract read-count and variant allele frequencies. Current
 }
 \examples{
 mutect_vcf = system.file("extdata", "mutect.somatic.vcf.gz", package = "LACHESIS")
-m_data = readVCF(vcf = mutect_vcf, vcf.source = "mutect")
+m_data = readVCF(vcf = mutect_vcf, vcf.source = "mutect", filter.value = ".")
 strelka_vcf = system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 s_data = readVCF(vcf = strelka_vcf, vcf.source = "strelka")
 dkfz_vcf = system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
