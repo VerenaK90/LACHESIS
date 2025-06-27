@@ -1,16 +1,19 @@
 #' Combine CNVs and SNVs
 #' @description
 #' Merges CNVs and SNVs into a single data.table. Each variant is assigned to its corresponding copy number segment and status.
-#' @param cnv CNV data from \code{\link{readCNV}}
-#' @param snv SNV data from \code{\link{readVCF}}
-#' @param purity tumor cell content
-#' @param ploidy average copy number in the tumor sample
-#' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature
+#' @param cnv CNV data from \code{\link{readCNV}}.
+#' @param snv SNV data from \code{\link{readVCF}}.
+#' @param purity tumor cell content.
+#' @param ploidy average copy number in the tumor sample.
+#' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature.
 #' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
-#' @param ID sample name
+#' @param ID sample name.
 #' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
 #' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
+#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
+#' @param seed Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.
+#'
 #' @examples
 #' # Example using all variants from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -24,14 +27,17 @@
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
-#' sig.filepath <- system.file("extdata", "NBE15", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
+#' sig.filepath <- system.file("extdata", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 #' @seealso \code{\link{plotNB}}
 #' @return a data.table
 #' @importFrom RColorBrewer brewer.pal
+#' @importFrom Biostrings getSeq
+#' @importFrom GenomicRanges GRanges
+#' @importFrom IRanges IRanges
 #' @export
 
-nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, assign.method = "sample", ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL){
+nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, assign.method = "sample", ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL, ref.build = NULL, seed = NULL){
 
   end <- start <- NULL
 
@@ -61,14 +67,14 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
   if(sig.assign == TRUE){
     t.sample <- attributes(sv)$t.sample
-    assign.result <- .assign_signatures(sv, sig.file, assign.method, ID, sig.select, min.p)
+    assign.result <- .assign_signatures(sv, sig.file, assign.method, ID, sig.select, min.p, ref.build, seed)
     sv <- assign.result$sv
     sig.colors <- assign.result$sig.colors
     attr(sv, "t.sample") <- t.sample
     attr(sv, "sig.colors") <- sig.colors
   }
 
-  #Make columns more intuitive
+  # Make columns more intuitive
   colnames(sv)[which(colnames(sv) == "i.start")] <- "snv_start"
   colnames(sv)[which(colnames(sv) == "i.end")] <- "snv_end"
   colnames(sv)[which(colnames(sv) == "start")] <- "cn_start"
@@ -79,7 +85,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
   sv
 }
 
-.assign_signatures <- function(sv = NULL, sig.file = NULL, assign.method = "sample", ID = NULL, sig.select = NULL, min.p = NULL) {
+.assign_signatures <- function(sv = NULL, sig.file = NULL, assign.method = "sample", ID = NULL, sig.select = NULL, min.p = NULL, ref.build = NULL, seed = NULL) {
 
 
   if (is.null(sv)) {
@@ -105,23 +111,31 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
       )
 
-    sv.1 <- sv[ref %in% c("A", "G"),]
-    sv.2 <- sv[!ref %in% c("A", "G"),]
-    sv <- rbind(sv.1[, sequence_context := as.character( getSeq(
-      genome,
-      names = paste0("chr", chrom),
-      start = i.start - 1,
-      end = i.end + 1,
-      strand = "-"
-       )), by = .I],
-    sv.2[, sequence_context := as.character( getSeq(
-      genome,
-      names = paste0("chr", chrom),
-      start = i.start - 1,
-      end = i.end + 1,
-      strand = "+"
-    )), by = .I])
-    rm(sv.1, sv.2)
+    # Option 1: using GRanges
+    gr <- GRanges(
+      seqnames = paste0("chr", sv$chrom),
+      ranges = IRanges(start = sv$i.start - 1, end = sv$i.end + 1),
+      strand = ifelse(sv$ref %in% c("A", "G"), "-", "+")
+    )
+
+    sv[, sequence_context := as.character(Biostrings::getSeq(genome, gr))]
+
+    # Option 2: without GRanges
+
+  # sv[, strand := ifelse(ref %in% c("A", "G"), "-", "+")]
+  #
+  # sv[, sequence_context := as.character(Biostrings::getSeq(
+  #   switch(ref.build,
+  #          "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
+  #          "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
+  #          "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38),
+  #   names = paste0("chr", chrom),
+  #   start = i.start - 1,
+  #   end = i.end + 1,
+  #   strand = strand
+  # )), by = .I]
+  #
+  # sv[, strand := NULL]
 
   }
 
@@ -137,10 +151,11 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     paste0(substr(ctx,1, 1), "[", substr(ctx,2, 2), ">", corrected.alt, "]", substr(ctx, 3, 3))
     }]
 
-  sv[, Sample := ID]
-  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE, all.y = FALSE)
-
+  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE, all.y = FALSE, allow.cartesian = TRUE)
+  sv1 <- sv
+  View(sv1)
   if (assign.method == "sample") {
+    set.seed(seed)
     tmp <- sv[, {
       probs <- as.numeric(unlist(.SD, use.names = FALSE))
 
@@ -197,7 +212,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 }
 
 .get_sig_colors <- function(n, palette = "Set3", max.colors = 12) {
-  base.colors <- brewer.pal(min(max.colors, n), palette)
+  base.colors <- RColorBrewer::brewer.pal(min(max.colors, n), palette)
   if (n > max.colors) {
     colorRampPalette(base.colors)(n)
   } else {
@@ -208,8 +223,8 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' Plot VAF distribution per copy number
 #' @description
 #' Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.
-#' @param nb output generated from \code{\link{nbImport}}
-#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
+#' @param nb output generated from \code{\link{nbImport}}.
+#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
 #' @param min.cn maximum copy number to be included in the plotting. Defaults to 2.
 #' @param max.cn maximum copy number to be included in the plotting. Defaults to 4.
 #' @param nb.col.abline optional, the color code for the abline.
@@ -218,7 +233,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' @param nb.col.hist optional, the color code for histograms.
 #' @param nb.border, optional, the line color.
 #' @param nb.breaks optional; the number of bins in the histogram.
-#' @param samp.name Sample name. Optional. Default NULL
+#' @param samp.name Sample name. Optional. Default NULL.
 #' @param output.file optional, will save the plot.
 #' @param sig.show plot stratified VAF histogram with assigned mutational signatures.
 #' @param sig.output.file optional, will save the stratified VAF histogram with mutational signatures.
@@ -237,7 +252,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
-#' sig.filepath <- system.file("extdata", "NBE15", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
+#' sig.filepath <- system.file("extdata", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 #' plotNB(nb, sig.show = TRUE)
 #' @export
@@ -270,7 +285,7 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
 
   contig_lens <- cumsum(.getContigLens(build = ref.build))
 
-  #n_copies <- length(min.cn:max.cn)
+  # n_copies <- length(min.cn:max.cn)
   n_copy_combs <- nrow(unique(nb[TCN >= min.cn & TCN <= max.cn,TCN, B]))
   n_copy_combs <- n_copy_combs + n_copy_combs%%2
   lo_mat <- matrix(data = c(rep(1, n_copy_combs/2), 2:(n_copy_combs/2+1), (n_copy_combs/2 + 2):(n_copy_combs+1)), nrow = 3, byrow = TRUE)
@@ -324,6 +339,10 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
 
   if (sig.show == TRUE) {
 
+    if (!is.null(sig.output.file)) {
+      pdf(file = sig.output.file, width = 8, height = 6)  # <--- open PDF
+    }
+
     for (cn in seq_along(nb)) {
       nb. <- split(nb[[cn]], nb[[cn]]$B)
       ploidy <- names(nb)[cn]
@@ -344,21 +363,18 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
             expected_vafs <- .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity)
             p <- p + geom_vline(xintercept = expected_vafs, linetype = "dashed")
           }
-          if (!is.null(sig.output.file)) {
-            pdf(file = sig.output.file, width = 8, height = 6)
-            print(p)
-            dev.off()
-          } else {
-            print(p)
-          }
+          print(p)
         }
       }
+    }
+
+    if (!is.null(sig.output.file)) {
+      dev.off()
     }
   }
 }
 
-
-#contig lengths for hg19, hg38 and hg18
+# Contig lengths for hg19, hg38 and hg18
 .getContigLens <- function(build = "hg19"){
 
   if(build == 'hg19'){
@@ -395,13 +411,13 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
     stop('Available reference builds: hg18, hg19, hg38')
   }
 
-  #Get chr lens
+  # Get chr lens
   chr.lens <- .getContigLens(build = build)
 
   segmentedData[,Start_Position := as.numeric(as.character(Start_Position))]
   segmentedData[,End_Position := as.numeric(as.character(End_Position))]
 
-  #Replace chr x and y with numeric value (23 and 24) for better ordering
+  # Replace chr x and y with numeric value (23 and 24) for better ordering
   segmentedData$Chromosome <- gsub(pattern = 'chr', replacement = '', x = segmentedData$Chromosome, fixed = TRUE)
   segmentedData$Chromosome <- gsub(pattern = 'X', replacement = '23', x = segmentedData$Chromosome, fixed = TRUE)
   segmentedData$Chromosome <- gsub(pattern = 'Y', replacement = '24', x = segmentedData$Chromosome, fixed = TRUE)
@@ -433,7 +449,7 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
   return(seg.spl.transformed)
 }
 
-# expected clonal VAFs for copy number CN at a given purity on autosomes
+# Expected clonal VAFs for copy number CN at a given purity on autosomes
 .expectedClVAF <- function(CN, purity){
   (1:CN)*purity/(purity*CN + 2*(1-purity))
 }

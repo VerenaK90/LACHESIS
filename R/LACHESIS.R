@@ -35,6 +35,7 @@
 #' @param fp.sd optional, the standard deviation of the false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
+#' @param seed Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.
 #' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS
 #' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature
 #' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
@@ -90,7 +91,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
                      ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, min.depth = 30,
                      vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
-                     ref.build = "hg19", filter.value = "PASS", sig.assign = FALSE, sig.file = NULL, assign.method = "sample", sig.select = NULL, min.p = NULL, ...){
+                     ref.build = "hg19", seed = NULL, filter.value = "PASS", sig.assign = FALSE, sig.file = NULL, assign.method = "sample", sig.select = NULL, min.p = NULL, ...){
 
 
   ID <- cnv.file <- snv.file <- fwrite <- NULL
@@ -105,6 +106,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         stop("Please provide snv and cnv input for every sample!")
       }
     }
+  }
+
+  if (is.null(seed)) {
+    seed <- sample.int(.Machine$integer.max, 1)
   }
 
   incl.chr <- setdiff(c(1:22), excl.chr)
@@ -171,7 +176,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                  excl.chr = numeric(),
                                                  ref.build = character(),
                                                  cnv.file = character(),
-                                                 snv.file = character())
+                                                 snv.file = character(),
+                                                 seed = numeric())
 
     sample.specs <- data.table::fread(input.files, sep = "\t", stringsAsFactors = FALSE)
 
@@ -236,7 +242,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
 
-      nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy, sig.assign = sig.assign, assign.method = assign.method, ID = x$ID, sig.file = sig.file, sig.select = sig.select, min.p = min.p)
+      nb <- nbImport(cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy, sig.assign = sig.assign, assign.method = assign.method, ID = x$ID, sig.file = sig.file, sig.select = sig.select, min.p = min.p, ref.build = ref.build, seed = seed)
 
       if(nrow(nb)==0){
         warning("Insufficient data for sample ", x$ID)
@@ -328,7 +334,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                       excl.chr = excl.chr,
                                                       ref.build = ref.build,
                                                       cnv.file = x$cnv.file,
-                                                      snv.file = x$snv.file)
+                                                      snv.file = x$snv.file,
+                                                      seed = seed)
 
       log.file.data.cohort <- merge(log.file.data.cohort, log.file.data.single, all=TRUE)
 
@@ -375,7 +382,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       snv <- readVCF(vcf = snv.files[i], vcf.source = vcf.source[i], t.sample = vcf.tumor.ids[i], min.depth = min.depth,
                      min.vaf = min.vaf, info.af = vcf.info.af, info.dp = vcf.info.dp, filter.value = filter.value)
 
-      nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i], sig.assign = sig.assign, assign.method = assign.method, ID = ids[i], sig.file = sig.file, sig.select = sig.select, min.p = min.p)
+      nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i], sig.assign = sig.assign, assign.method = assign.method, ID = ids[i], sig.file = sig.file, sig.select = sig.select, min.p = min.p, ref.build = ref.build, seed = seed)
 
       if(nrow(nb)==0){
         warning("Insufficient data for sample ", x$ID)
