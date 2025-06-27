@@ -7,47 +7,47 @@
 #' @param vcf.tumor.ids vector of sample names as given in the vcf file; will be ignored if `input.files` is specified.
 #' @param cnv.files vector of cnv files in same order as ids; should be in tab-delimited format, will be ignored if `input.files` is specified.
 #' @param snv.files vector of snv files in same order as ids; should be in vcf format, will be ignored if `input.files` is specified.
-#' @param vcf.source Tool used for generating VCF file. Can be `strelka` or `mutect` or `dkfz`
+#' @param vcf.source Tool used for generating VCF file. Can be `strelka` or `mutect` or `dkfz`.
 #' @param purity vector tumor cell content in same order as ids; will be ignored if `input.files` is specified.
 #' @param ploidy average copy number in the tumor sample in same order as ids; will be ignored if `input.files` is specified.
-#' @param cnv.chr.col column index of chromosome number in cnv.files
-#' @param cnv.start.col column index of first position of the segment
-#' @param cnv.end.col column index of last position of the segment
+#' @param cnv.chr.col column index of chromosome number in cnv.files.
+#' @param cnv.start.col column index of first position of the segment.
+#' @param cnv.end.col column index of last position of the segment.
 #' @param cnv.A.col column index of the number of A alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.
 #' @param cnv.B.col column index of the number of B alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.
 #' @param cnv.tcn.col column index of the total copy number. Is computed to A + B if not provided.
 #' @param output.dir link to directory in which output is to be stored.
-#' @param age, optional, the age at diagnosis
-#' @param OS.time, optional, overall survival time
-#' @param OS, optional, overall survival indicator variable
-#' @param EFS.time, optional, event-free survival time
-#' @param EFS, optional, event-free survival indicator variable
+#' @param age, optional, the age at diagnosis.
+#' @param OS.time, optional, overall survival time.
+#' @param OS, optional, overall survival indicator variable.
+#' @param EFS.time, optional, event-free survival time.
+#' @param EFS, optional, event-free survival indicator variable.
 #' @param min.cn minimum copy number to be included in the analysis. Default 2.
 #' @param max.cn maximum copy number to be included in the analysis. Default 4.
 #' @param merge.tolerance the maximum distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp.
-#' @param ignore.XY Ignore allosomes. Default TRUE
-#' @param min.vaf Remove variants with vcf below threshold. Default 0.01
+#' @param ignore.XY Ignore allosomes. Default TRUE.
+#' @param min.vaf Remove variants with vcf below threshold. Default 0.01.
 #' @param min.depth Minimum required depth for a variant to be considered. Default 30.
 #' @param vcf.info.af The string encoding the allele frequency field in the FORMAT column of the .vcf file. Defaults to `AF`and will be ignored if `vcf.source` != `sentieon`.
 #' @param vcf.info.dp The string encoding the read depth field in the FORMAT column of the .vcf file. Defaults to `DP`and will be ignored if `vcf.source` != `sentieon`.
-#' @param min.seg.size the minimal segment length to be included in the quantification
+#' @param min.seg.size the minimal segment length to be included in the quantification.
 #' @param fp.mean optional, the average false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param fp.sd optional, the standard deviation of the false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
-#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
-#' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS
-#' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature
+#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
+#' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS.
+#' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature.
 #' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
 #' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
 #' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
 #' @param ... further arguments and parameters passed to LACHESIS functions.
 #' @examples
-#' #an example file with sample annotations and meta data
+#' # An example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 #' input.files = data.table::fread(input.files)
 #'
-#' #cnv and snv files for example tumors
+#' # cnv and snv files for example tumors
 #' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
 #' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
 #' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
@@ -62,15 +62,15 @@
 #' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
-#' #Example with template file with paths to multiple cnv/snv files as an input
+#' # Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
 #'
-#' #Example with a single sample input
+#' # Example with a single sample input
 #' strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
 #' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
 #'
-#' #Example with multiple sample and data frame input
+#' # Example with multiple sample and data frame input
 #' nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' nbe11_cn = read.delim(system.file("extdata", "NBE11/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
 #' nbe15_vcf = system.file("extdata","NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -112,7 +112,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
     incl.chr <- c(incl.chr, "X", "Y")
   }
 
-  # collect ECA and MRCA densities for each tumor
+  # Collect ECA and MRCA densities for each tumor
   cohort.densities <- data.table::data.table(Sample_ID = character(),
                                              MRCA_time_mean = numeric(),
                                              MRCA_time_lower = numeric(),
@@ -222,7 +222,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       message("Computing SNV density for sample ", x$ID)
 
       if(!is.null(output.dir)){
-        dir.create(paste(output.dir, x$ID, sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
+        dir.create(paste(output.dir, x$ID, sep="/"), recursive = TRUE, showWarnings = FALSE) # Create per-sample output directory
       }else{
         warning("No output directory specified. LACHESIS output will be discarded.")
       }
@@ -282,11 +282,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       cohort.densities <- merge(cohort.densities, this.tumor.density, all=TRUE)
 
-      # output the result for this sample
+      # Output the result for this sample
       if(!is.null(output.dir)){
         mrca.densities <- transpose(data.table(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]))
         )
-        data.table::fwrite(mrca.densities, file = file.path(output.dir, x$ID, paste0("MRCA_densities_", x$ID, ".txt")), quote = F, col.names = F, sep="\t")
+        data.table::fwrite(mrca.densities, file = file.path(output.dir, x$ID, paste0("MRCA_densities_", x$ID, ".txt")), quote = FALSE, col.names = FALSE, sep="\t")
         data.table::fwrite(mrca, file = file.path(output.dir, x$ID, paste0("SNV_timing_per_segment_", x$ID, ".txt")), row.names = FALSE, quote = FALSE, sep = "\t")
       }
 
@@ -294,7 +294,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), ...)
       }
 
-      # collecting data for log file
+      # Collecting data for log file
       package.version <- as.character(utils::packageVersion("LACHESIS"))
       log.file.data.single <- data.table::data.table(Sample_ID = x$ID,
                                                       package.version = package.version,
@@ -353,7 +353,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       message("Computing SNV density for sample ", ids[i])
 
       if(!is.null(output.dir)){
-        dir.create(paste(output.dir, ids[i], sep="/"), recursive = TRUE, showWarnings = FALSE) # create per-sample output directory
+        dir.create(paste(output.dir, ids[i], sep="/"), recursive = TRUE, showWarnings = FALSE) # Create per-sample output directory
       }else{
         warning("No output directory specified. LACHESIS output will be discarded.")
       }
@@ -415,7 +415,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }else{
         mrca <- MRCA(normObj = norm.counts, min.seg.size = min.seg.size, fp.mean = fp.mean, excl.chr = excl.chr)
 
-        # output the result for this sample
+        # Output the result for this sample
         if(!is.null(output.dir)){
           mrca.densities <- transpose(data.table(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]))
           )
@@ -448,13 +448,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
     }
   }
 
-  # plot the distribution of Mutation densities at ECA and MRCA
+  # Plot the distribution of Mutation densities at ECA and MRCA
 
   if(!is.null(output.dir)){
     plotLachesis(cohort.densities, output.file = paste(output.dir, "SNV_densities_cohort.pdf", sep="/"), ...)
   }
 
-  # save log file as tsv
+  # Save log file as tsv
   if (!is.null(output.dir) && !is.null(input.files)) {
     timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
     output.file <- paste0(output.dir, "/LACHESIS_logfile_", timestamp, ".tsv")
@@ -468,21 +468,21 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 #' Plot SNV densities at ECA and MRCA
 #' @description
 #' Visualizes results from \code{\link{LACHESIS}}. Top plot, histograms of mean mutation densities; bottom plots, cumulative distribution of mean mutation densities with 95% confidence intervals.
-#' @param lachesis output generated from \code{\link{LACHESIS}}
+#' @param lachesis output generated from \code{\link{LACHESIS}}.
 #' @param lach.suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
-#' @param lach.log.densities plot logarithmic densities. Default `FALSE`
+#' @param lach.log.densities plot logarithmic densities. Default `FALSE`.
 #' @param lach.col.zero optional, the color code for MRCA.
 #' @param lach.col.multi optional, the color code for ECA.
-#' @param lach.border, optional, the line color
+#' @param lach.border, optional, the line color.
 #' @param binwidth optional; the bin-width in the histogram.
 #' @param output.file optional; the file to which the plot will be stored.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
-#' #an example file with sample annotations and meta data
+#' # An example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 #' input.files = data.table::fread(input.files)
 #'
-#' #cnv and snv files for example tumors
+#' # cnv and snv files for example tumors
 #' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
 #' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
 #' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
@@ -497,7 +497,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 #' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
-#' #Example with template file with paths to multiple cnv/snv files as an input
+#' # Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
 #' plotLachesis(lachesis)
 #' @export
@@ -526,7 +526,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
     pdf(output.file, width = 8, height = 6)
   }
 
-  # I. plot histograms
+  # I. Plot histograms
   to.plot <- lachesis
 
   if(lach.suppress.outliers){
@@ -687,17 +687,17 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
 #' Correlate SNV density at ECA/MRCA with clinical parameters such as age, OS, etc.
 #' @description
 #' Takes SNV densities as computed by `LACHESIS` as input and correlates them with clinical data such as age at diagnosis, survival data etc.
-#' @param lachesis output generated from \code{\link{LACHESIS}}
+#' @param lachesis output generated from \code{\link{LACHESIS}}.
 #' @param clin.par the clinical parameter used for correlation. Default `Age`.
 #' @param clin.suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
-#' @param clin.log.densities plot logarithmic densities. Default `FALSE`
+#' @param clin.log.densities plot logarithmic densities. Default `FALSE`.
 #' @param output.file optional; the file to which the plot will be stored.
 #' @examples
-#' #an example file with sample annotations and meta data
+#' # An example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 #' input.files = data.table::fread(input.files)
 #'
-#' #cnv and snv files for example tumors
+#' # cnv and snv files for example tumors
 #' nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
 #' nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
 #' nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
@@ -712,7 +712,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
 #' lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
-#' #Example with template file with paths to multiple cnv/snv files as an input
+#' # Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
 #' plotClinicalCorrelations(lachesis)
 #' @export
@@ -776,7 +776,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.sup
          0.75*max(to.plot[,get(clin.par)]), labels = paste("Pearson's r = ", to.plot[,round(cor(ECA_time_mean, get(clin.par)), digits=3)]),
          cex = 0.8)
   }else{
-    # empty plots
+    # Empty plots
     plot.new()
     plot.new()
   }
@@ -790,8 +790,8 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.sup
 #' Correlate SNV density timing at MRCA with Survival
 #' @description
 #' Takes SNV density timing as computed by `LACHESIS` as input and compares survival between tumors with high and low SNV densities
-#' @param lachesis output generated from \code{\link{LACHESIS}}
-#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be computationally inferred to maximize survival differences if not specified by user
+#' @param lachesis output generated from \code{\link{LACHESIS}}.
+#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be computationally inferred to maximize survival differences if not specified by user.
 #' @param output.dir the directory to which the plot will be stored.
 #' @param surv.time column name containing survival time; defaults to `OS.time`.
 #' @param surv.event column name containing event; defaults to `OS`.
@@ -800,8 +800,9 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.sup
 #' @param surv.palette color palette to be used. Allowed values include "hue" for the default hue color scale; "grey" for grey color palettes; brewer palettes e.g. "RdBu", "Blues", ...; or custom color palette e.g. c("blue", "red").
 #' @param surv.title main title.
 #' @param surv.ylab y-axis label, defaults to `Survival`.
+#' @param output.dir link to directory in which output is to be stored.
 #' @examples
-#' # an example file with sample annotations and meta data
+#' # An example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 #' input.files = data.table::fread(input.files)
 #'
@@ -922,15 +923,16 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
 
 #' Classify a tumor's evolutionary duration as "short" or "long" depending on the mutation density at its MRCA
 #' @description
-#' Takes SNV density timing as computed by `LACHESIS` as input and classifies the tumors in the cohort
-#' @param lachesis output generated from \code{\link{LACHESIS}}
-#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be used as inferred from a test data set if not specified by user
+#' Takes SNV density timing as computed by `LACHESIS` as input and classifies the tumors in the cohort.
+#' @param lachesis output generated from \code{\link{LACHESIS}}.
+#' @param mrca.cutpoint optional; value based on SNV_densities_cohort.pdf observation, will be used as inferred from a test data set if not specified by user.
 #' @param infer.cutpoint logical; should the MRCA cutpoint be inferred from the data?
 #' @param entity optional; the tumor entity if classifying according to a pre-defined threshold. Currently, only "neuroblastoma" is supported.
 #' @param surv.time column name containing survival time; defaults to `OS.time`.
 #' @param surv.event column name containing event; defaults to `OS`.
+#' @param output.dir link to directory in which output is to be stored.
 #' @examples
-#' # an example file with sample annotations and meta data
+#' # An example file with sample annotations and meta data
 #' input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 #' input.files = data.table::fread(input.files)
 #'
@@ -956,7 +958,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
 #' @export
 #' @import survminer
 
-classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = 'OS.time', surv.event = 'OS', ...){
+classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = 'OS.time', surv.event = 'OS', output.dir = NULL){
 
   if (is.null(lachesis)) {
     stop("Error: 'lachesis' dataset must be provided.")
@@ -1004,10 +1006,14 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, entity = "neuroblas
   attr(lachesis.categorized, "MRCA Cutpoint") <- mrca.cutpoint
   attr(lachesis.categorized, "Entity") <- entity
 
+  if (!is.null(output.dir)) {
+    data.table::fwrite(lachesis.categorized, file = file.path(output.dir, "Lachesis_classifier.txt"), sep = "\t")
+  }
+
   return(lachesis.categorized)
 }
 
-#cutpoint for neuroblastoma
+# Cutpoint for neuroblastoma
 .getCutpoint <- function(entity = "neuroblastoma"){
 
   if(entity == 'neuroblastoma'){
