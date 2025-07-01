@@ -127,17 +127,17 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
     # Extracting 3-base sequence context (ref base on "-" will be reverse-complemented)
     sv[, sequence_context := as.character(Biostrings::getSeq(
-      switch(ref.build,
-             "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
-             "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
-             "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38),
-      names = paste0("chr", chrom),
-      start = i.start - 1,
-      end = i.end + 1,
-      strand = strand
+         switch(ref.build,
+                "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
+                "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
+                "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38),
+         names = paste0("chr", chrom),
+         start = i.start - 1,
+         end = i.end + 1,
+         strand = strand
+       )), by = .I]
 
-
-    sv[, strand := NULL] # End of option 2
+      sv[, strand := NULL] # End of option 2
 
   }
 
