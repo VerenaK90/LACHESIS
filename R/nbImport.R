@@ -27,7 +27,7 @@
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
-#' sig.filepath <- system.file("extdata", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
+#' sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 #' @seealso \code{\link{plotNB}}
 #' @return a data.table
@@ -37,7 +37,7 @@
 #' @importFrom IRanges IRanges
 #' @export
 
-nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, assign.method = "sample", ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL, ref.build = NULL, seed = NULL){
+nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, assign.method = "sample", ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL, ref.build = "hg19", seed = NULL){
 
   end <- start <- NULL
 
@@ -111,36 +111,39 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
       )
 
-    # Option 1: using GRanges
-    gr <- GRanges(
-      seqnames = paste0("chr", sv$chrom),
-      ranges = IRanges(start = sv$i.start - 1, end = sv$i.end + 1),
-      strand = ifelse(sv$ref %in% c("A", "G"), "-", "+")
-    )
-
-    sv[, sequence_context := as.character(Biostrings::getSeq(genome, gr))]
+   # Option 1: using GRanges
+    # gr <- GenomicRanges::GRanges(
+    #   seqnames = paste0("chr", sv$chrom),
+    #   ranges = IRanges::IRanges(start = sv$i.start - 1, end = sv$i.end + 1),
+    #   strand = ifelse(sv$ref %in% c("A", "G"), "-", "+")
+    # )
+    #
+    # sv[, sequence_context := as.character(Biostrings::getSeq(genome, gr))]
 
     # Option 2: without GRanges
 
-  # sv[, strand := ifelse(ref %in% c("A", "G"), "-", "+")]
-  #
-  # sv[, sequence_context := as.character(Biostrings::getSeq(
-  #   switch(ref.build,
-  #          "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
-  #          "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
-  #          "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38),
-  #   names = paste0("chr", chrom),
-  #   start = i.start - 1,
-  #   end = i.end + 1,
-  #   strand = strand
-  # )), by = .I]
-  #
-  # sv[, strand := NULL]
+    # Mapping purine bases to reverse strand ("-")
+    sv[, strand := ifelse(ref %in% c("A", "G"), "-", "+")]
+
+    # Extracting 3-base sequence context (ref base on "-" will be reverse-complemented)
+    sv[, sequence_context := as.character(Biostrings::getSeq(
+      switch(ref.build,
+             "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
+             "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
+             "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38),
+      names = paste0("chr", chrom),
+      start = i.start - 1,
+      end = i.end + 1,
+      strand = strand
+
+
+    sv[, strand := NULL] # End of option 2
 
   }
 
   sv[, Sample := ID]
 
+  # Constructing MutationType (alt base on "-" will be reverse-complemented)
   sv <-sv[, MutationType := {
     ctx <- sequence_context
     corrected.alt <- alt
@@ -151,9 +154,8 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     paste0(substr(ctx,1, 1), "[", substr(ctx,2, 2), ">", corrected.alt, "]", substr(ctx, 3, 3))
     }]
 
-  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE, all.y = FALSE, allow.cartesian = TRUE)
-  sv1 <- sv
-  View(sv1)
+  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE, all.y = FALSE)
+
   if (assign.method == "sample") {
     set.seed(seed)
     tmp <- sv[, {
@@ -192,8 +194,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
   if (!is.null(min.p)) {
     sv <- sv[Probability >= min.p]
   }
-
-
 
   if (!is.null(sig.select)) {
     sv <- sv[Signature %in% sig.select]
@@ -252,7 +252,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
-#' sig.filepath <- system.file("extdata", "Decomposed_Mutation_Probabilities_NBE15.txt", package = "LACHESIS")
+#' sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 #' plotNB(nb, sig.show = TRUE)
 #' @export
