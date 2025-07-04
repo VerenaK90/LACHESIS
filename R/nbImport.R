@@ -96,9 +96,9 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     stop("Missing 'SigAssignment' input data!")
   }
 
-  sig.data <- fread(sig.file)
+  sig.data <- data.table::fread(sig.file)
 
-  setnames(sig.data, c("Sample Names"), c("Sample"))
+  data.table::setnames(sig.data, c("Sample Names"), c("Sample"))
 
   sbs.cols <- grep("^SBS", names(sig.data), value = TRUE)
 
@@ -111,40 +111,26 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
       )
 
-   # Option 1: using GRanges
-    # gr <- GenomicRanges::GRanges(
-    #   seqnames = paste0("chr", sv$chrom),
-    #   ranges = IRanges::IRanges(start = sv$i.start - 1, end = sv$i.end + 1),
-    #   strand = ifelse(sv$ref %in% c("A", "G"), "-", "+")
-    # )
-    #
-    # sv[, sequence_context := as.character(Biostrings::getSeq(genome, gr))]
-
-    # Option 2: without GRanges
-
     # Mapping purine bases to reverse strand ("-")
     sv[, strand := ifelse(ref %in% c("A", "G"), "-", "+")]
 
     # Extracting 3-base sequence context (ref base on "-" will be reverse-complemented)
     sv[, sequence_context := as.character(Biostrings::getSeq(
-         switch(ref.build,
-                "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
-                "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
-                "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38),
-         names = paste0("chr", chrom),
-         start = i.start - 1,
-         end = i.end + 1,
-         strand = strand
-       )), by = .I]
+      genome,
+      names = paste0("chr", chrom),
+      start = i.start - 1,
+      end = i.end + 1,
+      strand = strand
+    ))]
 
-      sv[, strand := NULL] # End of option 2
+    sv[, strand := NULL]
 
   }
 
   sv[, Sample := ID]
 
   # Constructing MutationType (alt base on "-" will be reverse-complemented)
-  sv <-sv[, MutationType := {
+  sv[, MutationType := {
     ctx <- sequence_context
     corrected.alt <- alt
     corrected.alt[alt=="A" & ref %in% c("A", "G")] <- "T"
