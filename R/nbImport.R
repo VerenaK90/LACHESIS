@@ -5,7 +5,7 @@
 #' @param snv SNV data from \code{\link{readVCF}}.
 #' @param purity tumor cell content.
 #' @param ploidy average copy number in the tumor sample.
-#' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature.
+#' @param sig.assign Logical. If TRUE, each variant will be assigned to a mutational signature.
 #' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
 #' @param ID sample name.
 #' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".

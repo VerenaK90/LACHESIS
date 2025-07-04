@@ -37,7 +37,7 @@
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`
 #' @param seed Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.
 #' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS
-#' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature
+#' @param sig.assign Logical. If TRUE, each variant will be assigned to a mutational signature
 #' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
 #' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
