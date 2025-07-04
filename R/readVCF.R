@@ -238,4 +238,3 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
   colnames(v) = c("chrom", "pos", "ref", "alt", "t_ref_count", "t_alt_count", "t_depth", "t_vaf")
   v
 }
-

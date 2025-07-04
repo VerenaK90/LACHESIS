@@ -312,17 +312,30 @@ nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL)
 library(knitr)
 
 nb_import_input <- data.frame(
-  Column1 = c("*cnv*", "*snv*", "*purity*", "*ploidy*"),
+  Column1 = c("*cnv*", "*snv*", "*purity*", "*ploidy*", "*sig.assign*", "*assign.method*", "*ID*", "*sig.file*", "*sig.select*", "*min.p*", "*ref.build*", "*seed*"),
   Column2 = c(
     "output of [readCNV](#output)",
     "output of [readVCF(#output-1)",
     "the tumor cell content",
-    "the average copy number in the tumor sample"
+    "the average copy number in the tumor sample",
+    "if TRUE, each variant will be assigned to the most likely mutational signature",
+    "method to assign signatures: `max` to assign the signature with the highest probability, `sample` to randomly assign based on signature probabilities",
+    "sample name",
+    "file path to the SigAssignment output file, typically named `Decomposed_MutationType_Probabilities.txt`",
+    "character vector of specific signatures to include in the analysis (e.g., c(´SBS1´, ´SBS5´, ´SBS40´) to focus on clock-like mutational processes)",
+    "minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature", 
+    "reference genome: hg18, hg19 or hg38",
+    "User-specified or automatically generated random number, will be documented in the log file."
   )
 )
 
 knitr::kable(nb_import_input, col.names = c("Input", "Definition"), escape = FALSE)
+
 ```
+
+##### Assignment of mutational signatures
+
+[SigProfilerAssignment](https://github.com/AlexandrovLab/SigProfilerAssignment) is a tool developed by Alexandrov lab at UC San Diego. It assigns previously known mutational signatures to sequenced samples. The tool generates a file called "Decomposed_MutationType_Probabilities.txt" that can be used as sig.file for LACHESIS. 
 
 #### Output
 
@@ -354,7 +367,7 @@ nb_import_output <- data.frame(
 knitr::kable(nb_import_output, col.names = c("Output", "Definition"), escape = FALSE)
 ```
 
-#### Example
+#### Example using all variants from vcf file
 
 ```{r, message=FALSE, warning=FALSE}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -362,7 +375,18 @@ s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- LACHESIS::readCNV(aceseq_cn)
 nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
-head(nb, n = 1)
+```
+
+#### Example using variants assosciated with specific SBS mutational signatures from vcf file
+
+```{r, message=FALSE, warning=FALSE}
+snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
+aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+c_data <- LACHESIS::readCNV(aceseq_cn)
+sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
+head(sig.filepath)
+nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 ```
 
 ### Plotting Imported Data (plotNB)  
@@ -380,7 +404,7 @@ plotNB(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "g
 library(knitr)
 
 plotnb_input <- data.frame(
-  Column1 = c("*nb*", "*ref.build*", "*min.cn*", "*max.cn*", "*nb.col.abline*", "*nb.col.cn.2*", "*nb.col.cn*", "*nb.col.hist*", "*nb.border*", "*nb.breaks*", "*samp.name*", "*output.file*"),
+  Column1 = c("*nb*", "*ref.build*", "*min.cn*", "*max.cn*", "*nb.col.abline*", "*nb.col.cn.2*", "*nb.col.cn*", "*nb.col.hist*", "*nb.border*", "*nb.breaks*", "*samp.name*", "*output.file*", "*sig.show*", "*sig.output.file*"),
   Column2 = c(
     "output from [nbImport](#output-2) function: combined SNV and CNV information",
     "reference genome: hg18, hg19 or hg38",
@@ -393,22 +417,37 @@ plotnb_input <- data.frame(
     "the line color in the VAF histograms",
     "the number of bins in the histograms",
     "the tumor sample name",
-    "output filename"
+    "output filename", 
+    "additional VAF histogram stratified by assigned mutational signatureswill be shown, if set to TRUE.",
+    "output filename for stratified VAF histogram with mutational signatures."
   )
 )
 
 knitr::kable(plotnb_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
-#### Example
+#### Example using all variants from vcf file
 
 ```{r, message=FALSE, warning=FALSE, fig.cap="Figure 2: *top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- LACHESIS::readCNV(aceseq_cn)
+nb <- snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 LACHESIS::plotNB(nb)
+```
+
+#### Example using variants assosciated with specific SBS mutational signatures from vcf file
+
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 2: *top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
+snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS") 
+s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz") 
+aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS") 
+c_data <- LACHESIS::readCNV(aceseq_cn) 
+sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS") 
+nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18")) 
+LACHESIS::plotNB(nb, sig.show = TRUE) 
 ```
 
 ## Processing Clonal Mutations 
@@ -844,7 +883,7 @@ snv.file = c(nbe11[2], nbe15[2], nbe63[2])
 input.files$cnv.file = cnv.file
 input.files$snv.file = snv.file
 
-# Make an axample input file with paths to cnv and snv file along with other meta data
+# Make an example input file with paths to cnv and snv file along with other meta data
 lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 ```
@@ -896,6 +935,8 @@ The function `plotSurvival` plots correlation between SNV density timing at MRCA
 
 #### Input
 
+```
+plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
 ```
 plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
 ```
