@@ -33,8 +33,6 @@
 #' @return a data.table
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom Biostrings getSeq
-#' @importFrom GenomicRanges GRanges
-#' @importFrom IRanges IRanges
 #' @export
 
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, assign.method = "sample", ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL, ref.build = "hg19", seed = NULL){

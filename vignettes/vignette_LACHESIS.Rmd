@@ -267,7 +267,6 @@ The `plotVAFdistr` function generates a VAF histogram of somatic SNVs. If `showd
 
 ```
 plotVAFdistr(vaf = NULL, vaf.interval = 0.05, t_sample = NULL, vaf.show.counts = FALSE, vaf.show.density = TRUE, vaf.col = "#34495e", vaf.border = "#bdc3c7", srtcounts = 45, output.file = NULL)
-
 ```
 
 ```{r, echo=FALSE}
@@ -313,7 +312,6 @@ nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL)
 library(knitr)
 
 nb_import_input <- data.frame(
-
   Column1 = c("*cnv*", "*snv*", "*purity*", "*ploidy*", "*sig.assign*", "*assign.method*", "*ID*", "*sig.file*", "*sig.select*", "*min.p*", "*ref.build*", "*seed*"),
   Column2 = c(
     "output of [readCNV](#output)",
@@ -334,7 +332,6 @@ nb_import_input <- data.frame(
 knitr::kable(nb_import_input, col.names = c("Input", "Definition"), escape = FALSE)
 
 ```
-
 
 ##### Assignment of mutational signatures
 
@@ -933,10 +930,6 @@ LACHESIS::plotClinicalCorrelations(lachesis)
 ```
 
 ### Plotting Survival (plotSurvival)
-
-The function `plotSurvival` plots correlation between SNV density timing at MRCA with Survival
-
-#### Input
 
 The function `plotSurvival` plots correlation between SNV density timing at MRCA with Survival
 
