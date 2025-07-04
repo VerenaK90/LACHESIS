@@ -213,13 +213,13 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
 #' @param min.cn maximum copy number to be included in the plotting. Defaults to 2.
 #' @param max.cn maximum copy number to be included in the plotting. Defaults to 4.
-#' @param nb.col.abline optional, the color code for the abline.
-#' @param nb.col.cn.2 optional, the color code if tcn = 2.
-#' @param nb.col.cn optional, the color code if other copy numbers.
-#' @param nb.col.hist optional, the color code for histograms.
-#' @param nb.border, optional, the line color.
-#' @param nb.breaks optional; the number of bins in the histogram.
-#' @param samp.name Sample name. Optional. Default NULL.
+#' @param nb.col.abline optional, the color code for the lines depicting clonality in the VAF histograms.
+#' @param nb.col.cn.2 optional, the color code for tcn = 2 in the CNV plot.
+#' @param nb.col.cn optional, the color code for other copy numbers in the CNV plot.
+#' @param nb.col.hist optional, the color code for bars in the VAF histograms.
+#' @param nb.border, optional, the line color in the VAF histograms.
+#' @param nb.breaks optional, the number of bins in the histograms.
+#' @param samp.name Sample name. Optional. Default NULL
 #' @param output.file optional, will save the plot.
 #' @param sig.show plot stratified VAF histogram with assigned mutational signatures.
 #' @param sig.output.file optional, will save the stratified VAF histogram with mutational signatures.

@@ -267,6 +267,7 @@ The `plotVAFdistr` function generates a VAF histogram of somatic SNVs. If `showd
 
 ```
 plotVAFdistr(vaf = NULL, vaf.interval = 0.05, t_sample = NULL, vaf.show.counts = FALSE, vaf.show.density = TRUE, vaf.col = "#34495e", vaf.border = "#bdc3c7", srtcounts = 45, output.file = NULL)
+
 ```
 
 ```{r, echo=FALSE}
@@ -312,6 +313,7 @@ nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL)
 library(knitr)
 
 nb_import_input <- data.frame(
+
   Column1 = c("*cnv*", "*snv*", "*purity*", "*ploidy*", "*sig.assign*", "*assign.method*", "*ID*", "*sig.file*", "*sig.select*", "*min.p*", "*ref.build*", "*seed*"),
   Column2 = c(
     "output of [readCNV](#output)",
@@ -330,6 +332,7 @@ nb_import_input <- data.frame(
 )
 
 knitr::kable(nb_import_input, col.names = c("Input", "Definition"), escape = FALSE)
+
 ```
 
 
@@ -883,7 +886,7 @@ snv.file = c(nbe11[2], nbe15[2], nbe63[2])
 input.files$cnv.file = cnv.file
 input.files$snv.file = snv.file
 
-# Make an axample input file with paths to cnv and snv file along with other meta data
+# Make an example input file with paths to cnv and snv file along with other meta data
 lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 ```
@@ -935,6 +938,12 @@ The function `plotSurvival` plots correlation between SNV density timing at MRCA
 
 #### Input
 
+The function `plotSurvival` plots correlation between SNV density timing at MRCA with Survival
+
+#### Input
+
+```
+plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
 ```
 plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
 ```
