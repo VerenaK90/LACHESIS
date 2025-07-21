@@ -879,17 +879,14 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
 
   # Calculating MRCA cutpoint
   if(is.null(mrca.cutpoint)){
-    mrca.cutpoint <- survminer::surv_cutpoint(
+    mrca.cutpoint.obj <- survminer::surv_cutpoint(
       lachesis,
       time = surv.time,
       event = surv.event,
       variables = c("MRCA_time_mean")
     )
 
-    if(!is.null(output.dir)){
-      data.table::fwrite(summary(mrca.cutpoint), file = paste0(output.dir, "/cutpoint_output.txt"), sep = "\t")
-    }
-    mrca.cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean", "cutpoint"])
+    mrca.cutpoint <- as.numeric(mrca.cutpoint.obj$cutpoint["MRCA_time_mean", "cutpoint"])
   }
 
   # Categorizing according to MRCA
@@ -912,6 +909,18 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
     annotate("text", x = p.value.pos, y = 0.2, label = paste0("p = ", ifelse(p_value > 0 & p_value < 0.0001, "< 0.0001", formatC(p_value, format = "f", digits = 4))), size = 5)
 
   survival.fit.risk.table <- survminer::ggrisktable(survival.fit, data = lachesis.categorized, legend.labs = c("Early MRCA", "Late MRCA"), break.time.by = surv.time.breaks)
+
+  # Printing cutpoint txt
+  if (!is.null(output.dir)) {
+    mrca.cutpoint.dt <- data.table::data.table(
+      cutpoint = mrca.cutpoint,
+      statistic = as.numeric(mrca.cutpoint.obj$cutpoint["MRCA_time_mean", "statistic"]),
+      p_value = p_value
+    )
+
+    mrca.cutpoint.rounded <- formatC(mrca.cutpoint, format = "f", digits = 2)
+    data.table::fwrite(mrca.cutpoint.dt, file = file.path(output.dir, paste0("cutpoint_estimate_", mrca.cutpoint.rounded, ".txt")), sep = "\t")
+  }
 
   # Printing pdf
   if(!is.null(output.dir)){
