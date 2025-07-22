@@ -919,7 +919,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
     )
 
     mrca.cutpoint.rounded <- formatC(mrca.cutpoint, format = "f", digits = 2)
-    data.table::fwrite(mrca.cutpoint.dt, file = file.path(output.dir, paste0("cutpoint_estimate_", mrca.cutpoint.rounded, ".txt")), sep = "\t")
+    data.table::fwrite(mrca.cutpoint.dt, file = file.path(output.dir, paste0("cutpoint_estimate_", surv.event, "_", mrca.cutpoint.rounded, ".txt")), sep = "\t")
   }
 
   # Printing pdf
