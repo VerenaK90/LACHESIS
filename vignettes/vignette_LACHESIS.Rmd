@@ -938,8 +938,6 @@ The function `plotSurvival` plots correlation between SNV density timing at MRCA
 ```
 plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
 ```
-plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
-```
 
 ```{r, echo=FALSE}
 plotlachesis_input <- data.frame(
@@ -968,6 +966,42 @@ input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS"
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
 LACHESIS::plotSurvival(lachesis, surv.time = 'EFS.time', surv.event = 'EFS')
+```
+
+### Classifying Tumor Evolution (classifyLACHESIS)
+
+The function `classifyLACHESIS` classifies a tumor's start of clonal outgrowth during tumorigenesis as "early" or "late" (favorable/ unfavorable prognosis) depending on the mutation density at its MRCA.
+
+#### Input
+
+```
+classifyLACHESIS(lachesis, mrca.cutpoint = NULL, output.dir = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = 'OS.time', surv.event = 'OS')
+```
+
+```{r, echo=FALSE}
+plotlachesis_input <- data.frame(
+  Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*entity*", "*infer.cutpoint*", "*surv.time*", "*surv.event*"),
+  Column2 = c(
+    "output from [LACHESIS](#output-6) function",
+    "MRCA density value to be used for survival stratification, will be computationally inferred to maximize survival differences if not specified by user",
+    "the directory to which the plot will be stored",
+    "the tumor entity if classifying according to a pre-defined threshold",
+    "the MRCA cutpoint will be inferred from the data if set to TRUE",
+    "column name containing survival time",
+    "column name containing event"
+  )
+)
+
+knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
+```
+
+#### Example
+
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"}
+input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
+
+LACHESIS::classifyLACHESIS(lachesis, entity = "neuroblastoma")
 ```
 
 # Quality control/ Filtering
