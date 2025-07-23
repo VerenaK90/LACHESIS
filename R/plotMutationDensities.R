@@ -112,10 +112,10 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   if(mut.show.realtime){
     weeks_pc <- c(12, 27, 38, 64, 90, 116)
     snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2) # Converting SNVs per day to SNVs per Mb starting from Gastrulation (-2 weeks), assuming haploid genome of 3300Mb
-
-    axis(side = 3, at = c(x.min, snvs_per_mb, x.max), labels = c("", weeks_pc, ""), cex.axis = 0.7)
+    realtime_labels <- c("12w", "27w", "38w", "6m", "12m", "18m")
+    axis(side = 3, at = c(x.min, snvs_per_mb, x.max), labels = c("", realtime_labels, ""), cex.axis = 0.7)
     segments(x0 = x.min, y0 = par("usr")[4], x1 = x.max, y1 = par("usr")[4], xpd = NA)
-    mtext("Estimated weeks p.c.", side = 3, line = 2, cex = 0.7)
+    mtext("Estimated time (weeks post conception and months postnatal)", side = 3, line = 2, cex = 0.7)
 
     title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2, line = 3.2)
   }
