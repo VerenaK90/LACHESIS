@@ -208,7 +208,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       stop("Duplicated IDs found!")
     }
 
-    clonality_list <- list()
+    #clonality_list <- list()
 
     for(i in 1:length(sample.specs.spl)){
 
@@ -265,9 +265,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         next
       }
 
-      snvClonality <- estimateClonality(nb = nb, ID = x$ID, purity = x$purity)
-      clonality_list[[i]] <- snvClonality
-
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), ...)
         plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
@@ -277,6 +274,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
       norm.counts <- normalizeCounts(countObj = raw.counts)
       mrca <- MRCA(normObj = norm.counts, min.seg.size = min.seg.size, fp.mean = fp.mean, excl.chr = excl.chr)
+
+      snvClonality <- estimateClonality(nbObj = nb, countObj = raw.counts, ID = x$ID, purity = x$purity)
+      #clonality_list[[i]] <- snvClonality
 
       this.tumor.density <- data.table::data.table(Sample_ID = x$ID,
                                                    MRCA_time_mean = attributes(mrca)$MRCA_time_mean,
@@ -411,9 +411,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         next
       }
 
-      snvClonality <- estimateClonality(nb = nb, ID = ids[i], purity = purity[i])
-      clonality_list[[i]] <- snvClonality
-
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), ...)
         plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
@@ -447,6 +444,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         }
       }
 
+      snvClonality <- estimateClonality(nbObj = nb, countObj = raw.counts, ID = ids[i], purity = purity[i])
+      #clonality_list[[i]] <- snvClonality
 
       this.tumor.density <- data.table::data.table(Sample_ID = ids[i],
                                                    MRCA_time_mean = attributes(mrca)$MRCA_time_mean,
@@ -469,74 +468,74 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
   # Plot clonality distribution of SNVs
 
-  clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
-
-  clonality_colors <- c("EC" = "#66c2a5",
-                        "LC" = "#fc8d62",
-                        "C"  = "#8da0cb",
-                        "SC" = "#e78ac3")
-
-
-  clonality_cohort[, Clonality := factor(Clonality, levels = names(clonality_colors))]
-
-  if (!is.null(output.dir)) {
-    pdf(file = paste(output.dir, "SNV_Clonality_cohort.pdf", sep="/"), width = 8, height = 6)
-    clonality_counts <- clonality_cohort[, .N, by = .(Sample, Clonality)]
-
-    p1 <- ggplot(clonality_counts, aes(x = Clonality, y = N, fill = Clonality)) +
-      geom_violin(alpha = 0.5, color = NA) +
-      geom_boxplot(width = 0.2, outlier.shape = NA, alpha = 0.8) +
-      scale_fill_manual(values = clonality_colors, drop = FALSE) +
-      theme_minimal() +
-      labs(title = "Distribution of SNV Counts by Clonality",
-           y = "Number of SNVs",
-           x = "Clonality",
-           fill = "Clonality")
-
-    print(p1)
-
-    clonality_counts[, Total := sum(N), by = Sample]
-    clonality_counts[, Percent := 100 * N / Total]
-
-    p2 <- ggplot(clonality_counts, aes(x = Clonality, y = Percent, fill = Clonality)) +
-      geom_violin(alpha = 0.5, color = NA) +
-      geom_boxplot(width = 0.2, outlier.shape = NA, alpha = 0.8) +
-      scale_fill_manual(values = clonality_colors, drop = FALSE) +
-      theme_minimal() +
-      labs(
-        title = "Percentage of SNVs by Clonality per Sample",
-        y = "Percentage of SNVs",
-        x = "Clonality",
-        fill = "Clonality"
-      ) +
-      scale_y_continuous(labels = scales::percent_format(scale = 1))
-
-    print(p2)
-
-    dev.off()
-  }
-
-  if (sig.assign == TRUE) {
-    if (!is.null(output.dir)) {
-
-      pdf(file = paste(output.dir, "SNV_Clonality_SBS_cohort.pdf", sep = "/"),
-        width = 8, height = 6)
-
-      p3 <- ggplot(clonality_cohort[!is.na(Signature)],
-                   aes(x = Signature, fill = Clonality)) +
-        geom_bar(position = "dodge") +
-        facet_wrap(~ Clonality, scales = "free_x") +
-        scale_fill_manual(values = clonality_colors, drop = FALSE) +
-        theme_minimal() +
-        labs(title = "Signature Distribution by Clonality",
-             y = "SNV Count", x = "Signature") +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-      print(p3)
-
-    dev.off()
-    }
-  }
+  # clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
+  #
+  # clonality_colors <- c("EC" = "#66c2a5",
+  #                       "LC" = "#fc8d62",
+  #                       "C"  = "#8da0cb",
+  #                       "SC" = "#e78ac3")
+  #
+  #
+  # clonality_cohort[, Clonality := factor(Clonality, levels = names(clonality_colors))]
+  #
+  # if (!is.null(output.dir)) {
+  #   pdf(file = paste(output.dir, "SNV_Clonality_cohort.pdf", sep="/"), width = 8, height = 6)
+  #   clonality_counts <- clonality_cohort[, .N, by = .(Sample, Clonality)]
+  #
+  #   p1 <- ggplot(clonality_counts, aes(x = Clonality, y = N, fill = Clonality)) +
+  #     geom_violin(alpha = 0.5, color = NA) +
+  #     geom_boxplot(width = 0.2, outlier.shape = NA, alpha = 0.8) +
+  #     scale_fill_manual(values = clonality_colors, drop = FALSE) +
+  #     theme_minimal() +
+  #     labs(title = "Distribution of SNV Counts by Clonality",
+  #          y = "Number of SNVs",
+  #          x = "Clonality",
+  #          fill = "Clonality")
+  #
+  #   print(p1)
+  #
+  #   clonality_counts[, Total := sum(N), by = Sample]
+  #   clonality_counts[, Percent := 100 * N / Total]
+  #
+  #   p2 <- ggplot(clonality_counts, aes(x = Clonality, y = Percent, fill = Clonality)) +
+  #     geom_violin(alpha = 0.5, color = NA) +
+  #     geom_boxplot(width = 0.2, outlier.shape = NA, alpha = 0.8) +
+  #     scale_fill_manual(values = clonality_colors, drop = FALSE) +
+  #     theme_minimal() +
+  #     labs(
+  #       title = "Percentage of SNVs by Clonality per Sample",
+  #       y = "Percentage of SNVs",
+  #       x = "Clonality",
+  #       fill = "Clonality"
+  #     ) +
+  #     scale_y_continuous(labels = scales::percent_format(scale = 1))
+  #
+  #   print(p2)
+  #
+  #   dev.off()
+  # }
+  #
+  # if (sig.assign == TRUE) {
+  #   if (!is.null(output.dir)) {
+  #
+  #     pdf(file = paste(output.dir, "SNV_Clonality_SBS_cohort.pdf", sep = "/"),
+  #       width = 8, height = 6)
+  #
+  #     p3 <- ggplot(clonality_cohort[!is.na(Signature)],
+  #                  aes(x = Signature, fill = Clonality)) +
+  #       geom_bar(position = "dodge") +
+  #       facet_wrap(~ Clonality, scales = "free_x") +
+  #       scale_fill_manual(values = clonality_colors, drop = FALSE) +
+  #       theme_minimal() +
+  #       labs(title = "Signature Distribution by Clonality",
+  #            y = "SNV Count", x = "Signature") +
+  #       theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  #
+  #     print(p3)
+  #
+  #   dev.off()
+  #   }
+  # }
 
   # Plot the distribution of Mutation densities at ECA and MRCA
 

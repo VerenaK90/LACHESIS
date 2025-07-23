@@ -485,7 +485,7 @@ A `data.table` containing the following information:
 ```{r, echo=FALSE}
 library(knitr)
 
-process_clonal_output <- data.frame(Column1 = c("*chrom*","*TCN*", "*A*", "*B*", "*Seglength*", "*n_mut_A*", "*n_mut_B*", "*n_mut_total*"),
+process_clonal_output <- data.frame(Column1 = c("*chrom*","*TCN*", "*A*", "*B*", "*Seglength*", "*n_mut_A*", "*n_mut_B*", "*n_mut_total_clonal*"),
   Column2 = c(
     "the chromosome",
     "the total copy number",
@@ -543,7 +543,7 @@ A `data.table` containing the following information:
 ```{r, echo=FALSE}
 library(knitr)
 
-normalize_counts_output <- data.frame(Column1 = c("*chrom*","*TCN*", "*A*", "*B*", "*Seglength*", "*n_mut_A*", "*n_mut_B*", "*n_mut_total*", "*density_total_mean*", "*density_total_lower*", "*density_total_upper*", "*density_A_mean*", "*density_A_lower*", "*density_A_upper*", "*density_B_mean*", "*density_B_lower*", "*density_B_upper*"),
+normalize_counts_output <- data.frame(Column1 = c("*chrom*","*TCN*", "*A*", "*B*", "*Seglength*", "*n_mut_A*", "*n_mut_B*", "*n_mut_total_clonal*", "*density_total_mean*", "*density_total_lower*", "*density_total_upper*", "*density_A_mean*", "*density_A_lower*", "*density_A_upper*", "*density_B_mean*", "*density_B_lower*", "*density_B_upper*"),
   Column2 = c(
     "the chromosome",
     "the total copy number",
@@ -620,7 +620,7 @@ library(knitr)
 
 mrca_dens_df <- data.frame(
   Column1 = c(
-    "chrom", "TCN", "A", "B", "Seglength", "n_mut_A", "n_mut_B", "n_mut_total", 
+    "chrom", "TCN", "A", "B", "Seglength", "n_mut_A", "n_mut_B", "n_mut_total_clonal", 
     "density_total_mean", "density_total_lower", "density_total_upper", 
     "density_A_mean", "density_A_lower", "density_A_upper", "density_B_mean", 
     "density_B_lower", "density_B_upper", "p_total_to_mrca", "p_A_to_mrca", 
