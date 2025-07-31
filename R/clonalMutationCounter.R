@@ -284,22 +284,6 @@ estimateClonality <- function(nbObj = NULL, countObj = NULL, ID = NULL, purity =
       likelihoods <- c(SC = lik_SC, LC = lik_LC, EC = lik_EC, C = lik_C)
       posteriors <- priors * likelihoods
       post_class <- names(posteriors)[which.max(posteriors)]
-
-      if (post_class %in% c("LC", "C")) {
-        if (A == 1 | B == 1) {
-          "C"
-        } else {
-          post_class
-        }
-      } else if (post_class %in% "EC") {
-        if (CN == 2 & A == B) {
-          "C"
-        } else {
-          post_class
-        }
-      } else {
-        post_class
-      }
     }
   }, by = 1:nrow(snvClonality)]
 
@@ -312,6 +296,23 @@ estimateClonality <- function(nbObj = NULL, countObj = NULL, ID = NULL, purity =
   (1:CN) * purity / (purity * CN + 2 * (1 - purity))
 }
 
+#
+#
+# ---------
+#
+# ## Driver genes -- take only genes that have been documented to be NB-relevant
+#
+# driver.genes <- c("ALK", "ATM", "BRAF", "CCND1", "CDK4", "CDKN2A", "CREBBP", "FGFR1", "LIN28B", "MDM2", "MDM4", "NF1", "PTPN11",
+#                   "HRAS", "KRAS", "NRAS", "RRAS", "TP53", "MYCN", "TERT", "ATRX")
+#
+# ## genetic positions
+# gene.positions <- read.delim(paste0(meta.data, "gencode_v19_gene_pos.txt"), header=F, row.names = 1)
+# driver.genes.with.genetic.pos <- data.frame(GENE=unique(driver.genes), gene.positions[unique(driver.genes),])
+# colnames(driver.genes.with.genetic.pos) <- c("GENE", "CHROM", "START", "END")
+#
+# ### known non-neutral mutations
+# known.driver.positions <- read.delim(paste0(meta.data, "Driver_mutations_w_position_DoCM_29_Aug_2020.tsv"),
+#                                      stringsAsFactors = F, sep="\t")
 
 #' Assigning clonality status to every single SNV
 #' @description

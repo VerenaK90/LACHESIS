@@ -208,7 +208,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       stop("Duplicated IDs found!")
     }
 
-    #clonality_list <- list()
+    clonality_list <- list()
 
     for(i in 1:length(sample.specs.spl)){
 
@@ -268,7 +268,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), ...)
         plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
-        plotClonality(snvClonality = snvClonality, sig.assign = sig.assign, output.file = paste(output.dir, x$ID, "SNV_clonality.pdf", sep="/"),...)
         }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -276,7 +275,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       mrca <- MRCA(normObj = norm.counts, min.seg.size = min.seg.size, fp.mean = fp.mean, excl.chr = excl.chr)
 
       snvClonality <- estimateClonality(nbObj = nb, countObj = raw.counts, ID = x$ID, purity = x$purity)
-      #clonality_list[[i]] <- snvClonality
+      clonality_list[[i]] <- snvClonality
+      if(!is.null(output.dir)){
+        data.table::fwrite(snvClonality, file = file.path(output.dir, x$ID, paste0("SNV_timing_per_SNV_", x$ID, ".txt")), quote = F, col.names = T, sep="\t")
+        if(sig.assign == TRUE){
+        plotClonality(snvClonality = snvClonality, sig.assign = sig.assign, output.file = paste(output.dir, x$ID, "SNV_timing_per_SNV.pdf", sep="/"),...)
+      }}
 
       this.tumor.density <- data.table::data.table(Sample_ID = x$ID,
                                                    MRCA_time_mean = attributes(mrca)$MRCA_time_mean,
@@ -297,9 +301,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       # output the result for this sample
       if(!is.null(output.dir)){
-        mrca.densities <- transpose(data.table(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]))
-        )
-        data.table::fwrite(mrca.densities, file = file.path(output.dir, x$ID, paste0("MRCA_densities_", x$ID, ".txt")), quote = F, col.names = F, sep="\t")
+        mrca_colnames <- c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")
+        mrca.densities <- transpose(data.table(unlist(attributes(mrca)[mrca_colnames])))
+        setnames(mrca.densities, mrca_colnames)
+        data.table::fwrite(mrca.densities, file = file.path(output.dir, x$ID, paste0("MRCA_densities_", x$ID, ".txt")), quote = FALSE, col.names = TRUE, sep="\t")
         data.table::fwrite(mrca, file = file.path(output.dir, x$ID, paste0("SNV_timing_per_segment_", x$ID, ".txt")), row.names = FALSE, quote = FALSE, sep = "\t")
       }
 
@@ -414,8 +419,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), ...)
         plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
-        plotClonality(snvClonality = snvClonality, sig.assign = sig.assign, output.file = paste(output.dir, ids[i], "SNV_clonality.pdf", sep="/"),...)
-      }
+        }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
       norm.counts <- normalizeCounts(countObj = raw.counts)
@@ -433,9 +437,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
         # output the result for this sample
         if(!is.null(output.dir)){
-          mrca.densities <- transpose(data.table(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]))
-          )
-          data.table::fwrite(mrca.densities, file = file.path(output.dir, ids[i], paste0("MRCA_densities_", ids[i], ".txt")), quote = F, col.names = F, sep="\t")
+          mrca_colnames <- c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")
+          mrca.densities <- transpose(data.table(unlist(attributes(mrca)[mrca_colnames])))
+          setnames(mrca.densities, mrca_colnames)
+          data.table::fwrite(mrca.densities, file = file.path(output.dir, ids[i], paste0("MRCA_densities_", ids[i], ".txt")), quote = FALSE, col.names = TRUE, sep="\t")
           data.table::fwrite(mrca, file = file.path(output.dir, ids[i], paste0("SNV_timing_per_segment_", ids[i], ".txt")), row.names = FALSE, quote = FALSE, sep = "\t")
         }
 
@@ -445,7 +450,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
 
       snvClonality <- estimateClonality(nbObj = nb, countObj = raw.counts, ID = ids[i], purity = purity[i])
-      #clonality_list[[i]] <- snvClonality
+      clonality_list[[i]] <- snvClonality
+      if(!is.null(output.dir)){
+        data.table::fwrite(snvClonality, file = file.path(output.dir, ids[i], paste0("SNV_timing_per_SNV_", ids[i], ".txt")), quote = F, col.names = T, sep="\t")
+        if(sig.assign == TRUE){
+        plotClonality(snvClonality = snvClonality, sig.assign = sig.assign, output.file = paste(output.dir, ids[i], "SNV_timing_per_SNV.pdf", sep="/"),...)
+      }}
 
       this.tumor.density <- data.table::data.table(Sample_ID = ids[i],
                                                    MRCA_time_mean = attributes(mrca)$MRCA_time_mean,
