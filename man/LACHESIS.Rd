@@ -37,7 +37,14 @@ LACHESIS(
   fp.mean = 0,
   fp.sd = 0,
   excl.chr = NULL,
-  ref_build = "hg19",
+  ref.build = "hg19",
+  seed = NULL,
+  filter.value = "PASS",
+  sig.assign = FALSE,
+  sig.file = NULL,
+  assign.method = "sample",
+  sig.select = NULL,
+  min.p = NULL,
   ...
 )
 }
@@ -52,17 +59,17 @@ LACHESIS(
 
 \item{snv.files}{vector of snv files in same order as ids; should be in vcf format, will be ignored if \code{input.files} is specified.}
 
-\item{vcf.source}{Tool used for generating VCF file. Can be \code{strelka} or \code{mutect} or \code{dkfz}}
+\item{vcf.source}{Tool used for generating VCF file. Can be \code{strelka} or \code{mutect} or \code{dkfz}.}
 
 \item{purity}{vector tumor cell content in same order as ids; will be ignored if \code{input.files} is specified.}
 
 \item{ploidy}{average copy number in the tumor sample in same order as ids; will be ignored if \code{input.files} is specified.}
 
-\item{cnv.chr.col}{column index of chromosome number in cnv.files}
+\item{cnv.chr.col}{column index of chromosome number in cnv.files.}
 
-\item{cnv.start.col}{column index of first position of the segment}
+\item{cnv.start.col}{column index of first position of the segment.}
 
-\item{cnv.end.col}{column index of last position of the segment}
+\item{cnv.end.col}{column index of last position of the segment.}
 
 \item{cnv.A.col}{column index of the number of A alleles. If A and B are not provided, allele configuration are assumed as 1:1 for disomic, 2:1 for trisomic and 3:1 for tetrasomic regions.}
 
@@ -70,19 +77,19 @@ LACHESIS(
 
 \item{cnv.tcn.col}{column index of the total copy number. Is computed to A + B if not provided.}
 
-\item{age, }{optional, the age at diagnosis}
+\item{age, }{optional, the age at diagnosis.}
 
-\item{OS.time, }{optional, overall survival time}
+\item{OS.time, }{optional, overall survival time.}
 
-\item{OS, }{optional, overall survival indicator variable}
+\item{OS, }{optional, overall survival indicator variable.}
 
-\item{EFS.time, }{optional, event-free survival time}
+\item{EFS.time, }{optional, event-free survival time.}
 
-\item{EFS, }{optional, event-free survival indicator variable}
+\item{EFS, }{optional, event-free survival indicator variable.}
 
 \item{output.dir}{link to directory in which output is to be stored.}
 
-\item{ignore.XY}{Ignore allosomes. Default TRUE}
+\item{ignore.XY}{Ignore allosomes. Default TRUE.}
 
 \item{min.cn}{minimum copy number to be included in the analysis. Default 2.}
 
@@ -90,7 +97,7 @@ LACHESIS(
 
 \item{merge.tolerance}{the maximum distance below which adjacent segments with equal copy number are merged. Defaults to 10^5 bp.}
 
-\item{min.vaf}{Remove variants with vcf below threshold. Default 0.01}
+\item{min.vaf}{Remove variants with vcf below threshold. Default 0.01.}
 
 \item{min.depth}{Minimum required depth for a variant to be considered. Default 30.}
 
@@ -98,7 +105,7 @@ LACHESIS(
 
 \item{vcf.info.dp}{The string encoding the read depth field in the FORMAT column of the .vcf file. Defaults to \code{DP}and will be ignored if \code{vcf.source} != \code{sentieon}.}
 
-\item{min.seg.size}{the minimal segment length to be included in the quantification}
+\item{min.seg.size}{the minimal segment length to be included in the quantification.}
 
 \item{fp.mean}{optional, the average false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.}
 
@@ -106,9 +113,23 @@ LACHESIS(
 
 \item{excl.chr}{a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.}
 
-\item{ref_build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}}
+\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}.}
 
-\item{...}{further arguments and parameters passed to \code{plotMutationDensities}.}
+\item{seed}{Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.}
+
+\item{filter.value}{The FILTER column value for variants that passed the filtering, defaults to PASS.}
+
+\item{sig.assign}{Logical. If TRUE, each variant will be assigned to the most likely mutational signature.}
+
+\item{sig.file}{File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".}
+
+\item{assign.method}{Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.}
+
+\item{sig.select}{A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).}
+
+\item{min.p}{Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.}
+
+\item{...}{further arguments and parameters passed to LACHESIS functions.}
 }
 \value{
 a data.table
@@ -118,11 +139,11 @@ Takes a set of SNV and CNV files as input and outputs per-tumor SNV densities. I
 the sample specifications or vectors giving direct paths to the sample files. CNV file requires columns for the chromosome number, start and end of the segment, and either the total copy number or the number of A- and B-alleles
 }
 \examples{
-#an example file with sample annotations and meta data
+# An example file with sample annotations and meta data
 input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 input.files = data.table::fread(input.files)
 
-#cnv and snv files for example tumors
+# cnv and snv files for example tumors
 nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
 nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
 nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
@@ -133,17 +154,25 @@ snv.file = c(nbe11[2], nbe15[2], nbe63[2])
 input.files$cnv.file = cnv.file
 input.files$snv.file = snv.file
 
-# Make an axample input file with paths to cnv and snv file along with other meta data
+# Make an example input file with paths to cnv and snv file along with other meta data
 lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
-#Exampele with template file with paths to multiple cnv/snv files as an input
+# Example with template file with paths to multiple cnv/snv files as an input
 lachesis <- LACHESIS(input.files = lachesis_input)
 
-#Example with a single sample input
+# Example with a single sample input
 strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
+lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
+
+# Example with multiple sample and data frame input
+nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+nbe11_cn = read.delim(system.file("extdata", "NBE11/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
+nbe15_vcf = system.file("extdata","NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+nbe15_cn = read.delim(system.file("extdata", "NBE15/NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
+lachesis <- LACHESIS(ids = c("NBE11", "NBE15"), cnv.files = list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf), vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51), cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3), cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37))
+
 }
 \seealso{
 \code{\link{MRCA}} \code{\link{clonalMutationCounter}} \code{\link{normalizeCounts}}
