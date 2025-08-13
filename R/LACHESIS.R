@@ -384,7 +384,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i], sig.assign = sig.assign, assign.method = assign.method, ID = ids[i], sig.file = sig.file, sig.select = sig.select, min.p = min.p, ref.build = ref.build, seed = seed)
 
       if(nrow(nb)==0){
-        warning("Insufficient data for sample ", x$ID)
+        warning("Insufficient data for sample ", ids[i])
         this.tumor.density <- data.table::data.table(Sample_ID = ids[i],
                                                      MRCA_time_mean = NA,
                                                      MRCA_time_lower = NA,
@@ -404,7 +404,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
+        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, ids[i], "VAF_histogram_strat_sig.pdf", sep="/"), ...)
       }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
