@@ -9,9 +9,12 @@
 #' @param mut.border optional, the line color
 #' @param mut.show.density optional; if `TRUE`, the density distribution of mutation densities on single copies will be shown in the histogram of mutation densities on multiple copies.
 #' @param mut.breaks optional; the number of bins in the histogram.
+#' @param mut.xaxis optional; cutoff value for x-axis in evolutionary timeline plot in SNVs/Mb
+#' @param mut.chr.label character specifying the chromosome label in the evolutionary timeline plot: either "copy_number" to show the segment's copy number state (chr_TCN_A) or "position" to show its location relative to the centromere (chr_p/q/whole).
 #' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception on the evolutionary timeline.
 #' @param mut.snv.rate optional; rate of accumulated SNVs per day in a diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)
 #' @param output.file optional; will save the plot.
+#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -26,7 +29,7 @@
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
 
-plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL, ...){
+plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, ref.build = "hg19", mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.xaxis = NULL, mut.chr.label = "copy_number", mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL, ...){
 
   Seglength <- . <- A <- B <- variable <- value <- lines <- density <- chrom <- TCN <- Seglength <- n_mut_A <- n_mut_B <- n_mut_total <- density_total_mean <- density_A_mean <- density_B_mean <- density_total_lower <- density_total_upper <- density_A_lower <- density_A_upper <- density_B_lower <- density_B_upper <- p_total_to_mrca <- p_A_to_mrca <- p_B_to_mrca <- p_adj_total_to_mrca <- p_adj_A_to_mrca <- p_adj_B_to_mrca <- MRCA_qual <- p_A_to_eca <- p_B_to_eca <- p_adj_A_to_eca <- p_adj_B_to_eca <- A_time <- B_time <- NULL
   if(is.null(mrcaObj)){
@@ -35,6 +38,24 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   if(!is.null(output.file)){
     pdf(output.file, width = 7, height = 6)
   }
+
+  # Add centromere position to mrcaObj
+  chromInfo <- .getCentromeres(ref.build)
+  setkey(mrcaObj, chrom)
+  setkey(chromInfo, chrom)
+  mrcaObj[chromInfo, centromere := i.centromere]
+
+  # Assign segment to p-/q-arm or whole chromosome
+  mrcaObj[, chr_region := data.table::fifelse(
+    Start < centromere & End > centromere, "whole",
+    data.table::fifelse(
+      Start < centromere & End <= centromere, "p",
+      data.table::fifelse(
+        Start >= centromere & End > centromere, "q",
+        "unknown region"
+      )
+    )
+  )]
 
   to.plot <- data.table::melt(mrcaObj, id.vars = c("chrom", "TCN", "A", "B", "Seglength"),
                               measure.vars = c("density_total_mean", "density_A_mean", "density_B_mean"))
@@ -94,17 +115,30 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
 
   # Timeline summary
+  chrom_all <- as.character(1:22)
+  chrom_palette <- c("#1F77B4FF", "#F15854", "#9467BDFF", "#E73F74FF", "#FFBB78FF",
+                     "#2D6D66FF", "#98DF8AFF", "#D62728FF", "#FF9896FF", "#A0CBE8FF",
+                     "#8C564BFF", "#C49C94FF", "#F7B6D2FF", "#7F7F7FFF", "#E377C2FF",
+                     "#C7C7C7FF", "#17BECFFF", "#BCBD22FF", "#FF8800", "#1A476FFF",
+                     "#F2B701FF", "#4B5320")
+
+  chrom_colors <- setNames(chrom_palette, chrom_all)
+
   if(mut.show.realtime){
     par(mar = c(3, 1, 5, 1), xpd = FALSE)
   }
   else{
     par(mar = c(3, 1, 3, 1), xpd = FALSE)
   }
-  x.min = 0
-  x.max = max(c(mrcaObj$density_total_upper, mrcaObj$density_A_upper, mrcaObj$density_B_upper), na.rm = TRUE)*1.3
-  y.min = 0
-  y.max.a = nrow(mrcaObj[A>1,])
-  y.max = max(c(1, nrow(mrcaObj[A>1,]) + nrow(mrcaObj[B>1 & B!=A])))
+  x.min <- 0
+  if(!is.null(mut.xaxis) && !is.na(mut.xaxis)) {
+    x.max <- as.numeric(mut.xaxis)
+  }else{
+    x.max <- max(c(mrcaObj$density_total_upper, mrcaObj$density_A_upper, mrcaObj$density_B_upper), na.rm = TRUE)*1.3
+  }
+  y.min <- 0
+  y.max.a <- nrow(mrcaObj[A>1,])
+  y.max <- max(c(1, nrow(mrcaObj[A>1,]) + nrow(mrcaObj[B>1 & B!=A])))
   plot(NA, NA, xlim = c(x.min, x.max), ylim = c(y.min, y.max), xlab = NA, ylab = NA, main = NA, axes = FALSE, frame.plot = FALSE)
   Axis(side = 1, cex = 0.7)
   mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
@@ -117,10 +151,10 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
     segments(x0 = x.min, y0 = par("usr")[4], x1 = x.max, y1 = par("usr")[4], xpd = NA)
     mtext("Estimated time (weeks post conception and months postnatal)", side = 3, line = 2, cex = 0.7)
 
-    title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2, line = 3.2)
+    title(main = paste("Evolutionary timeline of chromosomal gains"), cex.main = 1.2, line = 3.2)
   }
   else{
-    title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2)
+    title(main = paste("Evolutionary timeline of chromosomal gains"), cex.main = 1.2)
   }
 
   # ECA:
@@ -134,27 +168,68 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   abline(v = attr(mrcaObj, "MRCA_time_mean"), lty = 2)
 
   signs <- c("ECA" = 19, "MRCA" = 17, "ECA/MRCA" = 15, "not mapped to ECA or MRCA" = 1)
+
   # A alleles:
   if(nrow(mrcaObj[A>1,])>0){
-    points(mrcaObj[A>1,density_A_mean], 1:mrcaObj[,sum(A>1)], col=1:mrcaObj[,sum(A>1)], pch=signs[mrcaObj[A>1,A_time]])
-    arrows(x0=mrcaObj[A>1,density_A_lower], y0=1:mrcaObj[,sum(A>1)], x1=mrcaObj[A>1,density_A_upper], y1=1:mrcaObj[,sum(A>1)], code=3, angle=90, length=0, col=1:mrcaObj[,sum(A>1)], lwd=1)
+    points(mrcaObj[A>1,density_A_mean], 1:mrcaObj[,sum(A>1)], col=chrom_colors[mrcaObj[A > 1, chrom]], pch=signs[mrcaObj[A>1,A_time]])
+    arrows(x0=mrcaObj[A>1,density_A_lower], y0=1:mrcaObj[,sum(A>1)], x1=mrcaObj[A>1,density_A_upper], y1=1:mrcaObj[,sum(A>1)], code=3, angle=90, length=0, col=chrom_colors[mrcaObj[A > 1, chrom]], lwd=1)
     legend("topright",box.lwd = 0, pch=signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time], legend = names(signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time]), cex = 0.7)
   }
+
   # B alleles:
-  if(nrow(mrcaObj[B>1 & B!=A,])>0){
-    points(mrcaObj[B>1 & B!=A,density_B_mean], (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), col=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), pch=signs[mrcaObj[B>1 & B!=A,B_time]])
-    arrows(x0=mrcaObj[B>1 & B!=A,density_B_lower], y0=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), x1=mrcaObj[B>1 & B!=A,density_B_upper], y1=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), code=3, angle=90, length=0, col=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), lwd=1)
-    legend("bottomright", box.lwd = 0, lty=1, col= c(1:mrcaObj[,sum(A>1)],  (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)])),
-           legend = c(paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"),
-                      paste(paste0("chr", mrcaObj[B>1 & B!=A,chrom]), mrcaObj[B>1 & B!=A,TCN], mrcaObj[B>1 & B!=A,B], sep = "_")
-           ), cex = 0.7, ncol = 2)
+  ## Generate copy number or position based chromosome labels
+  if(mut.chr.label == "copy_number") {
+    chr_label_1 <- c(
+      paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, TCN], "_", mrcaObj[A > 1, A]),
+      paste0("chr", mrcaObj[B > 1 & B != A, chrom], "_", mrcaObj[B > 1 & B != A, TCN], "_", mrcaObj[B > 1 & B != A, B])
+    )
+    chr_label_2 <- paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, TCN], "_", mrcaObj[A > 1, A])
+  }else if(mut.chr.label == "position") {
+    chrom_label_1 <- paste0("chr", mrcaObj[, chrom], "_", mrcaObj[, chr_region])
+    chrom_label_2 <- paste0("chr", mrcaObj[, chrom], "_", mrcaObj[, chr_region])
   }else{
-    legend("bottomright", box.lwd = 0, lty=1, col= c(1:mrcaObj[,sum(A>1)]),
-           legend = paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"), cex = 0.7, ncol = 2)
+    stop("mut.chr.label must be either 'copy_number' or 'position'")
+  }
+
+  if(nrow(mrcaObj[B>1 & B!=A,])>0){
+    points(mrcaObj[B>1 & B!=A,density_B_mean], (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], pch=signs[mrcaObj[B>1 & B!=A,B_time]])
+    arrows(x0=mrcaObj[B>1 & B!=A,density_B_lower], y0=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), x1=mrcaObj[B>1 & B!=A,density_B_upper], y1=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), code=3, angle=90, length=0, col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], lwd=1)
+    legend("bottomright", box.lwd = 0, lty=1, col= chrom_colors[mrcaObj[A > 1, chrom]],
+           legend = chr_label_1, cex = 0.7, ncol = 2)
+  }else{
+    legend("bottomright", box.lwd = 0, lty=1, col= chrom_colors[mrcaObj[A > 1, chrom]],
+           legend = chr_label_2 , cex = 0.7, ncol = 2)
 
   }
 
   if(!is.null(output.file)){
     dev.off()
   }
+
+}
+
+.getCentromeres <- function(build = "hg19"){
+  if(build == 'hg19') {
+    centromeres <- c(123400000, 93900000, 91000000, 50000000, 48800000, 60000000, 58000000,
+                     45000000, 50000000, 39500000, 53000000, 35500000, 17500000, 18000000,
+                     36500000, 36000000, 38000000, 18500000, 27500000, 29000000, 14000000,
+                     12000000, 61000000, 17500000)
+  }else if(build == 'hg18'){
+    centromeres <- c(121000000, 93300000, 91000000, 50000000, 48800000, 60000000, 58000000,
+                     45000000, 50000000, 39500000, 53000000, 35500000, 17500000, 18000000,
+                     36500000, 36000000, 38000000, 18500000, 27500000, 29000000, 14000000,
+                     12000000, 61000000, 17500000)
+  }else if (build == 'hg38') {
+    centromeres <- c(123400000, 93300000, 91000000, 50000000, 48800000, 60000000, 58000000,
+                     45000000, 50000000, 39500000, 53000000, 35500000, 17500000, 18000000,
+                     36500000, 36000000, 38000000, 18500000, 27500000, 29000000, 14000000,
+                     12000000, 61000000, 17500000)
+  }else{
+    stop('Available reference builds: hg18, hg19, hg38')
+  }
+
+  data.table(
+    chrom = as.character(1:24),
+    centromere = centromeres
+  )
 }

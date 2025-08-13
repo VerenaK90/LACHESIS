@@ -687,14 +687,14 @@ This function visualizes the results of the MRCA analysis. The top plot presents
 #### Input 
 
 ```
-plotMutationDensities(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL)
+plotMutationDensities(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.xaxis = NULL, mut.chr.label = "copy_number", mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL)
 ```
 
 ```{r, echo=FALSE}
 library(knitr)
 
 plotmrca_input <- data.frame(
-  Column1 = c("*mrcaObj*", "*samp.name*", "*min.seg.size*", "*mut.col.zero*", "*mut.col.multi*", "*mut.border*", "*mut.show.density*", "*mut.breaks*", "*mut.show.realtime*", "*mut.snv.rate*", "*output.file*"),
+  Column1 = c("*mrcaObj*", "*samp.name*", "*min.seg.size*", "*mut.col.zero*", "*mut.col.multi*", "*mut.border*", "*mut.show.density*", "*mut.breaks*", "*mut.xaxis*", "*mut.chr.label*", "*mut.show.realtime*", "*mut.snv.rate*", "*output.file*"),
   Column2 = c(
     "output from [mrca](#output-5) function",
     "the tumor sample name",
@@ -704,6 +704,8 @@ plotmrca_input <- data.frame(
     "the color of the border around the bars",
     "if TRUE the density distribution of mutation densities on single copies will be shown in the histogram of mutation densities on multiple copies",
     "interval size [(hist() - breaks)](https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/hist)",
+    "optional, user-specified cutoff value for x-axis in evolutionary timeline plot in SNVs/Mb",
+    "chromosome label in the evolutionary timeline plot: either `copy_number` to show the segment's copy number state (chr_TCN_A) or `position` to show its location relative to the centromere (chr_p/q/whole)",
     "if TRUE the weeks post-conception will be shown on the evolutionary timeline",
     "rate of accumulated SNVs per day in a diploid genome",
     "output file"
