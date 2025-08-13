@@ -384,7 +384,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       nb <- nbImport(cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i], sig.assign = sig.assign, assign.method = assign.method, ID = ids[i], sig.file = sig.file, sig.select = sig.select, min.p = min.p, ref.build = ref.build, seed = seed)
 
       if(nrow(nb)==0){
-        warning("Insufficient data for sample ", x$ID)
+        warning("Insufficient data for sample ", ids[i])
         this.tumor.density <- data.table::data.table(Sample_ID = ids[i],
                                                      MRCA_time_mean = NA,
                                                      MRCA_time_lower = NA,

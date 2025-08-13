@@ -682,7 +682,7 @@ head(mrca, n = 1)
 
 ### Plotting Mutation Densities (plotMutationalDensities)
 
-This function visualizes the results of the MRCA analysis. The top plot presents histograms of mean mutation densities, while the bottom plot illustrates a timeline of early tumor evolution. This timeline highlights mutation densities (mean values and 95% confidence intervals) associated with individual chromosomal gains. Additionally, the mutation densities at the ECA and MRCA are depicted. 
+This function visualizes the results of the MRCA analysis. The top plot presents histograms of mean mutation densities, while the bottom plot illustrates a timeline of early tumor evolution. This timeline highlights mutation densities (mean values and 95% confidence intervals) associated with individual chromosomal gains. Additionally, the mutation densities at the ECA and MRCA are depicted. Optionally, the real-time estimation can be calculated based on a user-specified mutation rate (SNVs/day). Details on these rates are available in the literature. For neuroblastoma, a default value of 3.2 SNVs/ day is set according to calculations performed by Körber et al. ([Nature 2023](https://www.nature.com/articles/s41588-023-01332-y)).
 
 #### Input 
 
@@ -706,7 +706,7 @@ plotmrca_input <- data.frame(
     "interval size [(hist() - breaks)](https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/hist)",
     "optional, user-specified cutoff value for x-axis in evolutionary timeline plot in SNVs/Mb",
     "chromosome label in the evolutionary timeline plot: either `copy_number` to show the segment's copy number state (chr_TCN_A) or `position` to show its location relative to the centromere (chr_p/q/whole)",
-    "if TRUE the weeks post-conception will be shown on the evolutionary timeline",
+    "if TRUE the weeks post-conception or postnatal months will be shown on the evolutionary timeline",
     "rate of accumulated SNVs per day in a diploid genome",
     "output file"
   )
