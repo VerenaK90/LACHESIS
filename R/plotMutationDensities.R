@@ -146,7 +146,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   if(mut.show.realtime){
     weeks_pc <- c(12, 27, 38, 64, 90, 116)
     snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2) # Converting SNVs per day to SNVs per Mb starting from Gastrulation (-2 weeks), assuming haploid genome of 3300Mb
-    realtime_labels <- c("12w", "27w", "38w", "6m", "12m", "18m")
+    realtime_labels <- c("12wk", "27wk", "38wk", "6mo", "12mo", "18mo")
     axis(side = 3, at = c(x.min, snvs_per_mb, x.max), labels = c("", realtime_labels, ""), cex.axis = 0.7)
     segments(x0 = x.min, y0 = par("usr")[4], x1 = x.max, y1 = par("usr")[4], xpd = NA)
     mtext("Estimated time (weeks post conception and months postnatal)", side = 3, line = 2, cex = 0.7)
@@ -185,8 +185,8 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
     )
     chr_label_2 <- paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, TCN], "_", mrcaObj[A > 1, A])
   }else if(mut.chr.label == "position") {
-    chrom_label_1 <- paste0("chr", mrcaObj[, chrom], "_", mrcaObj[, chr_region])
-    chrom_label_2 <- paste0("chr", mrcaObj[, chrom], "_", mrcaObj[, chr_region])
+    chr_label_1 <- paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, chr_region])
+    chr_label_2 <- paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, chr_region])
   }else{
     stop("mut.chr.label must be either 'copy_number' or 'position'")
   }
