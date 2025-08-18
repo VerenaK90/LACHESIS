@@ -40,7 +40,7 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     Seglength = sum(cn_end.y - cn_start.y),
     Start = min(cn_start.y),
     End = max(cn_end.y)
-  ), by = data.table::key(countObj)]
+  ), by = eval(data.table::key(countObj))]
 
   # sum up for each copy number state the number of clonal variants
 
