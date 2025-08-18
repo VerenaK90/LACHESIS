@@ -177,30 +177,28 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   }
 
   # B alleles:
+  if(nrow(mrcaObj[B>1 & B!=A,])>0){
+    points(mrcaObj[B>1 & B!=A,density_B_mean], (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], pch=signs[mrcaObj[B>1 & B!=A,B_time]])
+    arrows(x0=mrcaObj[B>1 & B!=A,density_B_lower], y0=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), x1=mrcaObj[B>1 & B!=A,density_B_upper], y1=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), code=3, angle=90, length=0, col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], lwd=1)
+  }
+
   ## Generate copy number or position based chromosome labels
   if(mut.chr.label == "copy_number") {
-    chr_label_1 <- c(
+    chr_label <- c(
       paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, TCN], "_", mrcaObj[A > 1, A]),
       paste0("chr", mrcaObj[B > 1 & B != A, chrom], "_", mrcaObj[B > 1 & B != A, TCN], "_", mrcaObj[B > 1 & B != A, B])
     )
-    chr_label_2 <- paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, TCN], "_", mrcaObj[A > 1, A])
+    chr_label <- setdiff(chr_label, "chr__")
   }else if(mut.chr.label == "position") {
-    chr_label_1 <- paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, chr_region])
-    chr_label_2 <- paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, chr_region])
+    chr_label <- c(paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, chr_region]),
+                     paste0("chr", mrcaObj[B > 1 & B != A, chrom], "_", mrcaObj[B > 1 & B != A, chr_region]))
+    chr_label <- setdiff(chr_label, "chr_")
   }else{
     stop("mut.chr.label must be either 'copy_number' or 'position'")
   }
 
-  if(nrow(mrcaObj[B>1 & B!=A,])>0){
-    points(mrcaObj[B>1 & B!=A,density_B_mean], (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], pch=signs[mrcaObj[B>1 & B!=A,B_time]])
-    arrows(x0=mrcaObj[B>1 & B!=A,density_B_lower], y0=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), x1=mrcaObj[B>1 & B!=A,density_B_upper], y1=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), code=3, angle=90, length=0, col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], lwd=1)
-    legend("bottomright", box.lwd = 0, lty=1, col= chrom_colors[mrcaObj[A > 1, chrom]],
-           legend = chr_label_1, cex = 0.7, ncol = 2)
-  }else{
-    legend("bottomright", box.lwd = 0, lty=1, col= chrom_colors[mrcaObj[A > 1, chrom]],
-           legend = chr_label_2 , cex = 0.7, ncol = 2)
-
-  }
+  legend("bottomright", box.lwd = 0, lty=1, col= chrom_colors[mrcaObj[A > 1, chrom]],
+         legend = chr_label, cex = 0.7, ncol = 2)
 
   if(!is.null(output.file)){
     dev.off()
