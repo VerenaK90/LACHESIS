@@ -296,7 +296,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       }
 
       if(!is.null(output.dir)){
-        plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), ...)
+        plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, ref.build = ref.build, output.file = paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), ...)
       }
 
       # Collecting data for log file
@@ -430,7 +430,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         }
 
         if(!is.null(output.dir)){
-          plotMutationDensities(mrcaObj = mrca, samp.name = ids[i], output.file = paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), ...)
+          plotMutationDensities(mrcaObj = mrca, samp.name = ids[i], ref.build = ref.build, output.file = paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), ...)
         }
       }
 

@@ -35,8 +35,12 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
   countObj <- unique(nbObj[chrom %in% chromosomes & TCN >= min.cn & TCN <= max.cn], by=data.table::key(nbObj))
   # merge information from both objects
   countObj <- merge(countObj, unique(nbObj, by=c(data.table::key(countObj), "cn_start", "cn_end")))
-  # sum up the segment lengths for each copy number state per chromosome
-  countObj <- countObj[,.(Seglength = sum(cn_end.y - cn_start.y)), by = c(data.table::key(countObj))]
+  # sum up the segment lengths, start and end position for each copy number state per chromosome
+  countObj <- countObj[, .(
+    Seglength = sum(cn_end.y - cn_start.y),
+    Start = min(cn_start.y),
+    End = max(cn_end.y)
+  ), by = eval(data.table::key(countObj))]
 
   # sum up for each copy number state the number of clonal variants
 
