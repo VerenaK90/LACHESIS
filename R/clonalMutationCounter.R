@@ -168,6 +168,7 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
 
   }else if(length(clonal.vafs)==3){
     p.priors <- tidyr::crossing(seq(0, 1, 0.01), seq(0, 1, 0.01))
+    p.priors <- p.priors[rowSums(p.priors) <= 1,] #ensure probabilities add up to 1
 
     posteriors <- apply(p.priors, 1, function(p){
       sum(apply(measured.muts, 1, function(x){
