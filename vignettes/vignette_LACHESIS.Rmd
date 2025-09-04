@@ -725,6 +725,88 @@ mrca <- LACHESIS::MRCA(norm_muts)
 LACHESIS::plotMutationDensities(mrca)
 ```
 
+### Estimating Clonality per SNV (estimateClonality)
+
+This function determines the clonality status of each SNV, classifying them as clonal or subclonal. For clonal variants, the function further infers whether the mutation arose before or after a copy number alteration (pre-CNV or post-CNV) if possible.
+ 
+#### Input 
+
+```
+estimateClonality(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = NULL)
+```
+
+```{r, echo=FALSE}
+library(knitr)
+
+estimateClonality_input <- data.frame(
+  Column1 = c("*nbObj*", "*mrcaObj*", "*ID*", "*purity*"),
+  Column2 = c(
+    "output from [nbImport](#output-2) function",
+    "output from [mrca](#output-5) function",
+    "the tumor sample name",
+    "the tumor cell content"
+  )
+)
+
+knitr::kable(estimateClonality_input, col.names = c("Input", "Definition"), escape = FALSE)
+```
+
+#### Example
+
+```{r, message=FALSE, warning=FALSE}
+snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
+aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+c_data <- LACHESIS::readCNV(aceseq_cn)
+nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
+cl_muts <- LACHESIS::clonalMutationCounter(nb)
+norm_muts <- LACHESIS::normalizeCounts(cl_muts)
+mrca <- LACHESIS::MRCA(norm_muts) 
+LACHESIS::estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+```
+
+### Plotting Clonality per SNV (plotClonality)
+
+This function visualizes the output from estimateClonality, providing an overview of clonal and subclonal SNVs across the chromosomal segments. If a mutational signature file is supplied, the function further stratifies SNV clonality by SBS signature within each chromosome for detailed analysis.
+
+#### Input 
+
+```
+plotClonality(snvClonality = snvClonality, nb = NULL, sig.assign = FALSE, output.file = NULL)
+```
+
+```{r, echo=FALSE}
+library(knitr)
+
+estimateClonality_input <- data.frame(
+  Column1 = c("*snvClonality*", "*nbObj*", "*sig.assign*", "*output.file*"),
+  Column2 = c(
+    "output from [estimateClonality](#output-6) function",
+    "output from [nbImport](#output-2) function",
+    "if TRUE, each variant will be assigned to the most likely mutational signature",
+    "output filename"
+  )
+)
+
+knitr::kable(estimateClonality_input, col.names = c("Input", "Definition"), escape = FALSE)
+```
+
+#### Example
+
+```{r, message=FALSE, warning=FALSE}
+snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
+aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+c_data <- LACHESIS::readCNV(aceseq_cn)
+nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, ID = "NBE15")
+cl_muts <- LACHESIS::clonalMutationCounter(nb)
+norm_muts <- LACHESIS::normalizeCounts(cl_muts)
+mrca <- LACHESIS::MRCA(norm_muts) 
+snvClonality <- LACHESIS::estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+LACHESIS::plotClonality(snvClonality = snvClonality, nb = nb, sig.assign = FALSE)
+```
+
+
 # LACHESIS Wrapper Function
 
 This function calls all of the previously mentioned functions, and saves the results to the specified output directory. In addition, for every patient a datatable with mean, lower and upper bounds of mutation density at MRCA and ECA (if detected) is generated. These data tables will be combined into a single table, enabling comprehensive cohort analysis.
@@ -775,12 +857,12 @@ knitr::kable(lachesis_output, col.names = c("Column Name", "Definition"), align 
 
 #### Example with vectors
 
-```{r, message=FALSE, warning=FALSE}
-strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
-aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
-head(lachesis, n=1)
-```
+<!-- ```{r, message=FALSE, warning=FALSE} -->
+<!-- strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS") -->
+<!-- aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS") -->
+<!-- lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS") -->
+<!-- head(lachesis, n=1) -->
+<!-- ``` -->
 
 #### Example with tab-delimited sample-specification file
 
@@ -848,7 +930,7 @@ library(knitr)
 plotlachesis_input <- data.frame(
   Column1 = c("*lachesis*", "*lach.suppress.outliers*", "*lach.log.densities*", "*lach.col.multi*", "*lach.border*", "*binwidth*", "*lach.col.zero*", "*output.file*"),
   Column2 = c(
-    "output from [LACHESIS](#output-6) function",
+    "output from [LACHESIS](#output-7) function",
     "whehter outliers (defined as the 2.5% tumors with lowest and highest densities) are to be plot",
     "plotting logarithmic densities if set to TRUE", 
     "bar color for multi-copy SSNV densities",
@@ -909,7 +991,7 @@ library(knitr)
 plotclin_input <- data.frame(
   Column1 = c("*lachesis*", "*clin.par*", "*clin.suppress.outliers*", "*clin.log.densities*", "*output.file*"),
   Column2 = c(
-    "output from [LACHESIS](#output-6) function",
+    "output from [LACHESIS](#output-7) function",
     "the clinical parameter used for correlation, i.e. age",
     "plotting outliers (defined as the 2.5% tumors with lowest and highest densities) if set to TRUE",
     "plotting logarithmic densities if set to TRUE", 
@@ -945,7 +1027,7 @@ plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time
 plotlachesis_input <- data.frame(
   Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*surv.time*", "*surv.event*", "*surv.palette*", "*surv.time.breaks*", "*surv.time.scale*", "*surv.title*", "*surv.ylab*"),
   Column2 = c(
-    "output from [LACHESIS](#output-6) function",
+    "output from [LACHESIS](#output-7) function",
     "MRCA density value to be used for survival stratification, will be computationally inferred to maximize survival differences if not specified by user",
     "the directory to which the plot will be stored",
     "column name containing survival time",
@@ -1093,12 +1175,12 @@ see [Plotting Cohort Analysis](#plotting-cohort-analysis-plotlachesis), [Plottin
 ```
 warning("Removing x samples with missing MRCA density estimate.")
 ```
-The column *MRCA_time_mean* of [LACHESIS wrapper function](#output-6) output for the specified samples is empty; these samples will not be considered for further analysis. 
+The column *MRCA_time_mean* of [LACHESIS wrapper function](#output-7) output for the specified samples is empty; these samples will not be considered for further analysis. 
 
 ```
 warning("No sample with MRCA density estimate provided. Returning zero.")
 ```
-[LACHESIS wrapper function](#output-6) output is empty; no further analysis will be performed 
+[LACHESIS wrapper function](#output-7) output is empty; no further analysis will be performed 
 
 ## plotSurvival
 
@@ -1107,12 +1189,12 @@ see [Plotting Survival](#plotting-survival-plotsurvival) for details
 ```
 warning("Removing x samples with missing survival time.")
 ```
-The column named according to parameter `surv.time` of [LACHESIS wrapper function](#output-6) output for specified samples is empty; these samples will not be considered for further analysis. 
+The column named according to parameter `surv.time` of [LACHESIS wrapper function](#output-7) output for specified samples is empty; these samples will not be considered for further analysis. 
 
 ```
 warning("No survival events in cohort Returning zero.")
 ```
-The column named according to parameter `surv.event` of [LACHESIS wrapper function](#output-6) is empty; no further analysis will be performed. 
+The column named according to parameter `surv.event` of [LACHESIS wrapper function](#output-7) is empty; no further analysis will be performed. 
 
 # How To Get Help 
 

@@ -67,9 +67,9 @@
 #' lachesis <- LACHESIS(input.files = lachesis_input)
 #'
 #' #Example with a single sample input
-#' strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
-#' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
+#' #strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
+#' #aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
+#' #lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
 #'
 #' #Example with multiple sample and data frame input
 #' nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -116,6 +116,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
   if(!ignore.XY){
     incl.chr <- c(incl.chr, "X", "Y")
   }
+
+  clonality_list <- list()
 
   # collect ECA and MRCA densities for each tumor
   cohort.densities <- data.table::data.table(Sample_ID = character(),
@@ -208,8 +210,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       stop("Duplicated IDs found!")
     }
 
-    clonality_list <- list()
-
     for(i in 1:length(sample.specs.spl)){
 
       x <- sample.specs.spl[[i]]
@@ -274,14 +274,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       norm.counts <- normalizeCounts(countObj = raw.counts)
       mrca <- MRCA(normObj = norm.counts, min.seg.size = min.seg.size, fp.mean = fp.mean, excl.chr = excl.chr)
 
-      snvClonality <- estimateClonality(nbObj = nb, countObj = raw.counts, ID = x$ID, purity = x$purity)
-      clonality_list[[i]] <- snvClonality
-      if(!is.null(output.dir)){
-        data.table::fwrite(snvClonality, file = file.path(output.dir, x$ID, paste0("SNV_timing_per_SNV_", x$ID, ".txt")), quote = F, col.names = T, sep="\t")
-        if(sig.assign == TRUE){
-        plotClonality(snvClonality = snvClonality, sig.assign = sig.assign, output.file = paste(output.dir, x$ID, "SNV_timing_per_SNV.pdf", sep="/"),...)
-      }}
-
       this.tumor.density <- data.table::data.table(Sample_ID = x$ID,
                                                    MRCA_time_mean = attributes(mrca)$MRCA_time_mean,
                                                    MRCA_time_lower = attributes(mrca)$MRCA_time_lower,
@@ -310,6 +302,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       if(!is.null(output.dir)){
         plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), ...)
+      }
+
+      snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = x$ID, purity = x$purity)
+      clonality_list[[i]] <- snvClonality
+      if(!is.null(output.dir)){
+        data.table::fwrite(snvClonality, file = file.path(output.dir, x$ID, paste0("SNV_timing_per_SNV_", x$ID, ".txt")), quote = F, col.names = T, sep="\t")
+        plotClonality(snvClonality = snvClonality, nb = nb, sig.assign = sig.assign, output.file = paste(output.dir, x$ID, "SNV_timing_per_SNV.pdf", sep="/"),...)
       }
 
       # collecting data for log file
@@ -418,7 +417,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
+        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, ids[i], "VAF_histogram_strat_sig.pdf", sep="/"), ...)
         }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -449,13 +448,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         }
       }
 
-      snvClonality <- estimateClonality(nbObj = nb, countObj = raw.counts, ID = ids[i], purity = purity[i])
+      snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = ids[i], purity = purity[i])
       clonality_list[[i]] <- snvClonality
       if(!is.null(output.dir)){
         data.table::fwrite(snvClonality, file = file.path(output.dir, ids[i], paste0("SNV_timing_per_SNV_", ids[i], ".txt")), quote = F, col.names = T, sep="\t")
-        if(sig.assign == TRUE){
-        plotClonality(snvClonality = snvClonality, sig.assign = sig.assign, output.file = paste(output.dir, ids[i], "SNV_timing_per_SNV.pdf", sep="/"),...)
-      }}
+        plotClonality(snvClonality = snvClonality, nb = nb, sig.assign = sig.assign, output.file = paste(output.dir, ids[i], "SNV_timing_per_SNV.pdf", sep="/"),...)
+      }
 
       this.tumor.density <- data.table::data.table(Sample_ID = ids[i],
                                                    MRCA_time_mean = attributes(mrca)$MRCA_time_mean,
@@ -476,76 +474,15 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
     }
   }
 
+
   # Plot clonality distribution of SNVs
 
-  # clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
-  #
-  # clonality_colors <- c("EC" = "#66c2a5",
-  #                       "LC" = "#fc8d62",
-  #                       "C"  = "#8da0cb",
-  #                       "SC" = "#e78ac3")
-  #
-  #
-  # clonality_cohort[, Clonality := factor(Clonality, levels = names(clonality_colors))]
-  #
-  # if (!is.null(output.dir)) {
-  #   pdf(file = paste(output.dir, "SNV_Clonality_cohort.pdf", sep="/"), width = 8, height = 6)
-  #   clonality_counts <- clonality_cohort[, .N, by = .(Sample, Clonality)]
-  #
-  #   p1 <- ggplot(clonality_counts, aes(x = Clonality, y = N, fill = Clonality)) +
-  #     geom_violin(alpha = 0.5, color = NA) +
-  #     geom_boxplot(width = 0.2, outlier.shape = NA, alpha = 0.8) +
-  #     scale_fill_manual(values = clonality_colors, drop = FALSE) +
-  #     theme_minimal() +
-  #     labs(title = "Distribution of SNV Counts by Clonality",
-  #          y = "Number of SNVs",
-  #          x = "Clonality",
-  #          fill = "Clonality")
-  #
-  #   print(p1)
-  #
-  #   clonality_counts[, Total := sum(N), by = Sample]
-  #   clonality_counts[, Percent := 100 * N / Total]
-  #
-  #   p2 <- ggplot(clonality_counts, aes(x = Clonality, y = Percent, fill = Clonality)) +
-  #     geom_violin(alpha = 0.5, color = NA) +
-  #     geom_boxplot(width = 0.2, outlier.shape = NA, alpha = 0.8) +
-  #     scale_fill_manual(values = clonality_colors, drop = FALSE) +
-  #     theme_minimal() +
-  #     labs(
-  #       title = "Percentage of SNVs by Clonality per Sample",
-  #       y = "Percentage of SNVs",
-  #       x = "Clonality",
-  #       fill = "Clonality"
-  #     ) +
-  #     scale_y_continuous(labels = scales::percent_format(scale = 1))
-  #
-  #   print(p2)
-  #
-  #   dev.off()
-  # }
-  #
-  # if (sig.assign == TRUE) {
-  #   if (!is.null(output.dir)) {
-  #
-  #     pdf(file = paste(output.dir, "SNV_Clonality_SBS_cohort.pdf", sep = "/"),
-  #       width = 8, height = 6)
-  #
-  #     p3 <- ggplot(clonality_cohort[!is.na(Signature)],
-  #                  aes(x = Signature, fill = Clonality)) +
-  #       geom_bar(position = "dodge") +
-  #       facet_wrap(~ Clonality, scales = "free_x") +
-  #       scale_fill_manual(values = clonality_colors, drop = FALSE) +
-  #       theme_minimal() +
-  #       labs(title = "Signature Distribution by Clonality",
-  #            y = "SNV Count", x = "Signature") +
-  #       theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  #
-  #     print(p3)
-  #
-  #   dev.off()
-  #   }
-  # }
+  clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
+  if (!is.null(output.dir)) {
+    output.file <- paste0(output.dir, "/LACHESIS_SNV_timing_per_SNV_cohort.txt")
+    fwrite(  clonality_cohort, output.file, sep = "\t")
+  }
+
 
   # Plot the distribution of Mutation densities at ECA and MRCA
 
