@@ -79,21 +79,23 @@ LACHESIS utilizes whole genome sequencing data to determine the mutational timin
 
 #### Datatables (.txt)
 
-* **SNV_timing_per_segment_ID.txt:** purity, ploidy, and the estimated mean, lower, and upper bounds for the timing of the tumor's MRCA and ECA (if detected).
-
-* **MRCA_densities_ID.txt:** per-segment mutation time, differentiated by minor and major copy number (A and B). For more details go to [Estimating Mutation Densities at ECA/MRCA (MRCA)](#estimating-mutation-densities-at-ecamrca-mrca)
+* **SNV_timing_per_segment_ID.txt:** purity, ploidy, and the estimated mean, lower, and upper bounds for the timing of the tumor's MRCA and ECA (if detected)
+* **SNV_timing_per_SNV_ID.txt:** SNV context, clonality status and association with ECA/ MRCA.
+* **MRCA_densities_ID.txt:** per-segment mutation time, differentiated by minor and major copy number (A and B) For more details go to [Estimating Mutation Densities at ECA/MRCA (MRCA)](#estimating-mutation-densities-at-ecamrca-mrca)
 
 #### Graphs (.pdf)
 
 * **SNV_densities.pdf:** histograms of normalized, mean single-copy and multi-copy mutation densities and timeline of early tumor evolution
 * **VAF_histogram_strat.pdf:** measured copy numbers along the genome and variant allele frequency (VAF) histograms of SNVs stratified by copy number and minor/major allele count
 * **VAF_histogram:** variant allele frequency histogram and density distribution of all SNVs
+* **SNV_timing_per_SNV_ID.pdf:** clonality status of SNVs associated with specific chromosomal gains
 
 Additionally, if the function was applied to a cohort, the following files will be included:
 
 * **SNV_densities_cohort.pdf:** histograms and cumulative distributions (with 95% confidence intervals) of mean mutation densities per segment at MRCA and ECA
+* **Driver_mutations_cohort.pdf:** known driver SNVs and their evolutionary timing clonal (pre-CNV, post-CNV, unknown) or subclonal
 * **lachesis_clin.par.pdf:** correlation between SNV densities computed by LACHESIS and clinical parameters (age, survival,...)
-* **survival_plots.pdf:** Kaplan-Meier plots stratified by MRCA density if providing survival information.
+* **survival_plots.pdf:** Kaplan-Meier plots stratified by MRCA density if providing survival information
 
 ## Structure
 
@@ -739,12 +741,14 @@ estimateClonality(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = NULL)
 library(knitr)
 
 estimateClonality_input <- data.frame(
-  Column1 = c("*nbObj*", "*mrcaObj*", "*ID*", "*purity*"),
+  Column1 = c("*nbObj*", "*mrcaObj*", "*ID*", "*purity*", "*driver.file*", "*ref.build*"),
   Column2 = c(
     "output from [nbImport](#output-2) function",
     "output from [mrca](#output-5) function",
     "the tumor sample name",
-    "the tumor cell content"
+    "the tumor cell content", 
+    "file path to the information about known driver SNVs.", 
+    "reference genome: hg18, hg19 or hg38"
   )
 )
 
