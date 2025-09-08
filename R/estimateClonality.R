@@ -98,6 +98,15 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
       all.x = TRUE
     )
   }
+
+  if (!"Signature" %in% colnames(snvClonality)) {
+    snvClonality[, Signature := NA_character_]
+  }
+
+  snvClonality <- snvClonality[, .(chrom, snv_start, ref, alt, Sample, TCN, A, B,
+                                   cn_start, cn_end, Signature, A_time, B_time,
+                                   Clonality, gene)]
+
   return(snvClonality)
 }
 
