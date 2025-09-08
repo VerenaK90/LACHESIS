@@ -489,24 +489,28 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
     p1 <- ggplot(driver_dt, aes(x = Sample, y = gene, fill = Clonality)) +
       geom_tile(color = "white") +
-      scale_fill_manual(values = clonality_colors) +
+      scale_fill_manual(
+        values = clonality_colors,
+        labels = c(
+          "Precnv" = "Pre-CNV\n- Clonal",
+          "Postcnv" = "Post-CNV\n- Clonal",
+          "C" = "Unknown\n- Clonal",
+          "SC" = "Subclonal"
+        )
+      ) +
       labs(
         title = "Clonality of Driver Mutations",
         x = "Patient",
         y = "Gene"
       ) +
-      labels = c(
-        "Precnv" = "Pre-CNV\n- Clonal",
-        "Postcnv" = "Post-CNV\n- Clonal",
-        "C" = "unknown\n-Clonal",
-        "SC" = "\nSubclonal") +
+
       theme_minimal() +
       theme(
         axis.text.x = element_text(angle = 45, hjust = 1),
         axis.text.y = element_text(size = 8)
       )
 
-    pdf(paste(output.dir, "/Driver_mutations_cohort.pdf"))
+    pdf(paste(output.dir, "Driver_mutations_cohort.pdf"))
     print(p1)
     dev.off()
   }

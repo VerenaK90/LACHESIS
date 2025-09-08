@@ -124,8 +124,8 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
 #' cl_muts <- clonalMutationCounter(nb)
 #' norm_muts <- normalizeCounts(cl_muts)
 #' mrca <- MRCA(norm_muts)
-#' estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
-#' plotClonality(snvClonality, nb = nb, sig.assign = TRUE)
+#' snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+#' plotClonality(snvClonality, nbObj = nb, sig.assign = TRUE)
 #'
 #' @import ggplot2
 #' @export
