@@ -50,13 +50,13 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
       expected_SC <- expectedVAFs[1] * 0.5
       expected_C  <- expectedVAFs[1]
       expected_postcnv <- expectedVAFs[1]
-      expected_precnv <- expectedVAFs[2]
+      expected_precnv <- expectedVAFs[-1]
 
 
       lik_SC <- dbinom(alt, size = depth, prob = expected_SC)
       lik_C  <- dbinom(alt, size = depth, prob = expected_C)
-      lik_precnv <- dbinom(alt, size = depth, prob = expected_precnv)
       lik_postcnv <- dbinom(alt, size = depth, prob = expected_postcnv)
+      lik_precnv <- sum(dbinom(alt, size = depth, prob = expected_precnv))
 
       priors <- c(
         SC = ifelse(is.na(p_sc), 0.01, p_sc),
