@@ -169,10 +169,22 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
   signs <- c("ECA" = 19, "MRCA" = 17, "ECA/MRCA" = 15, "not mapped to ECA or MRCA" = 1)
 
+  mrcaObj <- mrcaObj[order(as.numeric(mrcaObj$chrom)), ]
+
+  ## Generate copy number or position based chromosome labels
+  if(mut.chr.label == "copy_number") {
+    chr_label <- paste0("chr", mrcaObj$chrom, "_", mrcaObj$TCN, "_", mrcaObj$A)
+  }else if(mut.chr.label == "position") {
+    chr_label <- paste0("chr", mrcaObj$chrom, "_", mrcaObj$chr_region, " (", mrcaObj$A, ":", mrcaObj$B, ")")
+  }else{
+    stop("mut.chr.label must be either 'copy_number' or 'position'")
+  }
+
   # A alleles:
   if(nrow(mrcaObj[A>1,])>0){
     points(mrcaObj[A>1,density_A_mean], 1:mrcaObj[,sum(A>1)], col=chrom_colors[mrcaObj[A > 1, chrom]], pch=signs[mrcaObj[A>1,A_time]])
     arrows(x0=mrcaObj[A>1,density_A_lower], y0=1:mrcaObj[,sum(A>1)], x1=mrcaObj[A>1,density_A_upper], y1=1:mrcaObj[,sum(A>1)], code=3, angle=90, length=0, col=chrom_colors[mrcaObj[A > 1, chrom]], lwd=1)
+    text(x = mrcaObj[A>1, density_A_upper], y = 1:mrcaObj[, sum(A>1)], labels = chr_label[mrcaObj$A > 1], cex = 0.6, pos = 4)
     legend("topright",box.lwd = 0, pch=signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time], legend = names(signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time]), cex = 0.7)
   }
 
@@ -180,25 +192,8 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   if(nrow(mrcaObj[B>1 & B!=A,])>0){
     points(mrcaObj[B>1 & B!=A,density_B_mean], (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], pch=signs[mrcaObj[B>1 & B!=A,B_time]])
     arrows(x0=mrcaObj[B>1 & B!=A,density_B_lower], y0=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), x1=mrcaObj[B>1 & B!=A,density_B_upper], y1=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), code=3, angle=90, length=0, col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], lwd=1)
+    text(x = mrcaObj[B>1 & B!=A, density_B_upper], y = (y.max.a + 1):(y.max.a + mrcaObj[, sum(B>1 & B != A)]), labels = chr_label[mrcaObj$B > 1 & mrcaObj$B != mrcaObj$A], cex = 0.6, pos = 4)
   }
-
-  ## Generate copy number or position based chromosome labels
-  if(mut.chr.label == "copy_number") {
-    chr_label <- c(
-      paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, TCN], "_", mrcaObj[A > 1, A]),
-      paste0("chr", mrcaObj[B > 1 & B != A, chrom], "_", mrcaObj[B > 1 & B != A, TCN], "_", mrcaObj[B > 1 & B != A, B])
-    )
-    chr_label <- setdiff(chr_label, "chr__")
-  }else if(mut.chr.label == "position") {
-    chr_label <- c(paste0("chr", mrcaObj[A > 1, chrom], "_", mrcaObj[A > 1, chr_region]),
-                     paste0("chr", mrcaObj[B > 1 & B != A, chrom], "_", mrcaObj[B > 1 & B != A, chr_region]))
-    chr_label <- setdiff(chr_label, "chr_")
-  }else{
-    stop("mut.chr.label must be either 'copy_number' or 'position'")
-  }
-
-  legend("bottomright", box.lwd = 0, lty=1, col= chrom_colors[mrcaObj[A > 1, chrom]],
-         legend = chr_label, cex = 0.7, ncol = 2)
 
   if(!is.null(output.file)){
     dev.off()
