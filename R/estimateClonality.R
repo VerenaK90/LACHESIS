@@ -8,7 +8,7 @@
 #' @param driver.file optional, path to file with "chrom", "snv_start", "ref", "alt", "gene" column containing known driver SNVs.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
 #' @examples
-#' # Example using variants assosciated with specific SBS mutational signatures from vcf file
+#' # Example using variants associated with specific SBS mutational signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -116,14 +116,14 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
 
 #' Plotting assigned clonality status for every SNV by chromosome
 #' @description
-#' Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.
+#' Visualizes results from  \code{\link{estimateClonality}}.
 #' @param snvClonality output generated from \code{\link{estimateClonality}}.
 #' @param nbObj output generated from \code{\link{nbImport}}.
 #' @param sig.assign Logical. If TRUE, clonality status distribution will be plotted for each SBS signature.
 #' @param output.file optional, will save the mutational signatures stratified by Clonality.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
-#' # Example using variants assosciated with specific SBS mutational signatures from vcf file
+#' # Example using variants associated with specific SBS mutational signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
