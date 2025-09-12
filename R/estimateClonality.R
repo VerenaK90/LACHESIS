@@ -103,9 +103,10 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
     snvClonality[, Signature := NA_character_]
   }
 
+  setnames(snvClonality, old = "gene", new = "known_driver_gene")
   snvClonality <- snvClonality[, .(chrom, snv_start, ref, alt, Sample, TCN, A, B,
                                    cn_start, cn_end, Signature, A_time, B_time,
-                                   Clonality, gene)]
+                                   Clonality, known_driver_gene)]
 
   return(snvClonality)
 }

@@ -484,10 +484,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
     clonality_colors <- c("Precnv" = "#66c2a5", "Postcnv" = "#fc8d62", "C" = "#8da0cb", "SC" = "#e78ac3")
 
-    driver_dt <- clonality_cohort[!is.na(gene) & trimws(gene) != ""]
+    driver_dt <- clonality_cohort[!is.na(known_driver_gene) & trimws(known_driver_gene) != ""]
     driver_dt[, Sample := factor(Sample)]
 
-    p1 <- ggplot(driver_dt, aes(x = Sample, y = gene, fill = Clonality)) +
+    p1 <- ggplot(driver_dt, aes(x = Sample, y = known_driver_gene, fill = Clonality)) +
       geom_tile(color = "white") +
       scale_fill_manual(
         values = clonality_colors,
