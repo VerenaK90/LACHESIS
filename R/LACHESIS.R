@@ -492,12 +492,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       scale_fill_manual(
         values = clonality_colors,
         labels = c(
-          "Precnv" = "Pre-CNV\n- Clonal",
-          "Postcnv" = "Post-CNV\n- Clonal",
-          "C" = "Unknown\n- Clonal",
-          "SC" = "Subclonal"
-        )
-      ) +
+          "Precnv" = "Clonal\n- Pre-CNV",
+          "Postcnv" = "Clonal\n- Post-CNV",
+          "C" = "Clonal\n-NOS",
+          "SC" = "Subclonal")) +
       labs(
         title = "Clonality of Driver Mutations",
         x = "Patient",

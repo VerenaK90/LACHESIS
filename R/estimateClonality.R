@@ -185,10 +185,10 @@ plotClonality <- function(snvClonality = snvClonality, nbObj = NULL, sig.assign 
       "SC" = "#e78ac3"
     ),
     labels = c(
-      "Precnv" = "Pre-CNV\n- Clonal",
-      "Postcnv" = "Post-CNV\n- Clonal",
-      "C" = "unknown\n-Clonal",
-      "SC" = "\nSubclonal")) +
+      "Precnv" = "Clonal\n- Pre-CNV",
+      "Postcnv" = "Clonal\n- Post-CNV",
+      "C" = "Clonal\n-NOS",
+      "SC" = "Subclonal")) +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.key.height = unit(1.5, "lines"))
 
@@ -213,10 +213,10 @@ plotClonality <- function(snvClonality = snvClonality, nbObj = NULL, sig.assign 
       "SC" = "#e78ac3"
     ),
     labels = c(
-      "Precnv" = "Pre-CNV\n- Clonal",
-      "Postcnv" = "Post-CNV\n- Clonal",
-      "C" = "unknown\n-Clonal",
-      "SC" = "\nSubclonal")) +
+      "Precnv" = "Clonal\n- Pre-CNV",
+      "Postcnv" = "Clonal\n- Post-CNV",
+      "C" = "Clonal\n-NOS",
+      "SC" = "Subclonal")) +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.key.height = unit(1.5, "lines"))
 
@@ -243,11 +243,10 @@ plotClonality <- function(snvClonality = snvClonality, nbObj = NULL, sig.assign 
           fill = "Signature"
         ) +
         scale_x_discrete(labels = c(
-          "Precnv" = "Pre-CNV\n- Clonal",
-          "Postcnv" = "Post-CNV\n- Clonal",
-          "C" = "unknown\n-Clonal",
-          "SC" = "\nSubclonal"
-        )) +
+          "Precnv" = "Clonal\n- Pre-CNV",
+          "Postcnv" = "Clonal\n- Post-CNV",
+          "C" = "Clonal\n-NOS",
+          "SC" = "Subclonal")) +
         scale_fill_manual(values = sig.colors) +
         theme_minimal() +
         theme(
