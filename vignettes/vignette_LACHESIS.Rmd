@@ -101,10 +101,8 @@ Additionally, if the function was applied to a cohort, the following files will 
 
 There are two ways to perform analyses using LACHESIS: either by utilizing the sub-functions individually or by calling the wrapper function. All of the functions presented in the main workflow are also invoked by the wrapper function. In addition, the wrapper function summarizes results across samples, allowing cohort analysis to be performed.
 
-```{r, echo=FALSE, fig.show='hold', out.width="45%"}
-knitr::include_graphics(system.file("extdata", "package_structure_main.png", package = "LACHESIS"))
-
-knitr::include_graphics(system.file("extdata", "package_structure_wrapper.png", package = "LACHESIS"))
+```{r, echo=FALSE, fig.show='hold', out.width="100%"}
+knitr::include_graphics(system.file("extdata", "LACHESIS_package_structure.png", package = "LACHESIS"))
 ```
 
 # LACHESIS Main Workflow
