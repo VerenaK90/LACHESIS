@@ -259,7 +259,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' @import gridExtra
 #' @import data.table
 
-plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE, sig.output.file = NULL, ...){
+plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE, ...){
 
   chrom <- start <- t_vaf <- NULL
 
