@@ -58,7 +58,7 @@ aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", p
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 
-# Example using variants assosciated with specific SBS mutational signatures from vcf file
+# Example using variants associated with specific SBS mutational signatures from vcf file
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")

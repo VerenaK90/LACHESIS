@@ -45,6 +45,7 @@ LACHESIS(
   assign.method = "sample",
   sig.select = NULL,
   min.p = NULL,
+  driver.file = NULL,
   ...
 )
 }
@@ -129,6 +130,8 @@ LACHESIS(
 
 \item{min.p}{Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.}
 
+\item{driver.file}{optional, path to file with "chrom", "snv_start", "ref", "alt", "gene" column containing known driver SNVs.}
+
 \item{...}{further arguments and parameters passed to LACHESIS functions.}
 }
 \value{
@@ -161,10 +164,10 @@ data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 # Example with template file with paths to multiple cnv/snv files as an input
 lachesis <- LACHESIS(input.files = lachesis_input)
 
-# Example with a single sample input
-strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
-aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
+#Example with a single sample input
+#strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
+#aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
+#lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
 
 # Example with multiple sample and data frame input
 nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
