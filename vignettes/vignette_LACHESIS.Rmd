@@ -682,19 +682,19 @@ head(mrca, n = 1)
 
 ### Plotting Mutation Densities (plotMutationalDensities)
 
-This function visualizes the results of the MRCA analysis. The top plot presents histograms of mean mutation densities, while the bottom plot illustrates a timeline of early tumor evolution. This timeline highlights mutation densities (mean values and 95% confidence intervals) associated with individual chromosomal gains. Additionally, the mutation densities at the ECA and MRCA are depicted. 
+This function visualizes the results of the MRCA analysis. The top plot presents histograms of mean mutation densities, while the bottom plot illustrates a timeline of early tumor evolution. This timeline highlights mutation densities (mean values and 95% confidence intervals) associated with individual chromosomal gains. Additionally, the mutation densities at the ECA and MRCA are depicted. Optionally, the real-time estimation can be calculated based on a user-specified mutation rate (SNVs/day). Details on these rates are available in the literature. For neuroblastoma, a default value of 3.2 SNVs/ day is set according to calculations performed by Körber et al. ([Nature 2023](https://www.nature.com/articles/s41588-023-01332-y)).
 
 #### Input 
 
 ```
-plotMutationDensities(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, output.file = NULL)
+plotMutationDensities(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL)
 ```
 
 ```{r, echo=FALSE}
 library(knitr)
 
 plotmrca_input <- data.frame(
-  Column1 = c("*mrcaObj*", "*samp.name*", "*min.seg.size*", "*mut.col.zero*", "*mut.col.multi*", "*mut.border*", "*mut.show.density*", "*mut.breaks*", "*output.file*"),
+  Column1 = c("*mrcaObj*", "*samp.name*", "*min.seg.size*", "*mut.col.zero*", "*mut.col.multi*", "*mut.border*", "*mut.show.density*", "*mut.breaks*", "*mut.show.realtime*", "*mut.snv.rate*", "*output.file*"),
   Column2 = c(
     "output from [mrca](#output-5) function",
     "the tumor sample name",
@@ -704,6 +704,8 @@ plotmrca_input <- data.frame(
     "the color of the border around the bars",
     "if TRUE the density distribution of mutation densities on single copies will be shown in the histogram of mutation densities on multiple copies",
     "interval size [(hist() - breaks)](https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/hist)",
+    "if TRUE the weeks post-conception or postnatal months will be shown on the evolutionary timeline",
+    "rate of accumulated SNVs per day in a diploid genome",
     "output file"
   )
 )
@@ -1022,8 +1024,6 @@ The function `plotSurvival` plots correlation between SNV density timing at MRCA
 ```
 plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
 ```
-plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
-```
 
 ```{r, echo=FALSE}
 plotlachesis_input <- data.frame(
@@ -1052,6 +1052,42 @@ input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS"
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
 LACHESIS::plotSurvival(lachesis, surv.time = 'EFS.time', surv.event = 'EFS')
+```
+
+### Classifying Tumor Evolution (classifyLACHESIS)
+
+The function `classifyLACHESIS` classifies a tumor's start of clonal outgrowth during tumorigenesis as "early" or "late" (favorable/ unfavorable prognosis) depending on the mutation density at its MRCA.
+
+#### Input
+
+```
+classifyLACHESIS(lachesis, mrca.cutpoint = NULL, output.dir = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = 'OS.time', surv.event = 'OS')
+```
+
+```{r, echo=FALSE}
+plotlachesis_input <- data.frame(
+  Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*entity*", "*infer.cutpoint*", "*surv.time*", "*surv.event*"),
+  Column2 = c(
+    "output from [LACHESIS](#output-6) function",
+    "MRCA density value to be used for survival stratification, will be computationally inferred to maximize survival differences if not specified by user",
+    "the directory to which the plot will be stored",
+    "the tumor entity if classifying according to a pre-defined threshold",
+    "the MRCA cutpoint will be inferred from the data if set to TRUE",
+    "column name containing survival time",
+    "column name containing event"
+  )
+)
+
+knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
+```
+
+#### Example
+
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"}
+input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
+
+LACHESIS::classifyLACHESIS(lachesis, entity = "neuroblastoma")
 ```
 
 # Quality control/ Filtering

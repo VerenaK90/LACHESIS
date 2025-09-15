@@ -9,6 +9,8 @@
 #' @param mut.border optional, the line color
 #' @param mut.show.density optional; if `TRUE`, the density distribution of mutation densities on single copies will be shown in the histogram of mutation densities on multiple copies.
 #' @param mut.breaks optional; the number of bins in the histogram.
+#' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception on the evolutionary timeline.
+#' @param mut.snv.rate optional; rate of accumulated SNVs per day in a diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)
 #' @param output.file optional; will save the plot.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
@@ -24,7 +26,7 @@
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
 
-plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, output.file = NULL, ...){
+plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL, ...){
 
   Seglength <- . <- A <- B <- variable <- value <- lines <- density <- chrom <- TCN <- Seglength <- n_mut_A <- n_mut_B <- n_mut_total_clonal <- density_total_mean <- density_A_mean <- density_B_mean <- density_total_lower <- density_total_upper <- density_A_lower <- density_A_upper <- density_B_lower <- density_B_upper <- p_total_to_mrca <- p_A_to_mrca <- p_B_to_mrca <- p_adj_total_to_mrca <- p_adj_A_to_mrca <- p_adj_B_to_mrca <- MRCA_qual <- p_A_to_eca <- p_B_to_eca <- p_adj_A_to_eca <- p_adj_B_to_eca <- A_time <- B_time <- NULL
   if(is.null(mrcaObj)){
@@ -92,16 +94,34 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
 
   # Timeline summary
-  par(mar = c(3, 1, 3, 1), xpd = FALSE)
-
+  if(mut.show.realtime){
+    par(mar = c(3, 1, 5, 1), xpd = FALSE)
+  }
+  else{
+    par(mar = c(3, 1, 3, 1), xpd = FALSE)
+  }
   x.min = 0
   x.max = max(c(mrcaObj$density_total_upper, mrcaObj$density_A_upper, mrcaObj$density_B_upper), na.rm = TRUE)*1.3
   y.min = 0
   y.max.a = nrow(mrcaObj[A>1,])
   y.max = max(c(1, nrow(mrcaObj[A>1,]) + nrow(mrcaObj[B>1 & B!=A])))
-  plot(NA, NA, xlim=c(x.min, x.max), ylim=c(y.min, y.max), xlab = NA, ylab = NA, main = NA, axes = FALSE, frame.plot = FALSE)
-  Axis(side=1, cex = 0.7)
+  plot(NA, NA, xlim = c(x.min, x.max), ylim = c(y.min, y.max), xlab = NA, ylab = NA, main = NA, axes = FALSE, frame.plot = FALSE)
+  Axis(side = 1, cex = 0.7)
   mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
+
+  if(mut.show.realtime){
+    weeks_pc <- c(12, 27, 38, 64, 90, 116)
+    snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2) # Converting SNVs per day to SNVs per Mb starting from Gastrulation (-2 weeks), assuming haploid genome of 3300Mb
+    realtime_labels <- c("12w", "27w", "38w", "6m", "12m", "18m")
+    axis(side = 3, at = c(x.min, snvs_per_mb, x.max), labels = c("", realtime_labels, ""), cex.axis = 0.7)
+    segments(x0 = x.min, y0 = par("usr")[4], x1 = x.max, y1 = par("usr")[4], xpd = NA)
+    mtext("Estimated time (weeks post conception and months postnatal)", side = 3, line = 2, cex = 0.7)
+
+    title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2, line = 3.2)
+  }
+  else{
+    title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2)
+  }
 
   # ECA:
   polygon(c(attr(mrcaObj, "ECA_time_lower"), rep(attr(mrcaObj, "ECA_time_upper"),2),attr(mrcaObj, "ECA_time_lower")), c(rep(y.min, 2), rep(y.max,2)),
@@ -133,9 +153,6 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
            legend = paste(paste0("chr", mrcaObj[A>1,chrom]), mrcaObj[A>1,TCN], mrcaObj[A>1,A], sep = "_"), cex = 0.7, ncol = 2)
 
   }
-
-
-  title(main = paste("Evolutionary timeline of chromosomal gains and losses"), cex.main = 1.2)
 
   if(!is.null(output.file)){
     dev.off()

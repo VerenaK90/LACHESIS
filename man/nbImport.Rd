@@ -4,16 +4,45 @@
 \alias{nbImport}
 \title{Combine CNVs and SNVs}
 \usage{
-nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL)
+nbImport(
+  cnv = NULL,
+  snv = NULL,
+  purity = NULL,
+  ploidy = NULL,
+  sig.assign = FALSE,
+  assign.method = "sample",
+  ID = NULL,
+  sig.file = NULL,
+  sig.select = NULL,
+  min.p = NULL,
+  ref.build = "hg19",
+  seed = NULL
+)
 }
 \arguments{
-\item{cnv}{CNV data from \code{\link{readCNV}}}
+\item{cnv}{CNV data from \code{\link{readCNV}}.}
 
-\item{snv}{SNV data from \code{\link{readVCF}}}
+\item{snv}{SNV data from \code{\link{readVCF}}.}
 
-\item{purity}{tumor cell content}
+\item{purity}{tumor cell content.}
 
-\item{ploidy}{average copy number in the tumor sample}
+\item{ploidy}{average copy number in the tumor sample.}
+
+\item{sig.assign}{Logical. If TRUE, each variant will be assigned to a mutational signature.}
+
+\item{assign.method}{Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.}
+
+\item{ID}{sample name.}
+
+\item{sig.file}{File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".}
+
+\item{sig.select}{A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).}
+
+\item{min.p}{Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.}
+
+\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}.}
+
+\item{seed}{Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.}
 }
 \value{
 a data.table
@@ -22,11 +51,20 @@ a data.table
 Merges CNVs and SNVs into a single data.table. Each variant is assigned to its corresponding copy number segment and status.
 }
 \examples{
+# Example using all variants from vcf file
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
+
+# Example using variants assosciated with specific SBS mutational signatures from vcf file
+snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
+aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+c_data <- readCNV(aceseq_cn)
+sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
+nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 }
 \seealso{
 \code{\link{plotNB}}

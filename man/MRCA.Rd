@@ -46,14 +46,14 @@ a data table reporting the assignment of individual segments to ECA or MRCA. Mut
 \item{\code{p_total_to_mrca}}{Probability that the density of mutations per single copy of the segment agrees with the mutation density at MRCA.}
 \item{\code{p_A_to_to_mrca}}{Probability that the density of mutations on all A alleles of the segment agrees with the mutation density at MRCA.}
 \item{\code{p_B_to_to_mrca}}{Probability that the density of mutations on all B alleles of the segment agrees with the mutation density at MRCA.}
-\item{\code{p_adj_total_to_mrca}}{Probability that the density of mutations on all B alleles of the segment agrees with the mutation density at MRCA, adjusted for multiple sampling (Holm correction).}
+\item{\code{p_adj_total_to_mrca}}{Probability that the density of mutations on all alleles of the segment agrees with the mutation density at MRCA, adjusted for multiple sampling (Holm correction).}
 \item{\code{p_adj_A_to_mrca}}{Probability that the density of mutations on all A alleles of the segment agrees with the mutation density at MRCA, adjusted for multiple sampling (Holm correction).}
 \item{\code{p_adj_B_to_mrca}}{Probability that the density of mutations on all B alleles of the segment agrees with the mutation density at MRCA, adjusted for multiple sampling (Holm correction).}
 \item{\code{MRCA_qual}}{Quality control. \code{PASS}, if the density of mutations on single copies agrees with the density at the MRCA.}
 \item{\code{p_total_to_eca}}{Probability that the density of mutations per single copy of the segment agrees with the mutation density at ECA.}
 \item{\code{p_A_to_to_eca}}{Probability that the density of mutations on all A alleles of the segment agrees with the mutation density at ECA.}
 \item{\code{p_B_to_to_eca}}{Probability that the density of mutations on all B alleles of the segment agrees with the mutation density at ECA.}
-\item{\code{p_adj_total_to_eca}}{Probability that the density of mutations on all B alleles of the segment agrees with the mutation density at ECA, adjusted for multiple sampling (Holm correction).}
+\item{\code{p_adj_total_to_eca}}{Probability that the density of mutations on all alleles of the segment agrees with the mutation density at ECA, adjusted for multiple sampling (Holm correction).}
 \item{\code{p_adj_A_to_eca}}{Probability that the density of mutations on all A alleles of the segment agrees with the mutation density at ECA, adjusted for multiple sampling (Holm correction).}
 \item{\code{p_adj_B_to_eca}}{Probability that the density of mutations on all B alleles of the segment agrees with the mutation density at ECA, adjusted for multiple sampling (Holm correction).}
 \item{\code{A_time}}{Time of A allele gain (can be "ECA", "MRCA", "ECA/MRCA" if assignment is unclear, or "not mapped to ECA or MRCA" if density does not agree with either ECA or MRCA).}
