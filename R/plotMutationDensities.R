@@ -185,7 +185,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   if(nrow(mrcaObj[B>1 & B!=A,])>0){
     points(mrcaObj[B>1 & B!=A,density_B_mean], (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], pch=signs[mrcaObj[B>1 & B!=A,B_time]])
     arrows(x0=mrcaObj[B>1 & B!=A,density_B_lower], y0=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), x1=mrcaObj[B>1 & B!=A,density_B_upper], y1=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), code=3, angle=90, length=0, col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], lwd=1)
-    text(x = mrcaObj[B>1 & B!=A, density_B_upper], y = (y.max.a + 1):(y.max.a + mrcaObj[, sum(B>1 & B != A)]), labels = chr_label[mrcaObj$B > 1 & mrcaObj$B != mrcaObj$A], cex = 0.6, pos = 4)
+    text(x = mrcaObj[B>1 & B!=A, density_B_upper], y = (y.max.a + 1):(y.max.a + mrcaObj[, sum(B>1 & B != A)]), labels = paste0(chr_label[mrcaObj$B > 1 & mrcaObj$B != mrcaObj$A], " B allele"), cex = 0.6, pos = 4)
   }
 
   if(!is.null(output.file)){
