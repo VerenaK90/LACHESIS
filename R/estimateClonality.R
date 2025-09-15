@@ -32,9 +32,8 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
     stop("Please specify tumor purity.")
   }
 
-  nbObj <- merge(nbObj, mrcaObj[, .(chrom, TCN, A, B, p_sc, p_lc, p_ec, p_c, A_time, B_time)],
+  snvClonality <- merge(nbObj, mrcaObj[, .(chrom, TCN, A, B, p_sc, p_lc, p_ec, p_c, A_time, B_time)],
                  by = c("chrom", "TCN", "A", "B"), all.x = TRUE)
-  snvClonality <- data.table::copy(nbObj)
 
   snvClonality[, Clonality := {
     CN <- as.numeric(TCN)
@@ -103,9 +102,9 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
     snvClonality[, Signature := NA_character_]
   }
 
-  setnames(snvClonality, old = "gene", new = "known_driver_gene")
+  data.table::setnames(snvClonality, old = "gene", new = "known_driver_gene")
   snvClonality <- snvClonality[, .(chrom, snv_start, ref, alt, Sample, TCN, A, B,
-                                   cn_start, cn_end, Signature, A_time, B_time,
+                                   cn_start, cn_end, t_vaf, Signature, A_time, B_time,
                                    Clonality, known_driver_gene)]
 
   return(snvClonality)

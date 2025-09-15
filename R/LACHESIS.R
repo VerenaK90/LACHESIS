@@ -269,7 +269,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
         }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -310,6 +309,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       clonality_list[[i]] <- snvClonality
       if(!is.null(output.dir)){
         data.table::fwrite(snvClonality, file = file.path(output.dir, x$ID, paste0("SNV_timing_per_SNV_", x$ID, ".txt")), quote = F, col.names = T, sep="\t")
+        plotNB(nb = nb, snvClonality = snvClonality, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
         plotClonality(snvClonality = snvClonality, nbObj = nb, sig.assign = sig.assign, output.file = paste(output.dir, x$ID, "SNV_timing_per_SNV.pdf", sep="/"),...)
       }
 
@@ -419,7 +419,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       if(!is.null(output.dir)){
         plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, ids[i], "VAF_histogram_strat_sig.pdf", sep="/"), ...)
         }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
@@ -454,6 +453,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       clonality_list[[i]] <- snvClonality
       if(!is.null(output.dir)){
         data.table::fwrite(snvClonality, file = file.path(output.dir, ids[i], paste0("SNV_timing_per_SNV_", ids[i], ".txt")), quote = F, col.names = T, sep="\t")
+        plotNB(nb = nb, snvClonality = snvClonality, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, sig.output.file = paste(output.dir, ids[i], "VAF_histogram_strat_sig.pdf", sep="/"), ...)
         plotClonality(snvClonality = snvClonality, nbObj = nb, sig.assign = sig.assign, output.file = paste(output.dir, ids[i], "SNV_timing_per_SNV.pdf", sep="/"),...)
       }
 
