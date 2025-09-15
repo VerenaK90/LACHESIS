@@ -435,7 +435,11 @@ aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", p
 c_data <- LACHESIS::readCNV(aceseq_cn)
 nb <- snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
-LACHESIS::plotNB(nb)
+cl_muts <- LACHESIS::clonalMutationCounter(nb)
+norm_muts <- LACHESIS::normalizeCounts(cl_muts)
+mrca <- LACHESIS::MRCA(norm_muts)
+snvClonality <- LACHESIS::estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+LACHESIS::plotNB(nb = nb, snvClonality = snvClonality)
 ```
 
 #### Example using variants assosciated with specific SBS mutational signatures from vcf file
@@ -447,7 +451,11 @@ aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", p
 c_data <- LACHESIS::readCNV(aceseq_cn) 
 sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS") 
 nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18")) 
-LACHESIS::plotNB(nb, sig.show = TRUE) 
+cl_muts <- LACHESIS::clonalMutationCounter(nb)
+norm_muts <- LACHESIS::normalizeCounts(cl_muts)
+mrca <- LACHESIS::MRCA(norm_muts)
+snvClonality <- LACHESIS::estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+LACHESIS::plotNB(nb = nb, snvClonality = snvClonality, sig.show = TRUE)
 ```
 
 ## Processing Clonal Mutations 

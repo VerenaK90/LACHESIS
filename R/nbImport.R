@@ -212,6 +212,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' @description
 #' Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.
 #' @param nb output generated from \code{\link{nbImport}}.
+#' @param snvClonality output generated from \code{\link{estimateClonality}}.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
 #' @param min.cn maximum copy number to be included in the plotting. Defaults to 2.
 #' @param max.cn maximum copy number to be included in the plotting. Defaults to 4.
@@ -233,7 +234,11 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
-#' plotNB(nb)
+#' cl_muts <- clonalMutationCounter(nb)
+#' norm_muts <- normalizeCounts(cl_muts)
+#' mrca <- MRCA(norm_muts)
+#' snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+#' plotNB(nb = nb, snvClonality = snvClonality)
 #'
 #' # Example using variants assosciated with specific SBS mutational signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
