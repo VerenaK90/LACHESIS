@@ -502,7 +502,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
         y = "Gene"
       ) +
 
-      theme_minimal() +
+      theme_classic() +
       theme(
         axis.text.x = element_text(angle = 45, hjust = 1),
         axis.text.y = element_text(size = 8)

@@ -188,7 +188,7 @@ plotClonality <- function(snvClonality = snvClonality, nbObj = NULL, sig.assign 
       "Postcnv" = "Clonal\n- Post-CNV",
       "C" = "Clonal\n-NOS",
       "SC" = "Subclonal")) +
-    theme_minimal() +
+    theme_classic() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.key.height = unit(1.5, "lines"))
 
   p1_bottom <- ggplot(
@@ -216,7 +216,7 @@ plotClonality <- function(snvClonality = snvClonality, nbObj = NULL, sig.assign 
       "Postcnv" = "Clonal\n- Post-CNV",
       "C" = "Clonal\n-NOS",
       "SC" = "Subclonal")) +
-    theme_minimal() +
+    theme_classic() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.key.height = unit(1.5, "lines"))
 
   gridExtra::grid.arrange(p1_top, p1_bottom, ncol = 1)
@@ -247,10 +247,11 @@ plotClonality <- function(snvClonality = snvClonality, nbObj = NULL, sig.assign 
           "C" = "Clonal\n-NOS",
           "SC" = "Subclonal")) +
         scale_fill_manual(values = sig.colors) +
-        theme_minimal() +
+        theme_classic() +
         theme(
           axis.text.x = element_text(angle = 45, hjust = 1),
-          strip.text = element_text(face = "bold")
+          strip.text = element_text(face = "bold"),
+          strip.background = element_blank()
         )
 
       print(p2)
