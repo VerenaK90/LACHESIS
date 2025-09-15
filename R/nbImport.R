@@ -350,6 +350,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
 
   if (!is.null(output.file)) {
     pdf(output.file, width = 7, height = 9)
+  }
 
     # Copy number plot and clonality histograms
     clonality_plot <- do.call(gridExtra::arrangeGrob, c(clonality_plots, ncol = 2))
@@ -360,8 +361,10 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
     if (sig.show && length(signature_plots) > 0) {
       do.call(gridExtra::grid.arrange, c(signature_plots, ncol = 2))
     }
-    dev.off()
-  }
+
+    if (!is.null(output.file)) {
+      dev.off
+    }
 
 }
 
