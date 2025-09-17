@@ -52,8 +52,6 @@ plotNB(
 \item{sig.show}{plot stratified VAF histogram with assigned mutational signatures.}
 
 \item{...}{further arguments and parameters passed to other LACHESIS functions.}
-
-\item{sig.output.file}{optional, will save the stratified VAF histogram with mutational signatures.}
 }
 \description{
 Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.

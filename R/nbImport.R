@@ -225,7 +225,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' @param samp.name Sample name. Optional. Default NULL
 #' @param output.file optional, will save the plot.
 #' @param sig.show plot stratified VAF histogram with assigned mutational signatures.
-#' @param sig.output.file optional, will save the stratified VAF histogram with mutational signatures.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' # Example using all variants from vcf file

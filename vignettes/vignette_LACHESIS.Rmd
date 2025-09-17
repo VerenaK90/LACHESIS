@@ -246,7 +246,7 @@ head(m_data, n = 1)
 
 ```{r, message=FALSE, warning=FALSE}
 strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
-s_data <- LACHESIS::readVCF(vcf= strelka_vcf, vcf.source = "strelka", filter.value = "LowEVS")
+s_data <- LACHESIS::readVCF(vcf= strelka_vcf, vcf.source = "strelka", filter.value = "PASS")
 head(s_data, n = 1)
 ```
 
@@ -294,7 +294,7 @@ knitr::kable(plotvaf_input, col.names = c("Input", "Definition"), escape = FALSE
 
 ```{r, message=FALSE, warning=FALSE, fig.cap="Figure 1: VAF distribution of SSNVs"}
 strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
-s_data <- LACHESIS::readVCF(vcf= strelka_vcf, vcf.source = "strelka", filter.value = "LowEVS")
+s_data <- LACHESIS::readVCF(vcf= strelka_vcf, vcf.source = "strelka")
 head(s_data, n = 1)
 LACHESIS::plotVAFdistr(s_data)
 ```
@@ -404,7 +404,7 @@ plotNB(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 2, max.cn = 
 library(knitr)
 
 plotnb_input <- data.frame(
-  Column1 = c("*nb*", "*ref.build*", "*min.cn*", "*max.cn*", "*nb.col.abline*", "*nb.col.cn.2*", "*nb.col.cn*", "*nb.col.hist*", "*nb.border*", "*nb.breaks*", "*samp.name*", "*output.file*", "*sig.show*", "*sig.output.file*"),
+  Column1 = c("*nb*", "*ref.build*", "*min.cn*", "*max.cn*", "*nb.col.abline*", "*nb.col.cn.2*", "*nb.col.cn*", "*nb.col.hist*", "*nb.border*", "*nb.breaks*", "*samp.name*", "*output.file*", "*sig.show*"),
   Column2 = c(
     "output from [nbImport](#output-2) function: combined SNV and CNV information",
     "reference genome: hg18, hg19 or hg38",
@@ -418,8 +418,7 @@ plotnb_input <- data.frame(
     "the number of bins in the histograms",
     "the tumor sample name",
     "output filename", 
-    "additional VAF histogram stratified by assigned mutational signatureswill be shown, if set to TRUE.",
-    "output filename for stratified VAF histogram with mutational signatures."
+    "additional VAF histogram stratified by assigned mutational signatureswill be shown, if set to TRUE."
   )
 )
 
@@ -869,12 +868,12 @@ knitr::kable(lachesis_output, col.names = c("Column Name", "Definition"), align 
 
 #### Example with vectors
 
-<!-- ```{r, message=FALSE, warning=FALSE} -->
-<!-- strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS") -->
-<!-- aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS") -->
-<!-- lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS") -->
-<!-- head(lachesis, n=1) -->
-<!-- ``` -->
+```{r, message=FALSE, warning=FALSE}
+strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
+aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
+lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
+head(lachesis, n=1)
+```
 
 #### Example with tab-delimited sample-specification file
 
