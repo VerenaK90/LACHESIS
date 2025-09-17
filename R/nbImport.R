@@ -367,7 +367,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
     }
 
     if (!is.null(output.file)) {
-      dev.off
+      dev.off()
     }
 
 }
