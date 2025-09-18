@@ -310,15 +310,15 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
     snvClonality_split_TCN_B <- split(snvClonality_split_TCN[[cn]], snvClonality_split_TCN[[cn]]$B)
     for (b in names(snvClonality_split_TCN_B)) {
       tcn <- snvClonality_split_TCN_B[[b]]
+      tcn$Clonality <- factor(tcn$Clonality, levels = c("Precnv", "Postcnv", "C", "SC"))
       if (nrow(tcn) == 0) next
       max_count <- max(hist(tcn$t_vaf, breaks = nb.breaks, plot = FALSE)$counts)
       p_clonality <- ggplot(tcn, aes(x = t_vaf, fill = Clonality)) +
-        geom_histogram(bins = nb.breaks, color = NA, position = "stack") +
-        scale_fill_manual(values = clonality_colors, labels = c("Precnv" = "Clonal\n- Pre-CNV", "Postcnv" = "Clonal\n- Post-CNV", "C" = "Clonal\n- NOS", "SC" = "Subclonal")) +
+        geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = T) +
+        scale_fill_manual(values = clonality_colors, labels = c("Precnv" = "Clonal\n- Pre-CNV", "Postcnv" = "Clonal\n- Post-CNV", "C" = "Clonal\n- NOS", "SC" = "Subclonal"), drop = F) +
         scale_x_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1)) +
         labs(x = "VAF", y = "No. of SNVs", title = paste0("CN:", cn, " (", as.numeric(cn) - as.numeric(b), ":", b, ")")) +
-        theme_classic() +
-        theme(legend.text = element_text(size = 8), legend.title = element_text(size = 9), plot.title = element_text(hjust = 0.5, face = "bold"))
+        theme_classic()
       if (!is.null(purity)) {
         expected_vafs <- .expectedClVAF(CN = as.numeric(cn), purity = purity)
         p_clonality <- p_clonality + geom_vline(xintercept = expected_vafs, linetype = "dashed", color = "black")
@@ -337,8 +337,8 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
         tcn <- snvClonality_split_TCN_B[[b]]
         if (nrow(tcn) == 0) next
         p_signature <- ggplot(tcn, aes(x = t_vaf, fill = Signature)) +
-          geom_histogram(bins = nb.breaks, color = NA, position = "stack") +
-          scale_fill_manual(values = sig.colors) +
+          geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = T) +
+          scale_fill_manual(values = sig.colors, drop = F) +
           scale_x_continuous(breaks = seq(0, 1, 0.2)) +
           labs(x = "VAF", y = "No. of SNVs", title = paste0("CN:", cn, " (", as.numeric(cn) - as.numeric(b), ":", b, ")")) +
           theme_classic() +
@@ -357,7 +357,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
   }
 
     # Copy number plot and clonality histograms
-    clonality_plot <- do.call(gridExtra::arrangeGrob, c(clonality_plots, ncol = 2))
+    clonality_plot <- do.call(.grid_arrange_shared_legend, c(clonality_plots, ncol = 2, nrow = ceiling(length(clonality_plots)/2)))
     first_page <- gridExtra::arrangeGrob(cnv_plot, clonality_plot, ncol = 1, heights = c(0.4, 0.6))
     grid::grid.draw(first_page)
 
@@ -454,4 +454,32 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
 
 
 
+# Plot shared legend, taken from https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs
+.grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1, position = c("bottom", "right")) {
 
+  plots <- list(...)
+  position <- match.arg(position)
+  g <- ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
+  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  lheight <- sum(legend$height)
+  lwidth <- sum(legend$width)
+  gl <- lapply(plots, function(x) x + theme(legend.position="none"))
+  gl <- c(gl, ncol = ncol, nrow = nrow)
+
+  combined <- switch(position,
+                     "bottom" = gridExtra::arrangeGrob(do.call(gridExtra::arrangeGrob, gl),
+                                            legend,
+                                            ncol = 1,
+                                            heights = grid::unit.c(unit(1, "npc") - lheight, lheight)),
+                     "right" = gridExtra::arrangeGrob(do.call(gridExtra::arrangeGrob, gl),
+                                           legend,
+                                           ncol = 2,
+                                           widths = grid::unit.c(unit(1, "npc") - lwidth, lwidth)))
+
+  grid::grid.newpage()
+  grid::grid.draw(combined)
+
+  # return gtable invisibly
+  invisible(combined)
+
+}
