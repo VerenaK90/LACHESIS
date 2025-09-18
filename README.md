@@ -1,7 +1,5 @@
-
-
 # &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; (LACHESIS) 
-<img width="150" height="150" alt="Lachesis_logo" src="https://github.com/user-attachments/assets/5c4d8701-72e5-4fa1-9895-8fb83a04edd2" align="left"/>
+<img width="200" height="200" alt="LACHESIS_logo" src="https://github.com/user-attachments/assets/2e73989a-9ce1-48d8-89a9-25d6a81f43c6" align="left"/>
 
 
 &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; (LACHESIS) is an R package to infer tumor evolution during malignant tranformation from bulk whole genome sequencing data. It uses single nucleotide variants and (ideally allele-specific) copy number information as input to compute mutation densities at clonal chromosomal gains and at the tumor's most recent common ancestor. Additionally, &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; tests whether there is evidence for an early common ancestor, oncogenic events acquired prior to malignant transformation. &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; also provides modalities to compare tumor evolution across patient collectives, and to correlate evolutionary timings with outcome. Please refer to our [vignette](vignettes/vignette_LACHESIS.Rmd) fur further information. 
