@@ -307,7 +307,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
       snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = x$ID, purity = x$purity, driver.file = driver.file, ref.build = ref.build)
       clonality_list[[i]] <- snvClonality
       if(!is.null(output.dir)){
-        data.table::fwrite(snvClonality, file = file.path(output.dir, x$ID, paste0("06_SNV_timing_per_SNV_", x$ID, ".txt")), quote = F, col.names = T, sep="\t")
+        data.table::fwrite(snvClonality, file = file.path(output.dir, x$ID, paste0("06_SNV_timing_per_SNV_", x$ID, ".txt")), quote = FALSE, col.names = TRUE, sep="\t")
         plotNB(nb = nb, snvClonality = snvClonality, samp.name = x$ID, output.file = paste(output.dir, x$ID, "02_VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, ...)
         plotClonality(snvClonality = snvClonality, nbObj = nb, sig.assign = sig.assign, output.file = paste(output.dir, x$ID, "07_SNV_timing_per_SNV.pdf", sep="/"),...)
       }
