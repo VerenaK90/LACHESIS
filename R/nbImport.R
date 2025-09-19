@@ -476,9 +476,6 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
                                            ncol = 2,
                                            widths = grid::unit.c(unit(1, "npc") - lwidth, lwidth)))
 
-  grid::grid.newpage()
-  grid::grid.draw(combined)
-
   # return gtable invisibly
   invisible(combined)
 
