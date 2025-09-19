@@ -72,11 +72,11 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
   mutation.time.mrca <- tot.muts.mrca/tot.seglength.mrca*(1 - fp.mean)*10^6
 
   # bootstrap upper and lower limits of the mutation time, while randomly subtracting false positive mutations
-  bootstrapped.mrca.time <- sapply(1:1000, function(x){
-    res <- sample(x = 1:nrow(workObj), size = nrow(workObj), prob = workObj[,Seglength], replace=T)
+  bootstrapped.mrca.time <- vapply(seq_len(1000), function(x){
+    res <- sample(x = seq_len(nrow(workObj)), size = nrow(workObj), prob = workObj[,Seglength], replace=T)
     res <- workObj[res, sum(n_mut_total_clonal)/sum(Seglength)]*10^6
     res <- res - res*rnorm(n = 1, mean = fp.mean, sd = fp.sd)
-  })
+  }, numeric(1))
   mutation.time.mrca.lower <- quantile(bootstrapped.mrca.time, 0.025)
   mutation.time.mrca.upper <- quantile(bootstrapped.mrca.time, 0.975)
 
@@ -102,11 +102,11 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
 
   # adjust p values and cut off at 0.01. Gains with p < 0.01 likely occurred at a different time point
   adj.p <- p.adjust(unlist(workObj[,c("p_total_to_mrca", "p_A_to_mrca", "p_B_to_mrca")]))
-  workObj[,"p_adj_total_to_mrca"] <- adj.p[1:nrow(workObj)]
-  adj.p <- adj.p[-(1:nrow(workObj))]
-  workObj[,"p_adj_A_to_mrca"] <- adj.p[1:nrow(workObj)]
-  adj.p <- adj.p[-(1:nrow(workObj))]
-  workObj[,"p_adj_B_to_mrca"] <- adj.p[1:nrow(workObj)]
+  workObj[,"p_adj_total_to_mrca"] <- adj.p[seq_len(nrow(workObj))]
+  adj.p <- adj.p[-(seq_len(nrow(workObj)))]
+  workObj[,"p_adj_A_to_mrca"] <- adj.p[seq_len(nrow(workObj))]
+  adj.p <- adj.p[-(seq_len(nrow(workObj)))]
+  workObj[,"p_adj_B_to_mrca"] <- adj.p[seq_len(nrow(workObj))]
   rm(adj.p)
 
   # fragments where total mutation count does not agree with mutation density at MRCA (quality control):
@@ -131,10 +131,10 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
 
   if(!is.na(mutation.time.eca)){
     # bootstrap upper and lower limits of the mutation time
-    bootstrapped.eca.time <- sapply(1:1000, function(x){
-      res <- sample(x = 1:length(mut.counts.eca), size = length(mut.counts.eca), prob = seg.length.eca, replace=T)
+    bootstrapped.eca.time <- vapply(seq_len(1000), function(x){
+      res <- sample(x = seq_len(length(mut.counts.eca)), size = length(mut.counts.eca), prob = seg.length.eca, replace=T)
       res <- sum(mut.counts.eca[res])/sum(seg.length.eca[res])*10^6
-    })
+    }, numeric(1))
     mutation.time.eca.lower <- quantile(bootstrapped.eca.time, 0.025)
     mutation.time.eca.upper <- quantile(bootstrapped.eca.time, 0.975)
   }else{
@@ -172,9 +172,9 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
 
   # adjust p values and cut off at 0.01. Gains with p < 0.01 likely occurred at a different time point
   adj.p <- p.adjust(unlist(workObj[,c("p_A_to_eca", "p_B_to_eca")]))
-  workObj[,"p_adj_A_to_eca"] <- adj.p[1:nrow(workObj)]
-  adj.p <- adj.p[-(1:nrow(workObj))]
-  workObj[,"p_adj_B_to_eca"] <- adj.p[1:nrow(workObj)]
+  workObj[,"p_adj_A_to_eca"] <- adj.p[seq_len(nrow(workObj))]
+  adj.p <- adj.p[-(seq_len(nrow(workObj)))]
+  workObj[,"p_adj_B_to_eca"] <- adj.p[seq_len(nrow(workObj))]
   rm(adj.p)
 
 
@@ -209,8 +209,8 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
   if(nrow(workObj[p_adj_A_to_mrca >= 0.01 | p_adj_B_to_mrca >= 0.01,])>0){
     adj.p <- p.adjust(unlist(c(workObj[p_adj_A_to_mrca >= 0.01,p_A_to_eca], workObj[p_adj_B_to_mrca >= 0.01, p_B_to_eca])))
     if(any(workObj$p_adj_A_to_mrca >= 0.01, na.rm = TRUE)){
-      workObj[p_adj_A_to_mrca >= 0.01,"p_adj_A_to_eca"] <- adj.p[1:sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm=T)]
-      adj.p <- adj.p[-(1:sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm=TRUE))]
+      workObj[p_adj_A_to_mrca >= 0.01,"p_adj_A_to_eca"] <- adj.p[seq_len(sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm=T))]
+      adj.p <- adj.p[-(seq_len(sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm=TRUE)))]
     }
     if(any(workObj$p_adj_B_to_mrca >= 0.01, na.rm = TRUE)){
       workObj[p_adj_B_to_mrca >= 0.01,"p_adj_B_to_eca"] <- adj.p
