@@ -50,9 +50,9 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     seed <- sample.int(.Machine$integer.max, 1)
   }
 
-  colnames(cnv)[1:3] <- c("chrom", "start", "end")
+  colnames(cnv)[c(1, 2, 3)] <- c("chrom", "start", "end")
   data.table::setDT(x = cnv, key = c("chrom", "start", "end"))
-  colnames(snv)[1:2] <- c("chrom", "start")
+  colnames(snv)[c(1, 2)] <- c("chrom", "start")
   snv[,end := start]
   data.table::setDT(x = snv, key = c("chrom", "start", "end"))
 
@@ -160,7 +160,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
       }
 
       list(Signature = Signature, Probability = Probability)
-    }, .SDcols = sbs.cols, by = 1:nrow(sv),]
+    }, .SDcols = sbs.cols, by = seq_len(nrow(sv)),]
     sv[, `:=`(Signature = tmp$Signature, Probability = tmp$Probability)]
 
   } else {
@@ -175,7 +175,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
           Probability = .SD[[max.p.sig]]
         )
       }
-    }, .SDcols = sbs.cols, by = 1:nrow(sv)]
+    }, .SDcols = sbs.cols, by = seq_len(nrow(sv))]
   }
   sv = sv[!is.na(Probability),]
 
@@ -281,28 +281,28 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
 
   segs <- attr(nb, "cnv")
   segs <- segs[order(chrom, start)]
-  colnames(segs)[1:3] <- c("Chromosome", "Start_Position", "End_Position")
+  colnames(segs)[c(1, 2, 3)] <- c("Chromosome", "Start_Position", "End_Position")
   segs <- .transformSegments(segmentedData = segs, build = ref.build)
 
   contig_lens <- cumsum(.getContigLens(build = ref.build))
-  contig_lens_dt <- data.table(Chromosome = c(1:22, "X", "Y"), mid = c(contig_lens[1] / 2, (contig_lens[-length(contig_lens)] + contig_lens[-1]) / 2))
+  contig_lens_dt <- data.table(Chromosome = c(seq_len(22), "X", "Y"), mid = c(contig_lens[1] / 2, (contig_lens[-length(contig_lens)] + contig_lens[-1]) / 2))
 
   label_subset <- contig_lens_dt[seq(1, .N, by = 2)]
 
   cnv_plot <- ggplot() +
     geom_rect(data = segs, aes(xmin = Start_Position_updated, xmax = End_Position_updated, ymin = TCN - 0.1, ymax = TCN + 0.1, fill = factor(ifelse(TCN == 2, nb.col.cn.2, nb.col.cn))), color = nb.border,linetype = "dotted") +
     scale_fill_identity() +
-    geom_hline(yintercept = 1:max.cn, linetype = "dashed", color = nb.col.abline, size = 0.3) +
+    geom_hline(yintercept = seq_len(max.cn), linetype = "dashed", color = nb.col.abline, size = 0.3) +
     geom_vline(xintercept = contig_lens, linetype = "dashed", color = nb.col.abline, size = 0.3) +
     scale_x_continuous(breaks = label_subset$mid, labels = label_subset$Chromosome, expand = c(0, 0)) +
-    scale_y_continuous(breaks = 0:max.cn) +
+    scale_y_continuous(breaks = c(0, seq_len(max.cn))) +
     labs(x = "Chromosome", y = "Total CN", title = ifelse(is.null(samp.name), attr(nb, "t.sample"), samp.name)) +
     theme_classic() +
     theme(axis.text.x = element_text(size = 9), plot.title = element_text(hjust = 0.5, face = "bold"))
 
   # Clonality histograms
   snvClonality <- snvClonality[TCN >= min.cn & TCN <= max.cn]
-  snvClonality[, TCN := factor(TCN, levels = 1:max.cn)]
+  snvClonality[, TCN := factor(TCN, levels = seq_len(max.cn))]
   snvClonality_split_TCN <- split(snvClonality, by = "TCN")
 
   clonality_plots <- list()
@@ -420,7 +420,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
   segmentedData$Chromosome <- gsub(pattern = 'X', replacement = '23', x = segmentedData$Chromosome, fixed = TRUE)
   segmentedData$Chromosome <- gsub(pattern = 'Y', replacement = '24', x = segmentedData$Chromosome, fixed = TRUE)
 
-  segmentedData$Chromosome <- factor(x = segmentedData$Chromosome, levels = 1:24, labels = 1:24)
+  segmentedData$Chromosome <- factor(x = segmentedData$Chromosome, levels = seq_len(24), labels = seq_len(24))
 
   segmentedData <- segmentedData[order(Chromosome, Start_Position, decreasing = FALSE)]
 
@@ -434,7 +434,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
 
   chr.lens.sumsum <- cumsum(chr.lens)
 
-  for(i in 2:length(seg.spl)){
+  for(i in seq(2, length(seg.spl))){
 
     x.seg <- seg.spl[[i]]
     if(nrow(x.seg) > 0){
@@ -449,7 +449,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
 
 # Expected clonal VAFs for copy number CN at a given purity on autosomes
 .expectedClVAF <- function(CN, purity){
-  (1:CN)*purity/(purity*CN + 2*(1-purity))
+  seq_len(CN)*purity/(purity*CN + 2*(1-purity))
 }
 
 
@@ -460,7 +460,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
   plots <- list(...)
   position <- match.arg(position)
   g <- ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
-  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  legend <- g[[which(vapply(g, function(x) x$name, character(1)) == "guide-box")]]
   lheight <- sum(legend$height)
   lwidth <- sum(legend$width)
   gl <- lapply(plots, function(x) x + theme(legend.position="none"))
