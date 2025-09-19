@@ -317,8 +317,8 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
             if (nrow(tcn) == 0) next
             max_count <- max(hist(tcn$t_vaf, breaks = nb.breaks, plot = FALSE)$counts)
             p_clonality <- ggplot(tcn, aes(x = t_vaf, fill = Clonality)) +
-                geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = T) +
-                scale_fill_manual(values = clonality_colors, labels = c("Precnv" = "Clonal\n- Pre-CNV", "Postcnv" = "Clonal\n- Post-CNV", "C" = "Clonal\n- NOS", "SC" = "Subclonal"), drop = F) +
+                geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = TRUE) +
+                scale_fill_manual(values = clonality_colors, labels = c("Precnv" = "Clonal\n- Pre-CNV", "Postcnv" = "Clonal\n- Post-CNV", "C" = "Clonal\n- NOS", "SC" = "Subclonal"), drop = FALSE) +
                 scale_x_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1)) +
                 labs(x = "VAF", y = "No. of SNVs", title = paste0("CN:", cn, " (", as.numeric(cn) - as.numeric(b), ":", b, ")")) +
                 theme_classic()
@@ -340,8 +340,8 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
                 tcn <- snvClonality_split_TCN_B[[b]]
                 if (nrow(tcn) == 0) next
                 p_signature <- ggplot(tcn, aes(x = t_vaf, fill = Signature)) +
-                    geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = T) +
-                    scale_fill_manual(values = sig.colors, drop = F) +
+                    geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = TRUE) +
+                    scale_fill_manual(values = sig.colors, drop = FALSE) +
                     scale_x_continuous(breaks = seq(0, 1, 0.2)) +
                     labs(x = "VAF", y = "No. of SNVs", title = paste0("CN:", cn, " (", as.numeric(cn) - as.numeric(b), ":", b, ")")) +
                     theme_classic() +

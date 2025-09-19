@@ -465,7 +465,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
             snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = ids[i], purity = purity[i], driver.file = driver.file, ref.build = ref.build)
             clonality_list[[i]] <- snvClonality
             if (!is.null(output.dir)) {
-                data.table::fwrite(snvClonality, file = file.path(output.dir, ids[i], paste0("06_SNV_timing_per_SNV_", ids[i], ".txt")), quote = F, col.names = T, sep = "\t")
+                data.table::fwrite(snvClonality, file = file.path(output.dir, ids[i], paste0("06_SNV_timing_per_SNV_", ids[i], ".txt")), quote = FALSE, col.names = TRUE, sep = "\t")
                 plotNB(nb = nb, snvClonality = snvClonality, samp.name = ids[i], output.file = paste(output.dir, ids[i], "02_VAF_histogram_strat.pdf", sep = "/"), ref.build = ref.build, ...)
                 plotClonality(snvClonality = snvClonality, nbObj = nb, sig.assign = sig.assign, output.file = paste(output.dir, ids[i], "07_SNV_timing_per_SNV.pdf", sep = "/"), ...)
             }
@@ -1094,7 +1094,7 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL, 
         stop("Please provide survival time if inferring cutpoint de novo.")
     }
 
-    if (infer.cutpoint == TRUE & (sum(!(is.na(lachesis[, ..surv.event]))) < 2 | sum(lachesis[, ..surv.event] != 0, na.rm = T) < 2)) {
+    if (infer.cutpoint == TRUE & (sum(!(is.na(lachesis[, ..surv.event]))) < 2 | sum(lachesis[, ..surv.event] != 0, na.rm = TRUE) < 2)) {
         stop("Please provide survival information if inferring cutpoint de novo.")
     }
     message("Classifying ", entity, " samples.")

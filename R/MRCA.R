@@ -71,7 +71,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
 
     # bootstrap upper and lower limits of the mutation time, while randomly subtracting false positive mutations
     bootstrapped.mrca.time <- sapply(1:1000, function(x) {
-        res <- sample(x = 1:nrow(workObj), size = nrow(workObj), prob = workObj[, Seglength], replace = T)
+        res <- sample(x = 1:nrow(workObj), size = nrow(workObj), prob = workObj[, Seglength], replace = TRUE)
         res <- workObj[res, sum(n_mut_total_clonal) / sum(Seglength)] * 10^6
         res <- res - res * rnorm(n = 1, mean = fp.mean, sd = fp.sd)
     })
@@ -136,7 +136,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
     if (!is.na(mutation.time.eca)) {
         # bootstrap upper and lower limits of the mutation time
         bootstrapped.eca.time <- sapply(1:1000, function(x) {
-            res <- sample(x = 1:length(mut.counts.eca), size = length(mut.counts.eca), prob = seg.length.eca, replace = T)
+            res <- sample(x = 1:length(mut.counts.eca), size = length(mut.counts.eca), prob = seg.length.eca, replace = TRUE)
             res <- sum(mut.counts.eca[res]) / sum(seg.length.eca[res]) * 10^6
         })
         mutation.time.eca.lower <- quantile(bootstrapped.eca.time, 0.025)
@@ -221,7 +221,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, ex
     if (nrow(workObj[p_adj_A_to_mrca >= 0.01 | p_adj_B_to_mrca >= 0.01, ]) > 0) {
         adj.p <- p.adjust(unlist(c(workObj[p_adj_A_to_mrca >= 0.01, p_A_to_eca], workObj[p_adj_B_to_mrca >= 0.01, p_B_to_eca])))
         if (any(workObj$p_adj_A_to_mrca >= 0.01, na.rm = TRUE)) {
-            workObj[p_adj_A_to_mrca >= 0.01, "p_adj_A_to_eca"] <- adj.p[1:sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm = T)]
+            workObj[p_adj_A_to_mrca >= 0.01, "p_adj_A_to_eca"] <- adj.p[1:sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm = TRUE)]
             adj.p <- adj.p[-(1:sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm = TRUE))]
         }
         if (any(workObj$p_adj_B_to_mrca >= 0.01, na.rm = TRUE)) {
