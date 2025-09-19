@@ -18,7 +18,7 @@
 #' @export
 
 
-clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromosomes = c(1:22)){
+clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromosomes = seq_len(22)){
 
   cn_end.y <- . <- cn_start.y <- t_vaf <- chrom <- TCN <- NULL
 
@@ -53,10 +53,10 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     TCN <- as.numeric(as.character(splt[,"TCN"]))
 
     # Expected VAFs at lower and higher-order clonal peaks:
-    clonal.vafs <- unlist(sapply(c(1, B, A), function(x){
+    clonal.vafs <- unlist(vapply(c(1, B, A), function(x){
       purity <- attr(nbObj, "purity")
-      x*purity/(purity*TCN + (1-purity)*2)
-    }))
+      x*purity/(purity*(A + B) + (1-purity)*2)
+    }, numeric(1)))
     clonal.vafs <- unique(sort(clonal.vafs[clonal.vafs>0]))
 
     # order of the clonal peaks
@@ -71,11 +71,11 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     if(nrow(measured.muts)==0){
       warning("No clonal VAFs for TCN = ", TCN, ", A = ", A,", on chromosome ", splt[,"chrom"])
 
-      splt$n_mut_A = 0
-      splt$n_mut_B = 0
-      splt$n_mut_total_clonal = 0
-      splt$n_mut_total_subclonal = nrow(excluded.muts)
-      splt$n_mut_total = nrow(all.muts)
+      splt$n_mut_A <- 0
+      splt$n_mut_B <- 0
+      splt$n_mut_total_clonal <- 0
+      splt$n_mut_total_subclonal <- nrow(excluded.muts)
+      splt$n_mut_total <- nrow(all.muts)
 
       return(splt)
     }
@@ -93,19 +93,19 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
         n_mut_firstpeak <- 0
       }
       if(which.order == A){
-        splt$n_mut_A = n_mut
-        splt$n_mut_B = 0
+        splt$n_mut_A <- n_mut
+        splt$n_mut_B <- 0
       }else if(which.order == B){
-        splt$n_mut_A = 0
-        splt$n_mut_B = n_mut
+        splt$n_mut_A <- 0
+        splt$n_mut_B <- n_mut
       }else{
-        splt$n_mut_A = 0
-        splt$n_mut_B = 0
+        splt$n_mut_A <- 0
+        splt$n_mut_B <- 0
       }
-      splt$n_mut_total_clonal = n_mut
-      splt$n_mut_total_subclonal = n_mut_subclonal
-      splt$n_mut_total = nrow(all.muts)
-      splt$n_mut_firstpeak = n_mut_firstpeak
+      splt$n_mut_total_clonal <- n_mut
+      splt$n_mut_total_subclonal <- n_mut_subclonal
+      splt$n_mut_total <- nrow(all.muts)
+      splt$n_mut_firstpeak <- n_mut_firstpeak
 
       return(splt)
     }
@@ -114,16 +114,16 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     if(TCN %in% c(1,2) & A == 1){
       n_mut <- nrow(measured.muts)*2 # first-order peak is quantified on the upper half only, thus multiply by 2
       n_mut_firstpeak <- n_mut
-      splt$n_mut_A = n_mut/2 # distribute mutations equally between A and B allele
+      splt$n_mut_A <- n_mut/2 # distribute mutations equally between A and B allele
       if(B == 0){
-        splt$n_mut_B = 0
+        splt$n_mut_B <- 0
       }else{
-        splt$n_mut_B = n_mut/2
+        splt$n_mut_B <- n_mut/2
       }
-      splt$n_mut_total_clonal = n_mut
-      splt$n_mut_total_subclonal = nrow(excluded.muts) - n_mut/2
-      splt$n_mut_total = nrow(all.muts)
-      splt$n_mut_firstpeak = n_mut_firstpeak
+      splt$n_mut_total_clonal <- n_mut
+      splt$n_mut_total_subclonal <- nrow(excluded.muts) - n_mut/2
+      splt$n_mut_total <- nrow(all.muts)
+      splt$n_mut_firstpeak <- n_mut_firstpeak
 
       return(splt)
     }
@@ -132,31 +132,31 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     rel.clone.size <- .peak_estimate(measured.muts = measured.muts, clonal.vafs = clonal.vafs)
 
     if(A == B){ # distribute mutations equally to both alleles
-      n_mut_A = nrow(measured.muts)*rel.clone.size[which(clone.order == A)]/2
-      n_mut_B = n_mut_A
+      n_mut_A <- nrow(measured.muts)*rel.clone.size[which(clone.order == A)]/2
+      n_mut_B <- n_mut_A
       n_mut_total_clonal <- n_mut_A + n_mut_B + nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
     }else if(B == 1){
-      n_mut_A = nrow(measured.muts)*rel.clone.size[which(clone.order == A)]
+      n_mut_A <- nrow(measured.muts)*rel.clone.size[which(clone.order == A)]
       n_mut_B <-  nrow(measured.muts)*rel.clone.size[which(clone.order == B)] *2 # first-order peak is quantified on the upper half only, thus multiply by 2
       n_mut_total_clonal <- n_mut_A + n_mut_B
     }else if(B == 0){
-      n_mut_A = nrow(measured.muts)*rel.clone.size[which(clone.order == A)]
+      n_mut_A <- nrow(measured.muts)*rel.clone.size[which(clone.order == A)]
       n_mut_B <-  0
       n_mut_total_clonal <- n_mut_A + n_mut_B + nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
     }else{
-      n_mut_A = nrow(measured.muts)*rel.clone.size[which(clone.order == A)]
+      n_mut_A <- nrow(measured.muts)*rel.clone.size[which(clone.order == A)]
       n_mut_B <-  nrow(measured.muts)*rel.clone.size[which(clone.order == B)]
       n_mut_total_clonal <- n_mut_A + n_mut_B + nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
     }
     n_mut_subclonal <- nrow(excluded.muts) - nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]
     n_mut_firstpeak <- nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
 
-    splt$n_mut_A = n_mut_A
-    splt$n_mut_B = n_mut_B
-    splt$n_mut_total_clonal = n_mut_total_clonal
-    splt$n_mut_total_subclonal = n_mut_subclonal
-    splt$n_mut_total = nrow(all.muts)
-    splt$n_mut_firstpeak = n_mut_firstpeak
+    splt$n_mut_A <- n_mut_A
+    splt$n_mut_B <- n_mut_B
+    splt$n_mut_total_clonal <- n_mut_total_clonal
+    splt$n_mut_total_subclonal <- n_mut_subclonal
+    splt$n_mut_total <- nrow(all.muts)
+    splt$n_mut_firstpeak <- n_mut_firstpeak
 
     return(splt)
   })
@@ -190,13 +190,13 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
 
     p.priors <- seq(0, 1, 0.01)
 
-    posteriors <- sapply(p.priors, function(p){
+    posteriors <- vapply(p.priors, function(p){
       sum(apply(measured.muts, 1, function(x){
         L <-  dbinom(x = as.numeric(as.character(x["t_alt_count"])), size=as.numeric(as.character(x["t_depth"])), prob = clonal.vafs)
         P <- L/sum(L)
         log(sum(c(p, 1-p)*P))
       }))
-    })
+    }, numeric(1))
 
     p.clones <- c(p.priors[which.max(posteriors)], 1-p.priors[which.max(posteriors)])
 
