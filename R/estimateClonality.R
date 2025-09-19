@@ -7,6 +7,7 @@
 #' @param purity tumor cell content.
 #' @param driver.file optional, path to file with "chrom", "snv_start", "ref", "alt", "gene" column containing known driver SNVs.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
+#' @return a data.table with per-SNV clonality assignment
 #' @examples
 #' # Example using variants associated with specific SBS mutational signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -124,6 +125,7 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
 #' @param sig.assign Logical. If TRUE, clonality status distribution will be plotted for each SBS signature.
 #' @param output.file optional, will save the mutational signatures stratified by Clonality.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
+#' @return graphs with clonality status of SNVs per chromosome and if specified, stratified by signature
 #' @examples
 #' # Example using variants associated with specific SBS mutational signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
