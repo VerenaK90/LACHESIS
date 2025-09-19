@@ -91,9 +91,9 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     } else if ("INFO" %in% colnames(v@fix)) {
       info_column <- vcfR::getINFO(v)
       vcf_df <- as.data.frame(data.table::tstrsplit(info_column, split = ";", type.convert = TRUE))
-      colnames(vcf_df) <- sapply(vcf_df[1, ], function(x) strsplit(x, "=")[[1]][1])
+      colnames(vcf_df) <- vapply(vcf_df[1, ], function(x) strsplit(x, "=")[[1]][1], character(1))
       vcf_df <- as.data.frame(lapply(vcf_df, function(col) {
-        sapply(col, function(x) ifelse(grepl("=", x), sub(".*?=", "", x), NA))
+        vapply(col, function(x) ifelse(grepl("=", x), sub(".*?=", "", x), NA), character(1))
       }), stringsAsFactors = FALSE)
     } else {
       stop("Error: Please provide vcf file with FORMAT or INFO column.")
@@ -113,7 +113,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
   }
 
   #Only analyze primary contigs (either with or without the chr prefix)
-  primary_contigs <- c(1:22, c("X", "Y"))
+  primary_contigs <- c(seq_len(22), c("X", "Y"))
   dt <- dt[chrom %in% primary_contigs]
   message("Primary contig vars.   : ", nrow(dt))
 
@@ -226,7 +226,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     info_tum <- unlist(lapply(info_tum_spl, function(y) data.table::tstrsplit(y, split = "=", keep = 2)))
 
     t_dp4 <- as.numeric(unlist(data.table::tstrsplit(info_tum[c("DP4")], split = ",")))
-    data.table::data.table(t_depth = sum(t_dp4), t_ref_count = sum(t_dp4[1:2]), t_alt_count = sum(t_dp4[3:4]), t_vaf = sum(t_dp4[3:4])/sum(t_dp4))
+    data.table::data.table(t_depth = sum(t_dp4), t_ref_count = sum(t_dp4[c(1, 2)]), t_alt_count = sum(t_dp4[c(3, 4)]), t_vaf = sum(t_dp4[c(3, 4)])/sum(t_dp4))
   })
   tum_info_dt <- data.table::rbindlist(tum_info_dt)
 
