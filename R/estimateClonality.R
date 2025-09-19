@@ -69,7 +69,7 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
       posteriors <- priors * likelihoods
       post_class <- names(posteriors)[which.max(posteriors)]
     }
-  }, by = 1:nrow(snvClonality)]
+  }, by = seq_len(nrow(snvClonality))]
 
   snvClonality <- data.table(Sample = ID, snvClonality)
 
@@ -111,7 +111,7 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = 
 }
 
 .expectedClVAF <- function(CN, purity) {
-  (1:CN) * purity / (purity * CN + 2 * (1 - purity))
+  seq_len(CN) * purity / (purity * CN + 2 * (1 - purity))
 }
 
 #' Plotting assigned clonality status for every SNV by chromosome
