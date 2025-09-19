@@ -58,19 +58,24 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
       x*purity/(purity*TCN + (1-purity)*2)
     }))
     clonal.vafs <- unique(sort(clonal.vafs[clonal.vafs>0]))
+
     # order of the clonal peaks
     clone.order <- sort(unique(c(1, B, A)))
     clone.order <- clone.order[clone.order > 0]
 
     # In order to avoid overestimation of the clonal peak due to subclonal SVNs, we quantify the first-order clonal peak on its upper half only
     measured.muts <- nbObj[splt][t_vaf >= min(clonal.vafs)]
+    excluded.muts <- nbObj[splt][t_vaf < min(clonal.vafs)]
+    all.muts <- nbObj[splt]
 
     if(nrow(measured.muts)==0){
       warning("No clonal VAFs for TCN = ", TCN, ", A = ", A,", on chromosome ", splt[,"chrom"])
 
       splt$n_mut_A = 0
       splt$n_mut_B = 0
-      splt$n_mut_total = 0
+      splt$n_mut_total_clonal = 0
+      splt$n_mut_total_subclonal = nrow(excluded.muts)
+      splt$n_mut_total = nrow(all.muts)
 
       return(splt)
     }
@@ -80,8 +85,12 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
       which.order <- clone.order[which.min(measured.muts[,(clonal.vafs - t_vaf)^2])]
       if(which.order==1){
         n_mut <- 2 # first-order peak is quantified on the upper half only, thus multiply by 2
+        n_mut_subclonal <- nrow(excluded.muts) - 1
+        n_mut_firstpeak <- n_mut
       }else{
         n_mut <- 1
+        n_mut_subclonal <- nrow(excluded.muts)
+        n_mut_firstpeak <- 0
       }
       if(which.order == A){
         splt$n_mut_A = n_mut
@@ -93,7 +102,10 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
         splt$n_mut_A = 0
         splt$n_mut_B = 0
       }
-      splt$n_mut_total = n_mut
+      splt$n_mut_total_clonal = n_mut
+      splt$n_mut_total_subclonal = n_mut_subclonal
+      splt$n_mut_total = nrow(all.muts)
+      splt$n_mut_firstpeak = n_mut_firstpeak
 
       return(splt)
     }
@@ -101,13 +113,17 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     ## On monosomic and heterozygous disomic regions, there is only one clonal peak. Thus  assign all mutations to that peak
     if(TCN %in% c(1,2) & A == 1){
       n_mut <- nrow(measured.muts)*2 # first-order peak is quantified on the upper half only, thus multiply by 2
+      n_mut_firstpeak <- n_mut
       splt$n_mut_A = n_mut/2 # distribute mutations equally between A and B allele
       if(B == 0){
         splt$n_mut_B = 0
       }else{
         splt$n_mut_B = n_mut/2
       }
-      splt$n_mut_total = n_mut
+      splt$n_mut_total_clonal = n_mut
+      splt$n_mut_total_subclonal = nrow(excluded.muts) - n_mut/2
+      splt$n_mut_total = nrow(all.muts)
+      splt$n_mut_firstpeak = n_mut_firstpeak
 
       return(splt)
     }
@@ -118,30 +134,44 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
     if(A == B){ # distribute mutations equally to both alleles
       n_mut_A = nrow(measured.muts)*rel.clone.size[which(clone.order == A)]/2
       n_mut_B = n_mut_A
-      n_mut_total <- n_mut_A + n_mut_B + nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
+      n_mut_total_clonal <- n_mut_A + n_mut_B + nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
     }else if(B == 1){
       n_mut_A = nrow(measured.muts)*rel.clone.size[which(clone.order == A)]
-      n_mut_B <-  nrow(measured.muts)*rel.clone.size[which(clone.order == B)] *2# first-order peak is quantified on the upper half only, thus multiply by 2
-      n_mut_total <- n_mut_A + n_mut_B
+      n_mut_B <-  nrow(measured.muts)*rel.clone.size[which(clone.order == B)] *2 # first-order peak is quantified on the upper half only, thus multiply by 2
+      n_mut_total_clonal <- n_mut_A + n_mut_B
     }else if(B == 0){
       n_mut_A = nrow(measured.muts)*rel.clone.size[which(clone.order == A)]
       n_mut_B <-  0
-      n_mut_total <- n_mut_A + n_mut_B + nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
+      n_mut_total_clonal <- n_mut_A + n_mut_B + nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
     }else{
       n_mut_A = nrow(measured.muts)*rel.clone.size[which(clone.order == A)]
       n_mut_B <-  nrow(measured.muts)*rel.clone.size[which(clone.order == B)]
-      n_mut_total <- n_mut_A + n_mut_B + nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
+      n_mut_total_clonal <- n_mut_A + n_mut_B + nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
     }
+    n_mut_subclonal <- nrow(excluded.muts) - nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]
+    n_mut_firstpeak <- nrow(measured.muts)*rel.clone.size[which(clone.order == 1)]*2
 
     splt$n_mut_A = n_mut_A
     splt$n_mut_B = n_mut_B
-    splt$n_mut_total = n_mut_total
-
+    splt$n_mut_total_clonal = n_mut_total_clonal
+    splt$n_mut_total_subclonal = n_mut_subclonal
+    splt$n_mut_total = nrow(all.muts)
+    splt$n_mut_firstpeak = n_mut_firstpeak
 
     return(splt)
   })
 
   splt.countObj <- data.table::rbindlist(l = splt.countObj, use.names = TRUE, fill = TRUE)
+
+  splt.countObj[, `:=`(
+    p_sc = ifelse(n_mut_total > 0, n_mut_total_subclonal / n_mut_total, NA_real_),
+    p_lc = ifelse(A != 1 & B != 1 & n_mut_total > 0,
+                  n_mut_firstpeak / n_mut_total, 0),
+    p_ec = ifelse((TCN > 2 | (TCN == 2 & A != B)) & n_mut_total > 0,
+                   (n_mut_total_clonal - n_mut_firstpeak) / n_mut_total, 0),
+    p_c  = ifelse((A == 1 | B == 1) & n_mut_total > 0,
+                   n_mut_firstpeak / n_mut_total, 0)
+  )]
 
   attr(splt.countObj, "purity") <- attr(nbObj, "purity")
   attr(splt.countObj, "ploidy") <- attr(nbObj, "ploidy")
@@ -190,4 +220,5 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4, chromoso
   return(unlist(p.clones))
 
 }
+
 

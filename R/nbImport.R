@@ -22,7 +22,7 @@
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #'
-#' # Example using variants assosciated with specific SBS mutational signatures from vcf file
+#' # Example using variants associated with specific SBS mutational signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -44,6 +44,10 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
   }
   if(any(is.null(purity), is.null(ploidy))){
     stop("Missing purity and ploidy inputs!")
+  }
+
+  if (is.null(seed)) {
+    seed <- sample.int(.Machine$integer.max, 1)
   }
 
   colnames(cnv)[1:3] <- c("chrom", "start", "end")
@@ -184,7 +188,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     sig.number <- length(sig.select)
     sig.colors <- setNames(.get_sig_colors(sig.number), sig.select)
   } else {
-    sig.options <- unique(sig.data$Signature)
+    sig.options <- unique(sv$Signature)
     sig.number <- length(sig.options)
     sig.colors <- setNames(.get_sig_colors(sig.number), sig.options)
   }
@@ -208,6 +212,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' @description
 #' Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.
 #' @param nb output generated from \code{\link{nbImport}}.
+#' @param snvClonality output generated from \code{\link{estimateClonality}}.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
 #' @param min.cn maximum copy number to be included in the plotting. Defaults to 2.
 #' @param max.cn maximum copy number to be included in the plotting. Defaults to 4.
@@ -220,7 +225,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' @param samp.name Sample name. Optional. Default NULL
 #' @param output.file optional, will save the plot.
 #' @param sig.show plot stratified VAF histogram with assigned mutational signatures.
-#' @param sig.output.file optional, will save the stratified VAF histogram with mutational signatures.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
 #' @examples
 #' # Example using all variants from vcf file
@@ -229,7 +233,11 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
-#' plotNB(nb)
+#' cl_muts <- clonalMutationCounter(nb)
+#' norm_muts <- normalizeCounts(cl_muts)
+#' mrca <- MRCA(norm_muts)
+#' snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+#' plotNB(nb = nb, snvClonality = snvClonality)
 #'
 #' # Example using variants assosciated with specific SBS mutational signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -237,13 +245,20 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 #' c_data <- readCNV(aceseq_cn)
 #' sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
-#' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
-#' plotNB(nb, sig.show = TRUE)
+#' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath)
+#' cl_muts <- clonalMutationCounter(nb)
+#' norm_muts <- normalizeCounts(cl_muts)
+#' mrca <- MRCA(norm_muts)
+#' snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+#' plotNB(nb = nb, snvClonality = snvClonality, sig.show = TRUE)
+#'
 #' @export
 #' @importFrom graphics abline axis box grid hist mtext par rect text title
 #' @import ggplot2
+#' @import gridExtra
+#' @import data.table
 
-plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE, sig.output.file = NULL, ...){
+plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE, ...){
 
   chrom <- start <- t_vaf <- NULL
 
@@ -251,16 +266,18 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
     stop("Missing input. Please provide the output generated by nbImport")
   }
 
+  if(is.null(snvClonality)){
+    stop("Missing input. Please provide the output generated by estimateClonality")
+  }
+
   if(max.cn <= min.cn){
     stop("max.cn must be larger than min.cn")
   }
 
-  if(!is.null(output.file)){
-    pdf(output.file, width = 7, height = 9)
-  }
 
   sig.colors <- attr(nb, "sig.colors")
   purity = attr(nb, "purity")
+  clonality_colors <- c("Precnv" = "#66c2a5", "Postcnv" = "#fc8d62", "C" = "#8da0cb", "SC" = "#e78ac3")
 
   segs <- attr(nb, "cnv")
   segs <- segs[order(chrom, start)]
@@ -268,94 +285,91 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
   segs <- .transformSegments(segmentedData = segs, build = ref.build)
 
   contig_lens <- cumsum(.getContigLens(build = ref.build))
+  contig_lens_dt <- data.table(Chromosome = c(1:22, "X", "Y"), mid = c(contig_lens[1] / 2, (contig_lens[-length(contig_lens)] + contig_lens[-1]) / 2))
 
-  # n_copies <- length(min.cn:max.cn)
-  n_copy_combs <- nrow(unique(nb[TCN >= min.cn & TCN <= max.cn,TCN, B]))
-  n_copy_combs <- n_copy_combs + n_copy_combs%%2
-  lo_mat <- matrix(data = c(rep(1, n_copy_combs/2), 2:(n_copy_combs/2+1), (n_copy_combs/2 + 2):(n_copy_combs+1)), nrow = 3, byrow = TRUE)
-  # lo_mat <- matrix(data = c(rep(1, n_copies), 2:(n_copies+1)), (n_copies + 2), nrow = 3, byrow = TRUE)
-  graphics::layout(mat = lo_mat, heights = c(3, 2, 2))
-  par(mar = c(3, 4, 4, 3))
-  plot(NA, ylim = c(0, max.cn), xlim = c(0, max(contig_lens)), axes = FALSE, xlab = NA, ylab = NA)
-  abline(h = 1:max.cn, v = contig_lens, lty = 2, col = nb.col.abline, lwd = 0.4)
-  rect(xleft = segs$Start_Position_updated, ybottom = segs$TCN-0.1, xright = segs$End_Position_updated, ytop = segs$TCN+0.1, col = ifelse(segs$TCN == 2, nb.col.cn.2, nb.col.cn), border = nb.border, lty = 3)
-  contig_lens_mid <- c(contig_lens[1] / 2,
-                       (contig_lens[-length(contig_lens)] + contig_lens[-1]) / 2)
-  axis(side = 1, at = c(0, contig_lens), labels = FALSE, pos = 0)
-  axis(side = 1, at = contig_lens_mid, labels = c(1:22, "X", "Y"), tick = FALSE, line = -0.5, cex.axis = 0.9)
-  axis(side = 2, at = 0:max.cn, labels = 0:max.cn, las = 2)
-  mtext(text = "Total CN", side = 2, line = 2, cex = 0.9)
-  mtext(text = "Chromosome", side = 1, line = 2, cex = 0.9)
-  title(main = ifelse(is.null(samp.name), yes = attr(nb, "t.sample"), no = samp.name))
+  label_subset <- contig_lens_dt[seq(1, .N, by = 2)]
 
-  nb <- nb[TCN >= min.cn & TCN <= max.cn,]
-  nb$TCN <- factor(nb$TCN, levels = 1:max.cn)
-  nb <- split(nb, nb$TCN)
+  cnv_plot <- ggplot() +
+    geom_rect(data = segs, aes(xmin = Start_Position_updated, xmax = End_Position_updated, ymin = TCN - 0.1, ymax = TCN + 0.1, fill = factor(ifelse(TCN == 2, nb.col.cn.2, nb.col.cn))), color = nb.border,linetype = "dotted") +
+    scale_fill_identity() +
+    geom_hline(yintercept = 1:max.cn, linetype = "dashed", color = nb.col.abline, size = 0.3) +
+    geom_vline(xintercept = contig_lens, linetype = "dashed", color = nb.col.abline, size = 0.3) +
+    scale_x_continuous(breaks = label_subset$mid, labels = label_subset$Chromosome, expand = c(0, 0)) +
+    scale_y_continuous(breaks = 0:max.cn) +
+    labs(x = "Chromosome", y = "Total CN", title = ifelse(is.null(samp.name), attr(nb, "t.sample"), samp.name)) +
+    theme_classic() +
+    theme(axis.text.x = element_text(size = 9), plot.title = element_text(hjust = 0.5, face = "bold"))
 
-  for(cn in seq_along(nb)){
-    nb. <- split(nb[[cn]], nb[[cn]]$B)
-    ploidy = names(nb)[cn]
-    for(b in seq_along(nb.)){
-      tcn <- nb.[[b]]
-      B <- names(nb.)[b]
-      if(nrow(tcn) == 0){
-        par(mar = c(3, 4, 3, 1))
-        plot(NA, xlim = c(0, 1), ylim = c(0, 50), xlab = NA, ylab = NA, col = nb.col.hist, main = NA, frame.plot = FALSE)
-        title(main = paste0("Total CN:", ploidy), cex.main = 1.2)
-        mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
-        mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
-      }else{
-        par(mar = c(3, 4, 3, 1))
-        hist(tcn[,t_vaf], breaks = nb.breaks, xlim = c(0, 1), xlab = NA, ylab = NA, border = nb.border, col = nb.col.hist, main = NA)
-        title(main = paste0("CN:", as.numeric(ploidy), " (", as.numeric(ploidy) - as.numeric(B), ":", as.numeric(B), ")"), cex.main = 1.2)
-        mtext(text = "No. of SNVs", side = 2, line = 2.5, cex = 0.7)
-        mtext(text = "VAF", side = 1, line = 1.8, cex = 0.7)
-        if(!is.null(purity)){
-          abline(v = .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity), lty = 2)
+  # Clonality histograms
+  snvClonality <- snvClonality[TCN >= min.cn & TCN <= max.cn]
+  snvClonality[, TCN := factor(TCN, levels = 1:max.cn)]
+  snvClonality_split_TCN <- split(snvClonality, by = "TCN")
+
+  clonality_plots <- list()
+  for (cn in names(snvClonality_split_TCN)) {
+    snvClonality_split_TCN_B <- split(snvClonality_split_TCN[[cn]], snvClonality_split_TCN[[cn]]$B)
+    for (b in names(snvClonality_split_TCN_B)) {
+      tcn <- snvClonality_split_TCN_B[[b]]
+      tcn$Clonality <- factor(tcn$Clonality, levels = c("Precnv", "Postcnv", "C", "SC"))
+      if (nrow(tcn) == 0) next
+      max_count <- max(hist(tcn$t_vaf, breaks = nb.breaks, plot = FALSE)$counts)
+      p_clonality <- ggplot(tcn, aes(x = t_vaf, fill = Clonality)) +
+        geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = T) +
+        scale_fill_manual(values = clonality_colors, labels = c("Precnv" = "Clonal\n- Pre-CNV", "Postcnv" = "Clonal\n- Post-CNV", "C" = "Clonal\n- NOS", "SC" = "Subclonal"), drop = F) +
+        scale_x_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1)) +
+        labs(x = "VAF", y = "No. of SNVs", title = paste0("CN:", cn, " (", as.numeric(cn) - as.numeric(b), ":", b, ")")) +
+        theme_classic()
+      if (!is.null(purity)) {
+        expected_vafs <- .expectedClVAF(CN = as.numeric(cn), purity = purity)
+        p_clonality <- p_clonality + geom_vline(xintercept = expected_vafs, linetype = "dashed", color = "black")
+      }
+      clonality_plots[[paste0(cn, "_", b)]] <- p_clonality
+    }
+  }
+
+  # Signature histograms
+  signature_plots <- NULL
+  if (sig.show) {
+    signature_plots <- list()
+    for (cn in names(snvClonality_split_TCN)) {
+      snvClonality_split_TCN_B <- split(snvClonality_split_TCN[[cn]], snvClonality_split_TCN[[cn]]$B)
+      for (b in names(snvClonality_split_TCN_B)) {
+        tcn <- snvClonality_split_TCN_B[[b]]
+        if (nrow(tcn) == 0) next
+        p_signature <- ggplot(tcn, aes(x = t_vaf, fill = Signature)) +
+          geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = T) +
+          scale_fill_manual(values = sig.colors, drop = F) +
+          scale_x_continuous(breaks = seq(0, 1, 0.2)) +
+          labs(x = "VAF", y = "No. of SNVs", title = paste0("CN:", cn, " (", as.numeric(cn) - as.numeric(b), ":", b, ")")) +
+          theme_classic() +
+          theme(plot.title = element_text(hjust = 0.5, face = "bold"), legend.text = element_text(size = 8), legend.title = element_text(size = 9))
+        if (!is.null(purity)) {
+          expected_vafs <- .expectedClVAF(CN = as.numeric(cn), purity = purity)
+          p_signature <- p_signature + geom_vline(xintercept = expected_vafs, linetype = "dashed", color = "black")
         }
+        signature_plots[[paste0(cn, "_", b)]] <- p_signature
       }
     }
   }
 
-  if(!is.null(output.file)){
-    dev.off()
+  if (!is.null(output.file)) {
+    pdf(output.file, width = 7, height = 9)
   }
 
-  if (sig.show == TRUE) {
+    # Copy number plot and clonality histograms
+    clonality_plot <- do.call(.grid_arrange_shared_legend, c(clonality_plots, ncol = 2, nrow = ceiling(length(clonality_plots)/2)))
+    first_page <- gridExtra::arrangeGrob(cnv_plot, clonality_plot, ncol = 1, heights = c(0.4, 0.6))
+    grid::grid.draw(first_page)
 
-    if (!is.null(sig.output.file)) {
-      pdf(file = sig.output.file, width = 8, height = 6)  # <--- open PDF
+    # Optional signature histograms
+    if (sig.show && length(signature_plots) > 0) {
+      do.call(gridExtra::grid.arrange, c(signature_plots, ncol = 2))
     }
 
-    for (cn in seq_along(nb)) {
-      nb. <- split(nb[[cn]], nb[[cn]]$B)
-      ploidy <- names(nb)[cn]
-
-      for (b in seq_along(nb.)) {
-        tcn <- nb.[[b]]
-        B <- names(nb.)[b]
-
-        if (nrow(tcn) > 0) {
-          p <- ggplot(tcn, aes(x = t_vaf, fill = Signature)) +
-            geom_histogram(bins = 100, color = "black", position = "stack") +
-            scale_x_continuous(breaks = seq(0, 1, by = 0.2)) +
-            labs(x = "VAF", y = "No. of SNVs") +
-            ggtitle(paste0("CN:", ploidy, " (", as.numeric(ploidy) - as.numeric(B), ":", B, ")")) +
-            scale_fill_manual(values = sig.colors) +
-            theme_minimal()
-          if (!is.null(purity)) {
-            expected_vafs <- .expectedClVAF(CN = as.numeric(names(nb)[cn]), purity = purity)
-            p <- p + geom_vline(xintercept = expected_vafs, linetype = "dashed")
-          }
-          print(p)
-        }
-      }
-    }
-
-    if (!is.null(sig.output.file)) {
+    if (!is.null(output.file)) {
       dev.off()
     }
-  }
+
 }
 
 # Contig lengths for hg19, hg38 and hg18
@@ -438,3 +452,31 @@ plotNB <- function(nb = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col
   (1:CN)*purity/(purity*CN + 2*(1-purity))
 }
 
+
+
+# Plot shared legend, taken from https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs
+.grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1, position = c("bottom", "right")) {
+
+  plots <- list(...)
+  position <- match.arg(position)
+  g <- ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
+  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  lheight <- sum(legend$height)
+  lwidth <- sum(legend$width)
+  gl <- lapply(plots, function(x) x + theme(legend.position="none"))
+  gl <- c(gl, ncol = ncol, nrow = nrow)
+
+  combined <- switch(position,
+                     "bottom" = gridExtra::arrangeGrob(do.call(gridExtra::arrangeGrob, gl),
+                                            legend,
+                                            ncol = 1,
+                                            heights = grid::unit.c(unit(1, "npc") - lheight, lheight)),
+                     "right" = gridExtra::arrangeGrob(do.call(gridExtra::arrangeGrob, gl),
+                                           legend,
+                                           ncol = 2,
+                                           widths = grid::unit.c(unit(1, "npc") - lwidth, lwidth)))
+
+  # return gtable invisibly
+  invisible(combined)
+
+}

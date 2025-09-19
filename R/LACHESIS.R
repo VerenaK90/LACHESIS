@@ -42,6 +42,7 @@
 #' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
 #' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
+#' @param driver.file optional, path to file with "chrom", "snv_start", "ref", "alt", "gene" column containing known driver SNVs.
 #' @param ... further arguments and parameters passed to LACHESIS functions.
 #' @examples
 #' # An example file with sample annotations and meta data
@@ -69,7 +70,7 @@
 #' # Example with a single sample input
 #' strelka_vcf = system.file("extdata","strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59, filter.value = "LowEVS")
+#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
 #'
 #' # Example with multiple sample and data frame input
 #' nbe11_vcf = system.file("extdata","NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -80,6 +81,7 @@
 #'
 #' @seealso \code{\link{MRCA}} \code{\link{clonalMutationCounter}} \code{\link{normalizeCounts}}
 #' @import tidyr
+#' @import ggplot2
 #' @importFrom utils packageVersion
 #' @return a data.table
 #' @export
@@ -91,7 +93,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
                      ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, min.depth = 30,
                      vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
-                     ref.build = "hg19", seed = NULL, filter.value = "PASS", sig.assign = FALSE, sig.file = NULL, assign.method = "sample", sig.select = NULL, min.p = NULL, ...){
+                     ref.build = "hg19", seed = NULL, filter.value = "PASS", sig.assign = FALSE, sig.file = NULL, assign.method = "sample", sig.select = NULL, min.p = NULL, driver.file = NULL, ...){
 
 
   ID <- cnv.file <- snv.file <- fwrite <- NULL
@@ -116,6 +118,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
   if(!ignore.XY){
     incl.chr <- c(incl.chr, "X", "Y")
   }
+
+  clonality_list <- list()
 
   # Collect ECA and MRCA densities for each tumor
   cohort.densities <- data.table::data.table(Sample_ID = character(),
@@ -261,10 +265,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                                                      EFS = x$EFS)
         next
       }
+
       if(!is.null(output.dir)){
-        plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = x$ID, output.file = paste(output.dir, x$ID, "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, min.cn = min.cn, max.cn = max.cn, sig.output.file = paste(output.dir, x$ID, "VAF_histogram_strat_sig.pdf", sep="/"), ...)
-      }
+        plotVAFdistr(snv, output.file = paste(output.dir, x$ID, "01_VAF_histogram.pdf", sep="/"), ...)
+        }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
       norm.counts <- normalizeCounts(countObj = raw.counts)
@@ -289,14 +293,23 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       # Output the result for this sample
       if(!is.null(output.dir)){
-        mrca.densities <- transpose(data.table(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]))
-        )
-        data.table::fwrite(mrca.densities, file = file.path(output.dir, x$ID, paste0("MRCA_densities_", x$ID, ".txt")), quote = FALSE, col.names = FALSE, sep="\t")
-        data.table::fwrite(mrca, file = file.path(output.dir, x$ID, paste0("SNV_timing_per_segment_", x$ID, ".txt")), row.names = FALSE, quote = FALSE, sep = "\t")
+        mrca_colnames <- c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")
+        mrca.densities <- transpose(data.table(unlist(attributes(mrca)[mrca_colnames])))
+        setnames(mrca.densities, mrca_colnames)
+        data.table::fwrite(mrca.densities, file = file.path(output.dir, x$ID, paste0("03_MRCA_densities_", x$ID, ".txt")), quote = FALSE, col.names = TRUE, sep="\t")
+        data.table::fwrite(mrca, file = file.path(output.dir, x$ID, paste0("04_SNV_timing_per_segment_", x$ID, ".txt")), row.names = FALSE, quote = FALSE, sep = "\t")
       }
 
       if(!is.null(output.dir)){
-        plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, ref.build = ref.build, output.file = paste(output.dir, x$ID, "SNV_densities.pdf", sep="/"), ...)
+        plotMutationDensities(mrcaObj = mrca, samp.name = x$ID, output.file = paste(output.dir, x$ID, "05_Evolutionary_timeline.pdf", sep="/"), ...)
+      }
+
+      snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = x$ID, purity = x$purity, driver.file = driver.file, ref.build = ref.build)
+      clonality_list[[i]] <- snvClonality
+      if(!is.null(output.dir)){
+        data.table::fwrite(snvClonality, file = file.path(output.dir, x$ID, paste0("06_SNV_timing_per_SNV_", x$ID, ".txt")), quote = F, col.names = T, sep="\t")
+        plotNB(nb = nb, snvClonality = snvClonality, samp.name = x$ID, output.file = paste(output.dir, x$ID, "02_VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, ...)
+        plotClonality(snvClonality = snvClonality, nbObj = nb, sig.assign = sig.assign, output.file = paste(output.dir, x$ID, "07_SNV_timing_per_SNV.pdf", sep="/"),...)
       }
 
       # Collecting data for log file
@@ -402,10 +415,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
         next
       }
+
       if(!is.null(output.dir)){
-        plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "VAF_histogram.pdf", sep="/"), ...)
-        plotNB(nb = nb, samp.name = ids[i], output.file = paste(output.dir, ids[i], "VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, min.cn = min.cn, max.cn = max.cn, sig.output.file = paste(output.dir, ids[i], "VAF_histogram_strat_sig.pdf", sep="/"), ...)
-      }
+        plotVAFdistr(snv, output.file = paste(output.dir, ids[i], "01_VAF_histogram.pdf", sep="/"), ...)
+        }
 
       raw.counts <- clonalMutationCounter(nbObj = nb, min.cn = min.cn, max.cn = max.cn, chromosomes = incl.chr)
       norm.counts <- normalizeCounts(countObj = raw.counts)
@@ -423,17 +436,25 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
         # Output the result for this sample
         if(!is.null(output.dir)){
-          mrca.densities <- transpose(data.table(unlist(attributes(mrca)[c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")]))
-          )
-          data.table::fwrite(mrca.densities, file = file.path(output.dir, ids[i], paste0("MRCA_densities_", ids[i], ".txt")), quote = F, col.names = F, sep="\t")
-          data.table::fwrite(mrca, file = file.path(output.dir, ids[i], paste0("SNV_timing_per_segment_", ids[i], ".txt")), row.names = FALSE, quote = FALSE, sep = "\t")
+          mrca_colnames <- c("purity", "ploidy", "MRCA_time_mean", "MRCA_time_lower", "MRCA_time_upper", "ECA_time_mean", "ECA_time_lower", "ECA_time_upper")
+          mrca.densities <- transpose(data.table(unlist(attributes(mrca)[mrca_colnames])))
+          setnames(mrca.densities, mrca_colnames)
+          data.table::fwrite(mrca.densities, file = file.path(output.dir, ids[i], paste0("03_MRCA_densities_", ids[i], ".txt")), quote = FALSE, col.names = TRUE, sep="\t")
+          data.table::fwrite(mrca, file = file.path(output.dir, ids[i], paste0("04_SNV_timing_per_segment_", ids[i], ".txt")), row.names = FALSE, quote = FALSE, sep = "\t")
         }
 
         if(!is.null(output.dir)){
-          plotMutationDensities(mrcaObj = mrca, samp.name = ids[i], ref.build = ref.build, output.file = paste(output.dir, ids[i], "SNV_densities.pdf", sep="/"), ...)
+          plotMutationDensities(mrcaObj = mrca, samp.name = ids[i], output.file = paste(output.dir, ids[i], "05_Evolutionary_timeline.pdf", sep="/"), ...)
         }
       }
 
+      snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = ids[i], purity = purity[i], driver.file = driver.file, ref.build = ref.build)
+      clonality_list[[i]] <- snvClonality
+      if(!is.null(output.dir)){
+        data.table::fwrite(snvClonality, file = file.path(output.dir, ids[i], paste0("06_SNV_timing_per_SNV_", ids[i], ".txt")), quote = F, col.names = T, sep="\t")
+        plotNB(nb = nb, snvClonality = snvClonality, samp.name = ids[i], output.file = paste(output.dir, ids[i], "02_VAF_histogram_strat.pdf", sep="/"), ref.build = ref.build, ...)
+        plotClonality(snvClonality = snvClonality, nbObj = nb, sig.assign = sig.assign, output.file = paste(output.dir, ids[i], "07_SNV_timing_per_SNV.pdf", sep="/"),...)
+      }
 
       this.tumor.density <- data.table::data.table(Sample_ID = ids[i],
                                                    MRCA_time_mean = attributes(mrca)$MRCA_time_mean,
@@ -452,6 +473,43 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
 
       cohort.densities <- merge(cohort.densities, this.tumor.density, all=TRUE)
     }
+  }
+
+  # Plot clonality distribution of SNVs
+  clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
+  if (!is.null(output.dir)) {
+    output.file <- paste0(output.dir, "SNV_timing_per_SNV_cohort.txt")
+    fwrite(clonality_cohort, output.file, sep = "\t")
+
+    clonality_colors <- c("Precnv" = "#66c2a5", "Postcnv" = "#fc8d62", "C" = "#8da0cb", "SC" = "#e78ac3")
+
+    driver_dt <- clonality_cohort[!is.na(known_driver_gene) & trimws(known_driver_gene) != ""]
+    driver_dt[, Sample := factor(Sample)]
+
+    p1 <- ggplot(driver_dt, aes(x = Sample, y = known_driver_gene, fill = Clonality)) +
+      geom_tile(color = "white") +
+      scale_fill_manual(
+        values = clonality_colors,
+        labels = c(
+          "Precnv" = "Clonal\n- Pre-CNV",
+          "Postcnv" = "Clonal\n- Post-CNV",
+          "C" = "Clonal\n-NOS",
+          "SC" = "Subclonal")) +
+      labs(
+        title = "Clonality of Driver Mutations",
+        x = "Patient",
+        y = "Gene"
+      ) +
+
+      theme_classic() +
+      theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 8)
+      )
+
+    pdf(paste(output.dir, "Driver_mutations_cohort.pdf"))
+    print(p1)
+    dev.off()
   }
 
   # Plot the distribution of Mutation densities at ECA and MRCA

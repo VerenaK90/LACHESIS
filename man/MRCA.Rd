@@ -33,7 +33,7 @@ a data table reporting the assignment of individual segments to ECA or MRCA. Mut
 \item{\code{Seglength}}{Number of bps with the given copy number configuration on this chromosome}
 \item{\code{n_mut_A}}{Normalized number of mutations present on all A alleles}
 \item{\code{n_mut_B}}{Normalized number of mutations present on all B alleles}
-\item{\code{n_mut_total}}{Normalized number of mutations per single copy of the segment}
+\item{\code{n_mut_total_clonal}}{Normalized number of mutations per single copy of the segment}
 \item{\code{density_A_mean}}{Normalized mean density of mutations present on all A alleles (1/Mb)}
 \item{\code{density_B_mean}}{Normalized mean density of mutations present on all B alleles (1/Mb)}
 \item{\code{density_total_mean}}{Normalized mean density of mutations per single copy of the segment (1/Mb)}
