@@ -31,22 +31,15 @@ knitr::opts_chunk$set(tidy = FALSE,
 
 # Installation
 
-To install this package, start R (version "4.4") and enter:
+To install this package, start R (version "4.5") and enter:
 
 ```{r install, eval=FALSE}
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-devtools::install_github("VerenaK90/LACHESIS")
+BiocManager::install("LACHESIS")
 ```
 
-<!-- I took this out for now as we are not yet on Bioconductor -->
-<!-- ```{r install, eval=FALSE} -->
-<!-- if (!require("BiocManager", quietly = TRUE)) -->
-<!--     install.packages("BiocManager") -->
-
-<!-- BiocManager::install("LACHESIS") -->
-<!-- ``` -->
 For older versions of R, please refer to the appropriate [Bioconductor release.](https://bioconductor.org/about/release-announcements/)
 
 # Citation
@@ -119,7 +112,7 @@ If total copy number information is available but the number of A and B alleles 
 
 #### Input 
 
-```
+```{r, eval = FALSE}
 readCNV(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL)
 ```
 
@@ -265,7 +258,7 @@ The `plotVAFdistr` function generates a VAF histogram of somatic SNVs. If `showd
 
 #### Input  
 
-```
+```{r, eval = FALSE}
 plotVAFdistr(vaf = NULL, vaf.interval = 0.05, t_sample = NULL, vaf.show.counts = FALSE, vaf.show.density = TRUE, vaf.col = "#34495e", vaf.border = "#bdc3c7", srtcounts = 45, output.file = NULL)
 ```
 
@@ -305,9 +298,10 @@ The function `nbImport` integrates CNV and SNV information into a single datatab
 
 #### Input  
 
-```
+```{r, eval = FALSE}
 nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL) 
 ```
+
 ```{r, echo=FALSE}
 library(knitr)
 
@@ -396,7 +390,7 @@ The bottom plots show VAF histograms of SNVs, stratified by copy number and mino
 
 #### Input 
 
-```
+```{r, eval = FALSE}
 plotNB(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE)
 ```
 
@@ -465,7 +459,7 @@ This function counts the number of clonal mutations residing on a single or mult
 
 #### Input
 
-```
+```{r, eval = FALSE}
 clonalMutationCounter(nbObj = NULL, min.cn = 1, max.cn = 4, chromosomes = c(1:22)) 
 ```
 
@@ -524,7 +518,7 @@ head(cl_muts, n = 1)
 
 This function translates the clonal mutation counts obtained with `clonalMutationCounter` into "molecular time". The normalized counts correspond to the number of mutations accumulated between conception/gastrulation and MRCA/copy number gain on a single DNA copy. 
 
-#### 
+#### Input
 
 ```{r, eval=FALSE}
 normalizeCounts(countObj)
@@ -596,7 +590,7 @@ This function estimates mutation densities at MRCA and, if present, ECA from the
 
 #### Input Parameters 
 
-```
+```{r, eval = FALSE}
 MRCA(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL)
 ```
 
@@ -693,7 +687,7 @@ This function visualizes the results of the MRCA analysis. The top plot presents
 
 #### Input 
 
-```
+```{r, eval = FALSE}
 plotMutationDensities(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.xaxis = NULL, mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL)
 ```
 
@@ -741,7 +735,7 @@ This function determines the clonality status of each SNV, classifying them as c
  
 #### Input 
 
-```
+```{r, eval = FALSE}
 estimateClonality(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = NULL)
 ```
 
@@ -783,7 +777,7 @@ This function visualizes the output from estimateClonality, providing an overvie
 
 #### Input 
 
-```
+```{r, eval = FALSE}
 plotClonality(snvClonality = snvClonality, nb = NULL, sig.assign = FALSE, output.file = NULL)
 ```
 
@@ -826,7 +820,7 @@ Input can be specified as vectors or in a tab-delimited **sample-specification f
 
 #### Input 
 
-```
+```{r, eval = FALSE}
 LACHESIS(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.files = NULL, snv.files = NULL, 
                       vcf.source = NULL, purity = NULL, ploidy = NULL, cnv.chr.col = NULL, cnv.start.col = NULL, 
                       cnv.end.col = NULL, cnv.A.col = NULL, cnv.B.col = NULL, cnv.tcn.col = NULL, age = NULL,
@@ -932,7 +926,7 @@ The function `plotLACHESIS` plots cumulative distributions of SSNV densities at 
 
 #### Input 
 
-```
+```{r, eval = FALSE}
 plotLachesis(lachesis = NULL, lach.suppress.outliers = FALSE, lach.log.densities = FALSE, lach.col.multi = "#176A02", lach.border = NULL, binwidth = NULL, lach.col.zero = "#4FB12B", output.file = NULL)
 ```
 
@@ -993,7 +987,7 @@ This function takes SNV densities as input and correlates them with clinical dat
 
 #### Input 
 
-```
+```{r, eval = FALSE}
 plotClinicalCorrelations(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE,  output.file = NULL)
 ```
 
@@ -1029,7 +1023,7 @@ The function `plotSurvival` plots correlation between SNV density timing at MRCA
 
 #### Input
 
-```
+```{r, eval = FALSE}
 plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
 ```
 
@@ -1068,7 +1062,7 @@ The function `classifyLACHESIS` classifies a tumor's start of clonal outgrowth d
 
 #### Input
 
-```
+```{r, eval = FALSE}
 classifyLACHESIS(lachesis, mrca.cutpoint = NULL, output.dir = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = 'OS.time', surv.event = 'OS')
 ```
 
@@ -1132,22 +1126,22 @@ knitr::include_graphics(system.file("extdata", "VAF_negative_example.png", packa
 
 see [Importing Copy Number Information](#importing-copy-number-information-readcnv) for details
 
-```
+```{r, eval = FALSE}
 warning("Removing x segments with start > end")
 ```
 This warning indicates that there are rows inside the provided cnv file where the end position is less than the start position. Corresponding genomic segments will be removed from the data. 
 
-```
+```{r, eval = FALSE}
 warning("Less than 10% of the genome with valid copy number information.")
 ```
 The total length of all valid genomic segments in the cnv file is less than 300 million base pairs (3*10^8 bp). The function assumes a default human genome size of 3 × 10⁹ bp. 
 
-```
+```{r, eval = FALSE}
 warning("No *x* identifier provided, assuming *y*")
 ```
 The user should specify the column names or index for the cnv file (cnv.x.col/ x.col). If no identifiers are provided, the function will attempt to identify the relevant columns using standard nomenclature. Please verify that the expected data for x is located in column y.
 
-```
+```{r, eval = FALSE}
 warning("Allele information is not provided and will be assumed 1:1 in disomic regions, 2:1 in trisomic regions, 2:2 in tetrasomic regions, ... .")
 ```
 This warning appears when no major allele column (cnv.A.col/ A.col) is specified or cannot be inferred using standard nomenclature. LACHESIS will assume that the total copy number arose through the minimal number of genomic changes. However, this assumption may lead to incorrect results in some cases.
@@ -1157,7 +1151,7 @@ To ensure accuracy, we strongly recommend providing allele-specific copy number 
 
 see [Assigning copy number states to single nucleotide variants](#assining-copy-number-states-to-single-nucleotide-variants-nbimport) for details
 
-```
+```{r, eval = FALSE}
 warning("Removed x variants with no copy number overlaps")
 ```
 After integrating overlapping snv and cnv data, x variants with empty cnv start column were removed. 
@@ -1166,7 +1160,7 @@ After integrating overlapping snv and cnv data, x variants with empty cnv start 
 
 see [Estimating Mutation Densities at ECA/MRCA](#estimating-mutation-densities-at-ecamrca-mrca) for details
 
-```
+```{r, eval = FALSE}
 warning(sum(workObj$MRCA_qual == "FAIL"), " segments did not conform to the mutation density at MRCA.")
 ```
 
@@ -1175,32 +1169,32 @@ warning(sum(workObj$MRCA_qual == "FAIL"), " segments did not conform to the muta
 
 see [LACHESIS Wrapper Function](#lachesis-wrapper-function) for details
 
-```
+```{r, eval = FALSE}
 warning("No sample name provided for samples x; sample name was set to 1 - y")
 ```
 This warning message specifies samples where no ID was provided, the total number of missing IDs (y) was calculated and IDs were specified as numeric values (1, 2, 3, ..., y). 
 
-```
+```{r, eval = FALSE}
 warning("No CNV/ SNV file provided for sample(s); sample(s) will be excluded")
 ```
 The cnv/ snv file is missing for the specified sample, therefor it was excluded from the analysis. Please refer to [Input Data](#input-data) for details on data requirements. 
 
-```
+```{r, eval = FALSE}
 warning("No output directory specified. Per-sample output will be discarded.")
 ```
 If the output directory (output.dir) was not specified, [LACHESIS Output](#package-output) will not be displayed or saved.
 
-```
+```{r, eval = FALSE}
 warning("Insufficient data for sample ", x$ID)
 ```
 This warning appears if the datatable generated at [nbImport](#output-2) is empty.
 
-```
+```{r, eval = FALSE}
 warning("No column identifier  provided for samples x; column name will be inferred")
 ```
 The parameter vcf.tumor.ids should be specified by the user, it will be passed to [readVCF](#importing-variant-information-readvcf) as t.sample, indicating the tumor sample name.
 
-```
+```{r, eval = FALSE}
 warning("Too few segments to estimate MRCA density for sample x.")
 ```
 The datatable generated at [normalizeCounts](#output-4) only has one row, no reliable estimation of MRCA density is possible. 
@@ -1209,7 +1203,7 @@ The datatable generated at [normalizeCounts](#output-4) only has one row, no rel
 
 see [Plotting Cohort Analysis](#plotting-cohort-analysis-plotlachesis) for details
 
-```
+```{r, eval = FALSE}
 warning("Cannot produce summary statistics for a single case. Returning null.")
 ```
 This warning messages indicates that the data for a single patient was specified to LACHESIS and therefore cumulative distributions of SSNV densities at ECA and MRCA across a cohort can not be plotted. 
@@ -1218,12 +1212,12 @@ This warning messages indicates that the data for a single patient was specified
 
 see [Plotting Cohort Analysis](#plotting-cohort-analysis-plotlachesis), [Plotting Clincal Correlations](#plotting-clincal-correlations-plotclinicalcorrelations), [Plotting Survival](#plotting-survival-plotsurvival) for details
 
-```
+```{r, eval = FALSE}
 warning("Removing x samples with missing MRCA density estimate.")
 ```
 The column *MRCA_time_mean* of [LACHESIS wrapper function](#output-7) output for the specified samples is empty; these samples will not be considered for further analysis. 
 
-```
+```{r, eval = FALSE}
 warning("No sample with MRCA density estimate provided. Returning zero.")
 ```
 [LACHESIS wrapper function](#output-7) output is empty; no further analysis will be performed 
@@ -1232,12 +1226,12 @@ warning("No sample with MRCA density estimate provided. Returning zero.")
 
 see [Plotting Survival](#plotting-survival-plotsurvival) for details
 
-```
+```{r, eval = FALSE}
 warning("Removing x samples with missing survival time.")
 ```
 The column named according to parameter `surv.time` of [LACHESIS wrapper function](#output-7) output for specified samples is empty; these samples will not be considered for further analysis. 
 
-```
+```{r, eval = FALSE}
 warning("No survival events in cohort Returning zero.")
 ```
 The column named according to parameter `surv.event` of [LACHESIS wrapper function](#output-7) is empty; no further analysis will be performed. 
