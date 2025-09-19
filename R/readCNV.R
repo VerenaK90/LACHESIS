@@ -32,7 +32,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 
     ## Check input format
     if (is.null(cn.info)) {
-        stop("Error: missing cn.info! Please provide path to file with copy number information.")
+        stop("Missing cn.info! Please provide path to file with copy number information.")
     }
 
     ## Read cn.info and assume column index if not provided
@@ -61,7 +61,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     cn.info <- cn.info[!is.na(cn.info[[tcn.col]]), ]
 
     if (nrow(cn.info) == 0) {
-        stop("Error: no segments with copy number information provided.")
+        stop("No segments with copy number information provided.")
     }
 
     message("********** Removing ", sum(cn.info[[tcn.col]] > max.cn), " segments with copy number > ", max.cn, "...")
@@ -69,7 +69,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
     cn.info <- cn.info[cn.info[[tcn.col]] <= max.cn & cn.info[[tcn.col]] > 0, ]
 
     if (nrow(cn.info) == 0) {
-        stop("Error: no segments with copy number information greater 0 and <= ", max.cn)
+        stop("No segments with copy number information greater 0 and <= ", max.cn)
     }
 
     if (estimate.alleles) { # assume 1:1, 2:1, 2:2, ... configuration
@@ -155,10 +155,9 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
 .format_cnv_data <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL) {
     if (is.data.frame(cn.info) || is.data.table(cn.info)) {
         cn.info <- data.table::setDT(cn.info)
-        print("datatable")
     } else if (is.character(cn.info)) {
         if (!file.exists(cn.info)) {
-            stop(paste("Please provide a valid CNV file path.", cn.info, "does not exist."))
+            stop("Please provide a valid CNV file path.", cn.info, "does not exist.")
         } else {
             cn.info <- data.table::fread(file = cn.info, sep = "\t", header = TRUE)
         }
@@ -176,10 +175,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
         chr.col <- match.arg(arg = chr.col, choices = colnames(cn.info), several.ok = FALSE)
     } else if (is.numeric(chr.col)) {
         if (chr.col > ncol(cn.info)) {
-            stop("Error: 'arg' should be between 1 and ", ncol(cn.info))
+            stop("'arg' should be between 1 and ", ncol(cn.info))
         }
     } else {
-        stop("Error: 'arg' should be string or numeric.")
+        stop("'arg' should be string or numeric.")
     }
 
     if (is.null(start.col) || is.na(start.col)) {
@@ -190,10 +189,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
         start.col <- match.arg(arg = start.col, choices = colnames(cn.info), several.ok = FALSE)
     } else if (is.numeric(start.col)) {
         if (start.col > ncol(cn.info)) {
-            stop("Error: 'arg' should be between 1 and ", ncol(cn.info))
+            stop("'arg' should be between 1 and ", ncol(cn.info))
         }
     } else {
-        stop("Error: 'arg' should be string or numeric.")
+        stop("'arg' should be string or numeric.")
     }
 
     if (is.null(end.col) || is.na(end.col)) {
@@ -204,10 +203,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
         end.col <- match.arg(arg = end.col, choices = colnames(cn.info), several.ok = FALSE)
     } else if (is.numeric(end.col)) {
         if (end.col > ncol(cn.info)) {
-            stop("Error: 'arg' should be between 1 and ", ncol(cn.info))
+            stop("'arg' should be between 1 and ", ncol(cn.info))
         }
     } else {
-        stop("Error: 'arg' should be string or numeric.")
+        stop("'arg' should be string or numeric.")
     }
 
 
@@ -233,10 +232,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
         A.col <- match.arg(arg = A.col, choices = colnames(cn.info), several.ok = FALSE)
     } else if (is.numeric(A.col)) {
         if (A.col > ncol(cn.info)) {
-            stop("Error: 'arg' should be between 1 and ", ncol(cn.info))
+            stop("'arg' should be between 1 and ", ncol(cn.info))
         }
     } else {
-        stop("Error: 'arg' should be string or numeric.")
+        stop("'arg' should be string or numeric.")
     }
 
     if (is.null(B.col) || is.na(B.col)) {
@@ -259,10 +258,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
         B.col <- match.arg(arg = B.col, choices = colnames(cn.info), several.ok = FALSE)
     } else if (is.numeric(B.col)) {
         if (B.col > ncol(cn.info)) {
-            stop("Error: 'arg' should be between 1 and ", ncol(cn.info))
+            stop("'arg' should be between 1 and ", ncol(cn.info))
         }
     } else {
-        stop("Error: 'arg' should be string or numeric.")
+        stop("'arg' should be string or numeric.")
     }
 
     if (is.null(tcn.col) || is.na(tcn.col)) {
@@ -274,7 +273,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
             tcn.col <- colnames(cn.info)[grepl("\\btcn\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcnt\\b", colnames(cn.info), ignore.case = TRUE) |
                 grepl("\\bcopynumber\\b", colnames(cn.info), ignore.case = TRUE) | grepl("\\bcopy number\\b", colnames(cn.info), ignore.case = TRUE)] # try to match with standard nomenclature
             if (length(tcn.col) == 0) {
-                stop("Error: TCN identifier is not provided and could not be inferred!")
+                stop("TCN identifier is not provided and could not be inferred!")
             }
             tcn.col <- tcn.col[1]
             warning("TCN identifier is not provided, assuming ", tcn.col)
@@ -283,22 +282,22 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = 
         tcn.col <- match.arg(arg = tcn.col, choices = colnames(cn.info), several.ok = FALSE)
     } else if (is.numeric(tcn.col)) {
         if (tcn.col > ncol(cn.info)) {
-            stop("Error: 'arg' should be between 1 and ", ncol(cn.info))
+            stop("'arg' should be between 1 and ", ncol(cn.info))
         }
     } else {
-        stop("Error: 'arg' should be string or numeric.")
+        stop("'arg' should be string or numeric.")
     }
 
     cn.info[[chr.col]] <- as.character(cn.info[[chr.col]])
 
     if (!is.character(cn.info[[chr.col]])) {
-        stop("Error: chromosome information must be string or numeric.")
+        stop("Chromosome information must be string or numeric.")
     } else if (!(is.character(cn.info[[tcn.col]]) | is.numeric(cn.info[[tcn.col]]))) {
-        stop("Error: total copy number must be string or numeric.")
+        stop("Total copy number must be string or numeric.")
     } else if (!is.numeric(cn.info[[start.col]])) {
-        stop("Error: start position must be numeric.")
+        stop("Start position must be numeric.")
     } else if (!is.numeric(cn.info[[end.col]])) {
-        stop("Error: end position must be numeric.")
+        stop("End position must be numeric.")
     }
 
     return(list(cn.info = cn.info, chr.col = chr.col, start.col = start.col, end.col = end.col, A.col = A.col, B.col = B.col, tcn.col = tcn.col, estimate.alleles = estimate.alleles))

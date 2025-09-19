@@ -945,7 +945,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.sup
 
 plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = "OS.time", surv.event = "OS", surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival") {
     if (is.null(lachesis)) {
-        stop("Error: 'lachesis' dataset must be provided.")
+        stop("'lachesis' dataset must be provided.")
     }
 
     if (any(is.na(lachesis$MRCA_time_mean))) {
@@ -954,11 +954,11 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
     }
 
     if (!surv.time %in% colnames(lachesis)) {
-        stop("Error: please provide a valid column name for `surv.time`.")
+        stop("Please provide a valid column name for `surv.time`.")
     }
 
     if (!surv.event %in% colnames(lachesis)) {
-        stop("Error: please provide a valid column name for `surv.event`.")
+        stop("Please provide a valid column name for `surv.event`.")
     }
 
     if (any(is.na(lachesis[, ..surv.time]))) {
@@ -1085,7 +1085,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
 
 classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL, infer.cutpoint = FALSE, entity = "neuroblastoma", surv.time = "OS.time", surv.event = "OS") {
     if (is.null(lachesis)) {
-        stop("Error: 'lachesis' dataset must be provided.")
+        stop("'lachesis' dataset must be provided.")
     }
     entities <- c("neuroblastoma")
     entity <- match.arg(arg = entity, choices = entities, several.ok = FALSE)
