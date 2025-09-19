@@ -153,9 +153,9 @@ readVCF <- function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.va
                 dalt[, t_ref_count := t_depth - A]
                 dalt[, t_alt_count := A]
             } else if (alt_base == "T") {
-                dalt[, t_vaf := T / t_depth]
-                dalt[, t_ref_count := t_depth - T]
-                dalt[, t_alt_count := T]
+                dalt[, t_vaf := `T` / t_depth]
+                dalt[, t_ref_count := t_depth - `T`]
+                dalt[, t_alt_count := `T`]
             } else if (alt_base == "G") {
                 dalt[, t_vaf := G / t_depth]
                 dalt[, t_ref_count := t_depth - G]
