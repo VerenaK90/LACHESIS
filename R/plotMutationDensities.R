@@ -114,7 +114,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
 
 
   # Timeline summary
-  chrom_all <- as.character(1:22)
+  chrom_all <- as.character(seq_len(22))
   chrom_palette <- c("#1F77B4FF", "#F15854", "#9467BDFF", "#E73F74FF", "#FFBB78FF",
                      "#2D6D66FF", "#98DF8AFF", "#D62728FF", "#FF9896FF", "#A0CBE8FF",
                      "#8C564BFF", "#C49C94FF", "#F7B6D2FF", "#7F7F7FFF", "#E377C2FF",
@@ -174,18 +174,18 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   chr_label <- paste0("chr", mrcaObj$chrom, mrcaObj$chr_region, " (", mrcaObj$A, ":", mrcaObj$B, ")")
 
   # A alleles:
-  if(nrow(mrcaObj[A>1,])>0){
-    points(mrcaObj[A>1,density_A_mean], 1:mrcaObj[,sum(A>1)], col=chrom_colors[mrcaObj[A > 1, chrom]], pch=signs[mrcaObj[A>1,A_time]])
-    arrows(x0=mrcaObj[A>1,density_A_lower], y0=1:mrcaObj[,sum(A>1)], x1=mrcaObj[A>1,density_A_upper], y1=1:mrcaObj[,sum(A>1)], code=3, angle=90, length=0, col=chrom_colors[mrcaObj[A > 1, chrom]], lwd=1)
-    text(x = mrcaObj[A>1, density_A_upper], y = 1:mrcaObj[, sum(A>1)], labels = chr_label[mrcaObj$A > 1], cex = 0.6, pos = 4)
-    legend("topright",box.lwd = 0, pch=signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time], legend = names(signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time]), cex = 0.7)
+  if(nrow(mrcaObj[A > 1,])>0){
+    points(mrcaObj[A > 1,density_A_mean], seq_len(mrcaObj[,sum(A > 1)]), col=chrom_colors[mrcaObj[A > 1, chrom]], pch = signs[mrcaObj[A > 1, A_time]])
+    arrows(x0 = mrcaObj[A > 1,density_A_lower], y0 = seq_len(mrcaObj[,sum(A > 1)]), x1=mrcaObj[A > 1,density_A_upper], y1 = seq_len(mrcaObj[,sum(A > 1)]), code = 3, angle = 90, length = 0, col = chrom_colors[mrcaObj[A > 1, chrom]], lwd = 1)
+    text(x = mrcaObj[A > 1, density_A_upper], y = seq_len(mrcaObj[, sum(A > 1)]), labels = chr_label[mrcaObj$A > 1], cex = 0.6, pos = 4)
+    legend("topright",box.lwd = 0, pch = signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time], legend = names(signs[names(signs) %in% mrcaObj$A_time | names(signs) %in% mrcaObj$B_time]), cex = 0.7)
   }
 
   # B alleles:
-  if(nrow(mrcaObj[B>1 & B!=A,])>0){
-    points(mrcaObj[B>1 & B!=A,density_B_mean], (y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], pch=signs[mrcaObj[B>1 & B!=A,B_time]])
-    arrows(x0=mrcaObj[B>1 & B!=A,density_B_lower], y0=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), x1=mrcaObj[B>1 & B!=A,density_B_upper], y1=(y.max.a+1):(y.max.a+mrcaObj[,sum(B>1 & B!=A)]), code=3, angle=90, length=0, col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], lwd=1)
-    text(x = mrcaObj[B>1 & B!=A, density_B_upper], y = (y.max.a + 1):(y.max.a + mrcaObj[, sum(B>1 & B != A)]), labels = paste0(chr_label[mrcaObj$B > 1 & mrcaObj$B != mrcaObj$A], " B allele"), cex = 0.6, pos = 4)
+  if(nrow(mrcaObj[B > 1 & B != A,])>0){
+    points(mrcaObj[B > 1 & B != A,density_B_mean], seq(y.max.a + 1, y.max.a + mrcaObj[, sum(B > 1 & B != A)]), col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], pch=signs[mrcaObj[B>1 & B != A,B_time]])
+    arrows(x0 = mrcaObj[B > 1 & B != A,density_B_lower], y0 = seq(y.max.a + 1, y.max.a + mrcaObj[,sum(B > 1 & B!=A)]), x1=mrcaObj[B>1 & B != A,density_B_upper], y1 = seq(y.max.a + 1, y.max.a+mrcaObj[,sum(B > 1 & B != A)]), code=3, angle = 90, length = 0, col=chrom_colors[mrcaObj[B > 1 & B != A, chrom]], lwd = 1)
+    text(x = mrcaObj[B > 1 & B != A, density_B_upper], y = seq(y.max.a + 1, y.max.a + mrcaObj[, sum(B > 1 & B != A)]), labels = paste0(chr_label[mrcaObj$B > 1 & mrcaObj$B != mrcaObj$A], " B allele"), cex = 0.6, pos = 4)
   }
 
   if(!is.null(output.file)){
@@ -215,7 +215,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size
   }
 
   data.table(
-    chrom = as.character(1:24),
+    chrom = as.character(seq_len(24)),
     centromere = centromeres
   )
 }
