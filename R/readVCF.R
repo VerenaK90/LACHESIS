@@ -22,23 +22,29 @@
 #' @return a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf
 #' @export
 
-readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL, info.af = "AF", info.dp = "DP", filter.value = "PASS"){
+readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka",
+                   min.vaf = 0.01, min.depth = 30, t.sample = NULL,
+                   info.af = "AF", info.dp = "DP", filter.value = "PASS"){
 
-  chrom <- t_vaf <- t_depth <- . <- pos <- ref <- alt <- t_ref_count <- t_alt_count <- NULL
+  chrom <- t_vaf <- t_depth <- . <- pos <- ref <- alt <- t_ref_count <-
+    t_alt_count <- NULL
 
   if(is.null(vcf)){
     stop("Missing input VCF file!")
   }
 
   vcf.sources <- c("strelka", "mutect", "dkfz", "sentieon")
-  vcf.source <- match.arg(arg = vcf.source, choices = vcf.sources, several.ok = FALSE)
+  vcf.source <- match.arg(arg = vcf.source, choices = vcf.sources,
+                          several.ok = FALSE)
 
   if(vcf.source == 'dkfz'){
     dt <- .parse_dkfz(FNAME = vcf)
 
     if(is.null(t.sample)){
-      t.sample <- unlist(data.table::tstrsplit(x = basename(vcf), split = "snvs", keep = 2))
-      t.sample <- gsub(x = t.sample, pattern = "^_|_somatic_$|_$", replacement = "")
+      t.sample <- unlist(data.table::tstrsplit(x = basename(vcf),
+                                               split = "snvs", keep = 2))
+      t.sample <- gsub(x = t.sample, pattern = "^_|_somatic_$|_$",
+                       replacement = "")
       message("Assuming ", t.sample, " as tumor")
     }
   }else{
@@ -87,20 +93,28 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
     if ("FORMAT" %in% colnames(v@gt)) {
       tum_format <- v@gt[, t.sample]
       vcf_df <- as.data.frame(data.table::tstrsplit(tum_format, split = ":"))
-      colnames(vcf_df) <- unlist(data.table::tstrsplit(x = v@gt[1, "FORMAT"], split = ":"))
+      colnames(vcf_df) <- unlist(data.table::tstrsplit(x =
+                                                         v@gt[1, "FORMAT"],
+                                                       split = ":"))
     } else if ("INFO" %in% colnames(v@fix)) {
       info_column <- vcfR::getINFO(v)
-      vcf_df <- as.data.frame(data.table::tstrsplit(info_column, split = ";", type.convert = TRUE))
-      colnames(vcf_df) <- sapply(vcf_df[1, ], function(x) strsplit(x, "=")[[1]][1])
+      vcf_df <- as.data.frame(data.table::tstrsplit(info_column, split = ";",
+                                                    type.convert = TRUE))
+      colnames(vcf_df) <- vapply(vcf_df[1, ],
+                                 function(x) strsplit(x, "=")[[1]][1],
+                                 character(1))
       vcf_df <- as.data.frame(lapply(vcf_df, function(col) {
-        sapply(col, function(x) ifelse(grepl("=", x), sub(".*?=", "", x), NA))
+        vapply(col, function(x) ifelse(grepl("=", x), sub(".*?=", "", x), NA),
+               character(1))
       }), stringsAsFactors = FALSE)
     } else {
       stop("Error: Please provide vcf file with FORMAT or INFO column.")
     }
 
     #Make a df of all necessary columns
-    dt <- data.table::data.table(chrom = vcfR::getCHROM(v), pos = vcfR::getPOS(v), ref = vcfR::getREF(v), alt = vcfR::getALT(v))
+    dt <- data.table::data.table(chrom = vcfR::getCHROM(v),
+                                 pos = vcfR::getPOS(v), ref = vcfR::getREF(v),
+                                 alt = vcfR::getALT(v))
     dt <- cbind(dt, vcf_df)
 
     #Parse FORMAT field and get vaf, etc
@@ -113,7 +127,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
   }
 
   #Only analyze primary contigs (either with or without the chr prefix)
-  primary_contigs <- c(1:22, c("X", "Y"))
+  primary_contigs <- c(seq_len(22), c("X", "Y"))
   dt <- dt[chrom %in% primary_contigs]
   message("Primary contig vars.   : ", nrow(dt))
 
@@ -125,14 +139,19 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 
   #Filter for VAF and depth. Return only necessary columns
   message("Filtering for min.depth and VAF..")
-  dt = dt[t_vaf >= min.vaf][t_depth >= min.depth][,.(chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf)]
+  dt = dt[t_vaf >= min.vaf][t_depth >= min.depth][,.(chrom, pos, ref,
+                                                     alt, t_ref_count,
+                                                     t_alt_count, t_depth,
+                                                     t_vaf)]
   data.table::setattr(x = dt, name = 't.sample', value = t.sample) #Add sample name as an attribute
   dt
 }
 
 .get_depth_dt <- function(d, source = "strelka"){
 
-  AU <- CU <- GU <- TU <- t_vaf <- A <- t_depth <- t_ref_count <- t_alt_count <- G <- C <- chrom <- pos <- ref <- alt <- t_depth <- t_ref_count <- t_alt_count <- t_vaf <- . <- NULL
+  AU <- CU <- GU <- TU <- t_vaf <- A <- t_depth <- t_ref_count <-
+    t_alt_count <- G <- C <- chrom <- pos <- ref <- alt <- t_depth <-
+    t_ref_count <- t_alt_count <- t_vaf <- . <- NULL
 
   if(source == "strelka"){
     d_dp <- apply(X = d[,.(AU, CU, GU, TU)], 2, function(x){
@@ -196,7 +215,8 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 #retrieve tumor sample ID
 .get_t_SM = function(vcf){
   temp <- data.table::fread(file = vcf, skip = "#CHROM", nrows = 1)
-  stdcols = c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT")
+  stdcols = c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER",
+              "INFO", "FORMAT")
   sm_ids = setdiff(colnames(temp), stdcols)
   #In case matched normal is used, second entry will always be the tumor sample, if not first sample is assumed to be tumor
   ifelse(length(sm_ids) > 1, yes = sm_ids[2], no = sm_ids[1])
@@ -205,7 +225,8 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 #retrieve available column names in vcf file
 .get_vcf_cols = function(vcf){
   temp <- data.table::fread(file = vcf, skip = "#CHROM", nrows = 1)
-  stdcols = c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT")
+  stdcols = c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER",
+              "INFO", "FORMAT")
   sm_ids = setdiff(colnames(temp), stdcols)
   return(sm_ids)
 }
@@ -213,20 +234,29 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
 #Parse DKFZ weird data format
 .parse_dkfz = function(FNAME){
 
-  . <- Chr <- Start <- Ref <- Alt <- t_ref_count <- t_alt_count <- t_depth <- t_vaf <- NULL
+  . <- Chr <- Start <- Ref <- Alt <- t_ref_count <- t_alt_count <-
+    t_depth <- t_vaf <- NULL
 
-  v <- data.table::fread(file = FNAME, fill = TRUE, sep = "\t", header = TRUE, skip = "CHROM")
+  v <- data.table::fread(file = FNAME, fill = TRUE, sep = "\t",
+                         header = TRUE, skip = "CHROM")
   v <- v[,c(1,2,4,5,8)]
   colnames(v) <- c('Chr', 'Start', 'Ref', 'Alt', 'info_t')
 
   #Parse depth and vaf info from 6th column (tumor)
   tum_info_dt = lapply(v$info_t, function(info_tum){
     info_tum_spl <- data.table::tstrsplit(x = info_tum, split = ";")
-    names(info_tum_spl) <- unlist(lapply(info_tum_spl, function(y) data.table::tstrsplit(y, split = "=", keep = 1)))
-    info_tum <- unlist(lapply(info_tum_spl, function(y) data.table::tstrsplit(y, split = "=", keep = 2)))
+    names(info_tum_spl) <- unlist(lapply(info_tum_spl,
+                                         function(y) data.table::tstrsplit(
+                                           y, split = "=", keep = 1)))
+    info_tum <- unlist(lapply(info_tum_spl, function(y) data.table::tstrsplit(
+      y, split = "=", keep = 2)))
 
-    t_dp4 <- as.numeric(unlist(data.table::tstrsplit(info_tum[c("DP4")], split = ",")))
-    data.table::data.table(t_depth = sum(t_dp4), t_ref_count = sum(t_dp4[1:2]), t_alt_count = sum(t_dp4[3:4]), t_vaf = sum(t_dp4[3:4])/sum(t_dp4))
+    t_dp4 <- as.numeric(unlist(data.table::tstrsplit(info_tum[c("DP4")],
+                                                     split = ",")))
+    data.table::data.table(t_depth = sum(t_dp4),
+                           t_ref_count = sum(t_dp4[c(1, 2)]),
+                           t_alt_count = sum(t_dp4[c(3, 4)]),
+                           t_vaf = sum(t_dp4[c(3, 4)])/sum(t_dp4))
   })
   tum_info_dt <- data.table::rbindlist(tum_info_dt)
 
@@ -235,6 +265,7 @@ readVCF = function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf
   v <- v[,.(Chr, Start, Ref, Alt, t_ref_count, t_alt_count, t_depth, t_vaf)]
   v[, Chr := as.character(Chr)]
   v[, Start := as.numeric(Start)]
-  colnames(v) = c("chrom", "pos", "ref", "alt", "t_ref_count", "t_alt_count", "t_depth", "t_vaf")
+  colnames(v) = c("chrom", "pos", "ref", "alt", "t_ref_count", "t_alt_count",
+                  "t_depth", "t_vaf")
   v
 }

@@ -35,7 +35,10 @@
 #' @importFrom Biostrings getSeq
 #' @export
 
-nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.assign = FALSE, assign.method = "sample", ID = NULL, sig.file = NULL, sig.select = NULL, min.p = NULL, ref.build = "hg19", seed = NULL){
+nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
+                     sig.assign = FALSE, assign.method = "sample", ID = NULL,
+                     sig.file = NULL, sig.select = NULL, min.p = NULL,
+                     ref.build = "hg19", seed = NULL){
 
   end <- start <- NULL
 
@@ -50,9 +53,9 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     seed <- sample.int(.Machine$integer.max, 1)
   }
 
-  colnames(cnv)[1:3] <- c("chrom", "start", "end")
+  colnames(cnv)[c(1, 2, 3)] <- c("chrom", "start", "end")
   data.table::setDT(x = cnv, key = c("chrom", "start", "end"))
-  colnames(snv)[1:2] <- c("chrom", "start")
+  colnames(snv)[c(1, 2)] <- c("chrom", "start")
   snv[,end := start]
   data.table::setDT(x = snv, key = c("chrom", "start", "end"))
 
@@ -69,7 +72,8 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 
   if(sig.assign == TRUE){
     t.sample <- attributes(sv)$t.sample
-    assign.result <- .assign_signatures(sv, sig.file, assign.method, ID, sig.select, min.p, ref.build, seed)
+    assign.result <- .assign_signatures(sv, sig.file, assign.method, ID,
+                                        sig.select, min.p, ref.build, seed)
     sv <- assign.result$sv
     sig.colors <- assign.result$sig.colors
     attr(sv, "t.sample") <- t.sample
@@ -87,7 +91,10 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
   sv
 }
 
-.assign_signatures <- function(sv = NULL, sig.file = NULL, assign.method = "sample", ID = NULL, sig.select = NULL, min.p = NULL, ref.build = NULL, seed = NULL) {
+.assign_signatures <- function(sv = NULL, sig.file = NULL,
+                               assign.method = "sample", ID = NULL,
+                               sig.select = NULL, min.p = NULL, ref.build = NULL,
+                               seed = NULL) {
 
 
   if (is.null(sv)) {
@@ -139,10 +146,12 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
     corrected.alt[alt=="C" & ref %in% c("A", "G")] <- "G"
     corrected.alt[alt=="G" & ref %in% c("A", "G")] <- "C"
     corrected.alt[alt=="T" & ref %in% c("A", "G")] <- "A"
-    paste0(substr(ctx,1, 1), "[", substr(ctx,2, 2), ">", corrected.alt, "]", substr(ctx, 3, 3))
+    paste0(substr(ctx,1, 1), "[", substr(ctx,2, 2), ">", corrected.alt, "]",
+           substr(ctx, 3, 3))
     }]
 
-  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE, all.y = FALSE)
+  sv <- merge(sv, sig.data, by = c("Sample", "MutationType"), all.x = TRUE,
+              all.y = FALSE)
 
   if (assign.method == "sample") {
     set.seed(seed)
@@ -160,7 +169,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
       }
 
       list(Signature = Signature, Probability = Probability)
-    }, .SDcols = sbs.cols, by = 1:nrow(sv),]
+    }, .SDcols = sbs.cols, by = seq_len(nrow(sv)),]
     sv[, `:=`(Signature = tmp$Signature, Probability = tmp$Probability)]
 
   } else {
@@ -175,7 +184,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
           Probability = .SD[[max.p.sig]]
         )
       }
-    }, .SDcols = sbs.cols, by = 1:nrow(sv)]
+    }, .SDcols = sbs.cols, by = seq_len(nrow(sv))]
   }
   sv = sv[!is.na(Probability),]
 
@@ -258,7 +267,11 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL, sig.a
 #' @import gridExtra
 #' @import data.table
 
-plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE, ...){
+plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 2,
+                   max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d",
+                   nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA,
+                   nb.breaks = 100, samp.name = NULL, output.file = NULL,
+                   sig.show = FALSE, ...){
 
   chrom <- start <- t_vaf <- NULL
 
@@ -277,51 +290,75 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
 
   sig.colors <- attr(nb, "sig.colors")
   purity = attr(nb, "purity")
-  clonality_colors <- c("Precnv" = "#66c2a5", "Postcnv" = "#fc8d62", "C" = "#8da0cb", "SC" = "#e78ac3")
+  clonality_colors <- c("Precnv" = "#66c2a5", "Postcnv" = "#fc8d62",
+                        "C" = "#8da0cb", "SC" = "#e78ac3")
 
   segs <- attr(nb, "cnv")
   segs <- segs[order(chrom, start)]
-  colnames(segs)[1:3] <- c("Chromosome", "Start_Position", "End_Position")
+  colnames(segs)[c(1, 2, 3)] <- c("Chromosome", "Start_Position", "End_Position")
   segs <- .transformSegments(segmentedData = segs, build = ref.build)
 
   contig_lens <- cumsum(.getContigLens(build = ref.build))
-  contig_lens_dt <- data.table(Chromosome = c(1:22, "X", "Y"), mid = c(contig_lens[1] / 2, (contig_lens[-length(contig_lens)] + contig_lens[-1]) / 2))
+  contig_lens_dt <- data.table(Chromosome = c(seq_len(22), "X", "Y"),
+                               mid = c(contig_lens[1] / 2,
+                                       (contig_lens[-length(contig_lens)] +
+                                          contig_lens[-1]) / 2))
 
   label_subset <- contig_lens_dt[seq(1, .N, by = 2)]
 
   cnv_plot <- ggplot() +
-    geom_rect(data = segs, aes(xmin = Start_Position_updated, xmax = End_Position_updated, ymin = TCN - 0.1, ymax = TCN + 0.1, fill = factor(ifelse(TCN == 2, nb.col.cn.2, nb.col.cn))), color = nb.border,linetype = "dotted") +
+    geom_rect(data = segs, aes(xmin = Start_Position_updated,
+                               xmax = End_Position_updated, ymin = TCN - 0.1,
+                               ymax = TCN + 0.1,
+                               fill = factor(ifelse(TCN == 2, nb.col.cn.2, nb.col.cn))),
+              color = nb.border,linetype = "dotted") +
     scale_fill_identity() +
-    geom_hline(yintercept = 1:max.cn, linetype = "dashed", color = nb.col.abline, size = 0.3) +
-    geom_vline(xintercept = contig_lens, linetype = "dashed", color = nb.col.abline, size = 0.3) +
-    scale_x_continuous(breaks = label_subset$mid, labels = label_subset$Chromosome, expand = c(0, 0)) +
-    scale_y_continuous(breaks = 0:max.cn) +
-    labs(x = "Chromosome", y = "Total CN", title = ifelse(is.null(samp.name), attr(nb, "t.sample"), samp.name)) +
+    geom_hline(yintercept = seq_len(max.cn), linetype = "dashed",
+               color = nb.col.abline, size = 0.3) +
+    geom_vline(xintercept = contig_lens, linetype = "dashed",
+               color = nb.col.abline, size = 0.3) +
+    scale_x_continuous(breaks = label_subset$mid,
+                       labels = label_subset$Chromosome, expand = c(0, 0)) +
+    scale_y_continuous(breaks = c(0, seq_len(max.cn))) +
+    labs(x = "Chromosome", y = "Total CN",
+         title = ifelse(is.null(samp.name), attr(nb, "t.sample"), samp.name)) +
     theme_classic() +
-    theme(axis.text.x = element_text(size = 9), plot.title = element_text(hjust = 0.5, face = "bold"))
+    theme(axis.text.x = element_text(size = 9),
+          plot.title = element_text(hjust = 0.5, face = "bold"))
 
   # Clonality histograms
   snvClonality <- snvClonality[TCN >= min.cn & TCN <= max.cn]
-  snvClonality[, TCN := factor(TCN, levels = 1:max.cn)]
+  snvClonality[, TCN := factor(TCN, levels = seq_len(max.cn))]
   snvClonality_split_TCN <- split(snvClonality, by = "TCN")
 
   clonality_plots <- list()
   for (cn in names(snvClonality_split_TCN)) {
-    snvClonality_split_TCN_B <- split(snvClonality_split_TCN[[cn]], snvClonality_split_TCN[[cn]]$B)
+    snvClonality_split_TCN_B <- split(snvClonality_split_TCN[[cn]],
+                                      snvClonality_split_TCN[[cn]]$B)
     for (b in names(snvClonality_split_TCN_B)) {
       tcn <- snvClonality_split_TCN_B[[b]]
-      tcn$Clonality <- factor(tcn$Clonality, levels = c("Precnv", "Postcnv", "C", "SC"))
+      tcn$Clonality <- factor(tcn$Clonality,
+                              levels = c("Precnv", "Postcnv", "C", "SC"))
       if (nrow(tcn) == 0) next
       max_count <- max(hist(tcn$t_vaf, breaks = nb.breaks, plot = FALSE)$counts)
       p_clonality <- ggplot(tcn, aes(x = t_vaf, fill = Clonality)) +
-        geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = T) +
-        scale_fill_manual(values = clonality_colors, labels = c("Precnv" = "Clonal\n- Pre-CNV", "Postcnv" = "Clonal\n- Post-CNV", "C" = "Clonal\n- NOS", "SC" = "Subclonal"), drop = F) +
+        geom_histogram(bins = nb.breaks, color = NA,
+                       position = "stack", show.legend = T) +
+        scale_fill_manual(values = clonality_colors,
+                          labels = c("Precnv" = "Clonal\n- Pre-CNV",
+                                     "Postcnv" = "Clonal\n- Post-CNV",
+                                     "C" = "Clonal\n- NOS",
+                                     "SC" = "Subclonal"), drop = F) +
         scale_x_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1)) +
-        labs(x = "VAF", y = "No. of SNVs", title = paste0("CN:", cn, " (", as.numeric(cn) - as.numeric(b), ":", b, ")")) +
+        labs(x = "VAF", y = "No. of SNVs",
+             title = paste0("CN:", cn, " (", as.numeric(cn) -
+                              as.numeric(b), ":", b, ")")) +
         theme_classic()
       if (!is.null(purity)) {
         expected_vafs <- .expectedClVAF(CN = as.numeric(cn), purity = purity)
-        p_clonality <- p_clonality + geom_vline(xintercept = expected_vafs, linetype = "dashed", color = "black")
+        p_clonality <- p_clonality +
+          geom_vline(xintercept = expected_vafs,
+                     linetype = "dashed", color = "black")
       }
       clonality_plots[[paste0(cn, "_", b)]] <- p_clonality
     }
@@ -332,20 +369,28 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
   if (sig.show) {
     signature_plots <- list()
     for (cn in names(snvClonality_split_TCN)) {
-      snvClonality_split_TCN_B <- split(snvClonality_split_TCN[[cn]], snvClonality_split_TCN[[cn]]$B)
+      snvClonality_split_TCN_B <- split(snvClonality_split_TCN[[cn]],
+                                        snvClonality_split_TCN[[cn]]$B)
       for (b in names(snvClonality_split_TCN_B)) {
         tcn <- snvClonality_split_TCN_B[[b]]
         if (nrow(tcn) == 0) next
         p_signature <- ggplot(tcn, aes(x = t_vaf, fill = Signature)) +
-          geom_histogram(bins = nb.breaks, color = NA, position = "stack", show.legend = T) +
+          geom_histogram(bins = nb.breaks, color = NA,
+                         position = "stack", show.legend = T) +
           scale_fill_manual(values = sig.colors, drop = F) +
           scale_x_continuous(breaks = seq(0, 1, 0.2)) +
-          labs(x = "VAF", y = "No. of SNVs", title = paste0("CN:", cn, " (", as.numeric(cn) - as.numeric(b), ":", b, ")")) +
+          labs(x = "VAF", y = "No. of SNVs",
+               title = paste0("CN:", cn, " (", as.numeric(cn) -
+                                as.numeric(b), ":", b, ")")) +
           theme_classic() +
-          theme(plot.title = element_text(hjust = 0.5, face = "bold"), legend.text = element_text(size = 8), legend.title = element_text(size = 9))
+          theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+                legend.text = element_text(size = 8),
+                legend.title = element_text(size = 9))
         if (!is.null(purity)) {
           expected_vafs <- .expectedClVAF(CN = as.numeric(cn), purity = purity)
-          p_signature <- p_signature + geom_vline(xintercept = expected_vafs, linetype = "dashed", color = "black")
+          p_signature <- p_signature +
+            geom_vline(xintercept = expected_vafs,
+                       linetype = "dashed", color = "black")
         }
         signature_plots[[paste0(cn, "_", b)]] <- p_signature
       }
@@ -357,8 +402,11 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
   }
 
     # Copy number plot and clonality histograms
-    clonality_plot <- do.call(.grid_arrange_shared_legend, c(clonality_plots, ncol = 2, nrow = ceiling(length(clonality_plots)/2)))
-    first_page <- gridExtra::arrangeGrob(cnv_plot, clonality_plot, ncol = 1, heights = c(0.4, 0.6))
+    clonality_plot <- do.call(.grid_arrange_shared_legend,
+                              c(clonality_plots, ncol = 2,
+                                nrow = ceiling(length(clonality_plots)/2)))
+    first_page <- gridExtra::arrangeGrob(cnv_plot, clonality_plot, ncol = 1,
+                                         heights = c(0.4, 0.6))
     grid::grid.draw(first_page)
 
     # Optional signature histograms
@@ -376,10 +424,11 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
 .getContigLens <- function(build = "hg19"){
 
   if(build == 'hg19'){
-    chr.lens = c(249250621, 243199373, 198022430, 191154276, 180915260, 171115067, 159138663,
-                 146364022, 141213431, 135534747, 135006516, 133851895, 115169878, 107349540,
-                 102531392, 90354753, 81195210, 78077248, 59128983, 63025520, 48129895, 51304566,
-                 155270560, 59373566)
+    chr.lens = c(249250621, 243199373, 198022430, 191154276, 180915260,
+                 171115067, 159138663, 146364022, 141213431, 135534747,
+                 135006516, 133851895, 115169878, 107349540, 102531392,
+                 90354753, 81195210, 78077248, 59128983, 63025520, 48129895,
+                 51304566, 155270560, 59373566)
   } else if(build == 'hg18'){
     chr.lens = c(247249719, 242951149, 199501827, 191273063, 180857866, 170899992,
                  158821424, 146274826, 140273252, 135374737, 134452384, 132349534,
@@ -416,25 +465,33 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
   segmentedData[,End_Position := as.numeric(as.character(End_Position))]
 
   # Replace chr x and y with numeric value (23 and 24) for better ordering
-  segmentedData$Chromosome <- gsub(pattern = 'chr', replacement = '', x = segmentedData$Chromosome, fixed = TRUE)
-  segmentedData$Chromosome <- gsub(pattern = 'X', replacement = '23', x = segmentedData$Chromosome, fixed = TRUE)
-  segmentedData$Chromosome <- gsub(pattern = 'Y', replacement = '24', x = segmentedData$Chromosome, fixed = TRUE)
+  segmentedData$Chromosome <- gsub(pattern = 'chr', replacement = '',
+                                   x = segmentedData$Chromosome,
+                                   fixed = TRUE)
+  segmentedData$Chromosome <- gsub(pattern = 'X', replacement = '23',
+                                   x = segmentedData$Chromosome, fixed = TRUE)
+  segmentedData$Chromosome <- gsub(pattern = 'Y', replacement = '24',
+                                   x = segmentedData$Chromosome, fixed = TRUE)
 
-  segmentedData$Chromosome <- factor(x = segmentedData$Chromosome, levels = 1:24, labels = 1:24)
+  segmentedData$Chromosome <- factor(x = segmentedData$Chromosome,
+                                     levels = seq_len(24), labels = seq_len(24))
 
-  segmentedData <- segmentedData[order(Chromosome, Start_Position, decreasing = FALSE)]
+  segmentedData <- segmentedData[order(Chromosome, Start_Position,
+                                       decreasing = FALSE)]
 
   seg.spl <- split(segmentedData, segmentedData$Chromosome)
 
   seg.spl.transformed <- seg.spl[[1]]
   if(nrow(seg.spl.transformed) > 0){
-    seg.spl.transformed$Start_Position_updated <- seg.spl.transformed$Start_Position
-    seg.spl.transformed$End_Position_updated <- seg.spl.transformed$End_Position
+    seg.spl.transformed$Start_Position_updated <-
+      seg.spl.transformed$Start_Position
+    seg.spl.transformed$End_Position_updated <-
+      seg.spl.transformed$End_Position
   }
 
   chr.lens.sumsum <- cumsum(chr.lens)
 
-  for(i in 2:length(seg.spl)){
+  for(i in seq(2, length(seg.spl))){
 
     x.seg <- seg.spl[[i]]
     if(nrow(x.seg) > 0){
@@ -449,32 +506,34 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
 
 # Expected clonal VAFs for copy number CN at a given purity on autosomes
 .expectedClVAF <- function(CN, purity){
-  (1:CN)*purity/(purity*CN + 2*(1-purity))
+  seq_len(CN)*purity/(purity*CN + 2*(1-purity))
 }
 
 
 
 # Plot shared legend, taken from https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs
-.grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1, position = c("bottom", "right")) {
+.grid_arrange_shared_legend <- function(..., ncol = length(list(...)),
+                                        nrow = 1,
+                                        position = c("bottom", "right")) {
 
   plots <- list(...)
   position <- match.arg(position)
   g <- ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
-  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  legend <- g[[which(vapply(g, function(x) x$name, character(1)) == "guide-box")]]
   lheight <- sum(legend$height)
   lwidth <- sum(legend$width)
   gl <- lapply(plots, function(x) x + theme(legend.position="none"))
   gl <- c(gl, ncol = ncol, nrow = nrow)
 
   combined <- switch(position,
-                     "bottom" = gridExtra::arrangeGrob(do.call(gridExtra::arrangeGrob, gl),
-                                            legend,
-                                            ncol = 1,
-                                            heights = grid::unit.c(unit(1, "npc") - lheight, lheight)),
-                     "right" = gridExtra::arrangeGrob(do.call(gridExtra::arrangeGrob, gl),
-                                           legend,
-                                           ncol = 2,
-                                           widths = grid::unit.c(unit(1, "npc") - lwidth, lwidth)))
+                     "bottom" = gridExtra::arrangeGrob(
+                       do.call(gridExtra::arrangeGrob, gl),
+                       legend, ncol = 1, heights = grid::unit.c(
+                                              unit(1, "npc") - lheight, lheight)),
+                     "right" = gridExtra::arrangeGrob(do.call(
+                       gridExtra::arrangeGrob, gl),
+                       legend, ncol = 2, widths = grid::unit.c(unit(1, "npc") -
+                                                                 lwidth, lwidth)))
 
   # return gtable invisibly
   invisible(combined)

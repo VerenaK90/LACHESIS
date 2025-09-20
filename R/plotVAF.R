@@ -19,7 +19,10 @@
 #' @return data.table of frequency table
 #' @importFrom graphics axis box grid hist mtext par text title
 #' @export
-plotVAFdistr <- function(vaf = NULL, vaf.interval = 0.05, t_sample = NULL, vaf.show.counts = FALSE, vaf.show.density = TRUE, vaf.col = "#34495e", vaf.border = "#bdc3c7", srtcounts = 45, output.file = NULL, ...){
+plotVAFdistr <- function(vaf = NULL, vaf.interval = 0.05, t_sample = NULL,
+                         vaf.show.counts = FALSE, vaf.show.density = TRUE,
+                         vaf.col = "#34495e", vaf.border = "#bdc3c7",
+                         srtcounts = 45, output.file = NULL, ...){
 
   if(is.null(vaf)){
     stop("Missing input vaf. Use `readVCF` to extract vaf.")
@@ -30,11 +33,13 @@ plotVAFdistr <- function(vaf = NULL, vaf.interval = 0.05, t_sample = NULL, vaf.s
   }
 
   par(mar = c(4, 4, 2, 1), fig = c(0,1,0,1))
-  h <-hist(vaf$t_vaf, breaks = seq(0, 1, vaf.interval), col = vaf.col, border = vaf.border, xlab = NA, ylab = NA, axes = FALSE, main = NA)
+  h <-hist(vaf$t_vaf, breaks = seq(0, 1, vaf.interval), col = vaf.col,
+           border = vaf.border, xlab = NA, ylab = NA, axes = FALSE, main = NA)
   axis(side = 1, at = seq(0, 1, 0.1))
   axis(side = 2, at = pretty(h$counts), las = 2)
   if(vaf.show.counts){
-    text(x = h$mids, y = h$counts, labels = h$counts, pos = 3, xpd = TRUE, srt = srtcounts, cex = 0.7)
+    text(x = h$mids, y = h$counts, labels = h$counts, pos = 3, xpd = TRUE,
+         srt = srtcounts, cex = 0.7)
   }
 
 
@@ -48,7 +53,8 @@ plotVAFdistr <- function(vaf = NULL, vaf.interval = 0.05, t_sample = NULL, vaf.s
 
   if(vaf.show.density){
     par(fig = c(0.65, 1, 0.55, 0.95), new = TRUE, mar = c(3, 2, 1, 1))
-    plot(density(vaf$t_vaf), frame.plot = FALSE, main = NA, axes = FALSE, xlim = c(0, 1), col = vaf.col)
+    plot(density(vaf$t_vaf), frame.plot = FALSE, main = NA, axes = FALSE,
+         xlim = c(0, 1), col = vaf.col)
     grid(nx = 5)
     box(lty = 1, lwd = 0.1)
     mtext(text = "Density", side = 2, cex = 0.7)
