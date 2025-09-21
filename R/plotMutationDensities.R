@@ -27,7 +27,8 @@
 #' mrca <- MRCA(norm_muts)
 #' plotMutationDensities(mrca)
 #' @export
-#' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
+#' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon segments
+#' @importFrom stats setNames
 
 plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, ref.build = "hg19", mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.xaxis = NULL, mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL, ...) {
     Seglength <- . <- A <- B <- variable <- value <- lines <- density <- chrom <- TCN <- Seglength <- n_mut_A <- n_mut_B <- n_mut_total_clonal <- density_total_mean <- density_A_mean <- density_B_mean <- density_total_lower <- density_total_upper <- density_A_lower <- density_A_upper <- density_B_lower <- density_B_upper <- p_total_to_mrca <- p_A_to_mrca <- p_B_to_mrca <- p_adj_total_to_mrca <- p_adj_A_to_mrca <- p_adj_B_to_mrca <- MRCA_qual <- p_A_to_eca <- p_B_to_eca <- p_adj_A_to_eca <- p_adj_B_to_eca <- A_time <- B_time <- NULL

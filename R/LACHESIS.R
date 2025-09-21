@@ -83,6 +83,7 @@
 #' @import tidyr
 #' @import ggplot2
 #' @importFrom utils packageVersion
+#' @importFrom stats setNames
 #' @return a data.table
 #' @export
 
@@ -1015,7 +1016,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
     p.value.pos <- max(survival.fit$time) * (1 / 6)
 
     survival.fit.plot <- survminer::ggsurvplot_df(surv_summary(survival.fit, data = lachesis.categorized),
-        title = surv.title, conf.int = TRUE, color = "strata", censor.shape = 124,
+        title = surv.title, conf.int = FALSE, color = "strata", censor.shape = 124,
         palette = surv.palette, xlab = "Time", ylab = surv.ylab, legend.labs = c("Early MRCA", "Late MRCA"), break.time.by = surv.time.breaks
     ) +
         annotate("text", x = p.value.pos, y = 0.2, label = paste0("p = ", ifelse(p_value > 0 & p_value < 0.0001, "< 0.0001", formatC(p_value, format = "f", digits = 4))), size = 5)

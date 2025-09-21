@@ -21,6 +21,7 @@
 #' mrca <- MRCA(norm_muts)
 #' estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
 #'
+#' @importFrom stats setNames
 #' @export
 
 estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = NULL, driver.file = NULL, ref.build = "hg19") {
