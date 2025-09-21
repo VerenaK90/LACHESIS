@@ -12,7 +12,7 @@
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
 #' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
-#' @param seed Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.
+#' @param seed Integer. Optional, changes the global RNG state, it will be documented in the log file.
 #'
 #' @examples
 #' # Example using all variants from vcf file

@@ -35,7 +35,7 @@
 #' @param fp.sd optional, the standard deviation of the false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
-#' @param seed Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.
+#' @param seed Integer. Optional, changes the global RNG state, it will be documented in the log file.
 #' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS.
 #' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature.
 #' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
@@ -109,7 +109,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
     }
 
     if (is.null(seed)) {
-        seed <- sample.int(.Machine$integer.max, 1)
+      if (exists(".Random.seed", envir = .GlobalEnv)) {
+        seed <- sum(.Random.seed)
+      } else {
+        stop("No seed specified, please specify the seed parameter or initialize the RNG in the global environment.")
+      }
     }
 
     incl.chr <- setdiff(c(1:22), excl.chr)
