@@ -11,6 +11,7 @@ A [vignette](vignettes/vignette_LACHESIS.Rmd) explaining how to use &Lambda;&Alp
 
 ## Demo 
 
+Please refer to our [vignette](vignettes/vignette_LACHESIS.Rmd) for an example analysis with &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma;.
 
 ## System requirements
 
@@ -33,7 +34,7 @@ Windows 10, Version 22H2
 
 ## Version
 
-0.0.0.9000
+1.0.0
 
 ## Citation
 
