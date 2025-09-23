@@ -95,7 +95,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
                      ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, min.depth = 30,
                      vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL,
                      ref.build = "hg19", seed = NULL, filter.value = "PASS", sig.assign = FALSE, sig.file = NULL, assign.method = "sample", sig.select = NULL, min.p = NULL, driver.file = NULL, ...) {
-    ID <- cnv.file <- snv.file <- fwrite <- NULL
+    ID <- cnv.file <- snv.file <- fwrite <- known_driver_gene <- Sample <- Clonality <- NULL
 
     if (is.null(input.files) & is.null(cnv.files)) {
         stop("Missing input file!")
@@ -829,7 +829,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE, lach.l
 #' @importFrom stats cor
 
 plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE, output.file = NULL) {
-    ECA_time_mean <- NULL
+    ECA_time_mean <- MRCA_time_mean <- NULL
 
     if (!clin.par %in% colnames(lachesis)) {
         stop(clin.par, " not found!")
@@ -949,6 +949,8 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age", clin.sup
 #' @importFrom stats pchisq
 
 plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = "OS.time", surv.event = "OS", surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival") {
+    MRCA_time_mean <- ECA_time_mean <- ..surv.time <- ..surv.event <- NULL
+
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")
     }
@@ -1089,6 +1091,8 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NUL
 #' @import survminer
 
 classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL, infer.cutpoint = FALSE, entity = "neuroblastoma", surv.time = "OS.time", surv.event = "OS") {
+    MRCA_time_mean <- ..surv.time <- ..surv.event <- NULL
+
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")
     }
