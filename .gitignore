@@ -1,47 +1,41 @@
-.Rproj.user
-Meta
-lach_mrca
-doc
-proj.user
-.Rhistory
+*.Rproj
+.Rproj.user/
+  .Rproj.user/
+  .Rhistory
 .RData
-.Rproj.user
-.icloud
-inst/doc
-vignettes/.gitignore
-.gitignore
-.renviron
-.rprofile
+.Rapp.history
+.Renviron
+.Rprofile
 .rproj
 .rproj.user
-.rhistory
-.rapp.history
-.o
-.sl
-.so
-.dylib
-.a
-.dll
-.def
-.ds_store
-unsrturl.bst
-.log
-.aux
-.backups
-.cproject
-.directory
-.dropbox
-.exrc
-.gdb.history
-.gitattributes
-.gitmodules
-.hgtags
-.project
-.seed
-.settings
-.tm_properties
-.cloud
+*.Rcheck/
+  *.tar.gz
+*.pdf
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.toc
+*.synctex.gz
+.DS_Store
 .icloud
-.Rbuildignore
-/doc/
-/Meta/
+.cloud
+.backups
+*.o
+*.so
+*.dll
+*.dylib
+*.a
+inst/doc/
+  vignettes/*.html
+vignettes/*.pdf
+Meta/
+  doc/
+  proj.user/
+  .seed
+.settings/
+  .cproject
+.directory
+
+
