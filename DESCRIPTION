@@ -1,12 +1,12 @@
 Package: LACHESIS
 Title: Functions used to analyze early tumor evolution from whole genome sequencing data
-Version: 0.99.0
+Version: 0.0.0.9000
 Authors@R: c(
   person(given = "Verena",
          family = "Körber",
          role = c("aut", "cre"),
          email = "verena.korber@ndcls.ox.ac.uk",
-         comment = c(ORCID = "0009-0005-3888-2648")),
+         comment = c(ORCID = "YOUR-ORCID-ID")),
   person(given = "Anand",
          family = "Mayakonda",
          role = c("aut"),
@@ -19,7 +19,7 @@ Description: This package contains custom functions used to analyze neuroblastom
 License: GPL (>= 3)
 Copyright: Verena Körber, Anand Mayakonda, Maximilia Eggle (2025)
 Encoding: UTF-8
-LazyData: false
+LazyData: true
 Roxygen: list(markdown = TRUE)
 Depends:
   R (>= 2.10)
@@ -27,8 +27,5 @@ Imports:
   data.table, vcfR, tidyr, stats, utils, graphics, grDevices, ggplot2, gridExtra, survival, survminer, RColorBrewer, BSgenome.Hsapiens.UCSC.hg18, BSgenome.Hsapiens.UCSC.hg19, BSgenome.Hsapiens.UCSC.hg38, Biostrings
 Suggests:
   Cairo, rmarkdown, knitr, R.utils
-biocViews: Software, StatisticalMethod, TimeCourse, Sequencing, WholeGenome, Survival, SomaticMutation
-VignetteBuilder: knitr
-RoxygenNote: 7.3.3
-URL: https://github.com/VerenaK90/LACHESIS
-BugReports: https://github.com/VerenaK90/LACHESIS/issues
+VignetteBuilder: knitr, rmarkdown
+RoxygenNote: 7.3.2

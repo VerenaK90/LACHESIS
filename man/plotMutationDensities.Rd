@@ -8,13 +8,11 @@ plotMutationDensities(
   mrcaObj = NULL,
   samp.name = NULL,
   min.seg.size = 10^7,
-  ref.build = "hg19",
   mut.col.zero = "#4FB12B",
   mut.col.multi = "#176A02",
   mut.border = NULL,
   mut.show.density = TRUE,
   mut.breaks = NULL,
-  mut.xaxis = NULL,
   mut.show.realtime = FALSE,
   mut.snv.rate = 3.2,
   output.file = NULL,
@@ -28,8 +26,6 @@ plotMutationDensities(
 
 \item{min.seg.size}{minimal segment size to plot}
 
-\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}.}
-
 \item{mut.col.zero}{optional, the bar color for densities of mutations present on single copies.}
 
 \item{mut.col.multi}{optional, the bar color for densities of mutations present on multiple copies.}
@@ -40,8 +36,6 @@ plotMutationDensities(
 
 \item{mut.breaks}{optional; the number of bins in the histogram.}
 
-\item{mut.xaxis}{optional; cutoff value for x-axis in evolutionary timeline plot in SNVs/Mb}
-
 \item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception on the evolutionary timeline.}
 
 \item{mut.snv.rate}{optional; rate of accumulated SNVs per day in a diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)}
@@ -49,9 +43,6 @@ plotMutationDensities(
 \item{output.file}{optional; will save the plot.}
 
 \item{...}{further arguments and parameters passed to other LACHESIS functions.}
-}
-\value{
-graphs with mutation densitiy at ECA and MRCA as well as evolutionary timeline plot
 }
 \description{
 Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95\% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.
