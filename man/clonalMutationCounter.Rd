@@ -8,7 +8,7 @@ clonalMutationCounter(
   nbObj = NULL,
   min.cn = 1,
   max.cn = 4,
-  chromosomes = c(1:22)
+  chromosomes = seq_len(22)
 )
 }
 \arguments{

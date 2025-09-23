@@ -8,11 +8,13 @@ plotMutationDensities(
   mrcaObj = NULL,
   samp.name = NULL,
   min.seg.size = 10^7,
+  ref.build = "hg19",
   mut.col.zero = "#4FB12B",
   mut.col.multi = "#176A02",
   mut.border = NULL,
   mut.show.density = TRUE,
   mut.breaks = NULL,
+  mut.xaxis = NULL,
   mut.show.realtime = FALSE,
   mut.snv.rate = 3.2,
   output.file = NULL,
@@ -26,6 +28,8 @@ plotMutationDensities(
 
 \item{min.seg.size}{minimal segment size to plot}
 
+\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}.}
+
 \item{mut.col.zero}{optional, the bar color for densities of mutations present on single copies.}
 
 \item{mut.col.multi}{optional, the bar color for densities of mutations present on multiple copies.}
@@ -35,6 +39,8 @@ plotMutationDensities(
 \item{mut.show.density}{optional; if \code{TRUE}, the density distribution of mutation densities on single copies will be shown in the histogram of mutation densities on multiple copies.}
 
 \item{mut.breaks}{optional; the number of bins in the histogram.}
+
+\item{mut.xaxis}{optional; cutoff value for x-axis in evolutionary timeline plot in SNVs/Mb}
 
 \item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception on the evolutionary timeline.}
 
