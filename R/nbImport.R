@@ -244,6 +244,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 #' @param output.file optional, will save the plot.
 #' @param sig.show plot stratified VAF histogram with assigned mutational signatures.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
+#' @return copy number plot, VAF histograms stratified by copynumber and clonality; if specified, VAF histograms stratified by copynumber and signature
 #' @examples
 #' # Example using all variants from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")

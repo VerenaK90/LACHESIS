@@ -53,6 +53,9 @@ plotNB(
 
 \item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
+\value{
+copy number plot, VAF histograms stratified by copynumber and clonality; if specified, VAF histograms stratified by copynumber and signature
+}
 \description{
 Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.
 }
