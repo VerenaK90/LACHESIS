@@ -11,14 +11,16 @@ normalizeCounts(countObj = NULL)
 }
 \value{
 a data table reporting the normalized mutation counts and densities per segment, stratified by copy number
+}
+\description{
+This function normalizes the clonal mutation counts obtained with \code{\link{clonalMutationCounter}}. The normalized counts correspond to the number of mutations accumulated between conception/gastrulation and MRCA/copy number gain. They can hence be interpreted as "molecular time".
+}
+\examples{
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 cl_muts <- clonalMutationCounter(nb)
 norm_muts <- normalizeCounts(cl_muts)
-}
-\description{
-This function normalizes the clonal mutation counts obtained with \code{\link{clonalMutationCounter}}. The normalized counts correspond to the number of mutations accumulated between conception/gastrulation and MRCA/copy number gain. They can hence be interpreted as "molecular time".
 }
