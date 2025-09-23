@@ -115,11 +115,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
     }
 
     if (is.null(seed)) {
-      if (exists(".Random.seed", envir = .GlobalEnv)) {
-        seed <- sum(.Random.seed)
-      } else {
-        stop("No seed specified, please specify the seed parameter or initialize the RNG in the global environment.")
-      }
+        if (exists(".Random.seed", envir = .GlobalEnv)) {
+            seed <- sum(.Random.seed)
+        } else {
+            stop("No seed specified, please specify the seed parameter or initialize the RNG in the global environment.")
+        }
     }
 
     incl.chr <- setdiff(c(1:22), excl.chr)
