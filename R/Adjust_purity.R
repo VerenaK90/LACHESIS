@@ -1,6 +1,6 @@
 ##############################################################################################################################################
 ## source the settings
-# source("./Nextcloud/NB_manuscript/Submission_NG/RevisionII//Plots_and_scripts/Custom_scripts/Settings.R")
+#source("./Nextcloud/NB_manuscript/Submission_NG/RevisionII//Plots_and_scripts/Custom_scripts/Settings.R")
 
 ##############################################################################################################################################
 ## For most tumors, the purity-ploidy estimate is okay, but for XI003_19079 it needs to be adjusted
@@ -45,4 +45,4 @@
 #   ploidy[i] <- ploidy.
 # }
 
-# save(purity, ploidy, file=paste0(rdata.directory, "/Purity_ploidy.RData"))
+#save(purity, ploidy, file=paste0(rdata.directory, "/Purity_ploidy.RData"))

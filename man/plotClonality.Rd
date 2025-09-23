@@ -23,9 +23,6 @@ plotClonality(
 
 \item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
-\value{
-graphs with clonality status of SNVs per chromosome and if specified, stratified by signature
-}
 \description{
 Visualizes results from  \code{\link{estimateClonality}}.
 }

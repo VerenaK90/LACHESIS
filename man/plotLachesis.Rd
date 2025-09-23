@@ -35,30 +35,27 @@ plotLachesis(
 
 \item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
-\value{
-graph with cohort overview of SNV densities at ECA/ MRCA
-}
 \description{
 Visualizes results from \code{\link{LACHESIS}}. Top plot, histograms of mean mutation densities; bottom plots, cumulative distribution of mean mutation densities with 95\% confidence intervals.
 }
 \examples{
 # An example file with sample annotations and meta data
-input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
-input.files <- data.table::fread(input.files)
+input.files = system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+input.files = data.table::fread(input.files)
 
 # cnv and snv files for example tumors
-nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
-nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
-nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+nbe11 = list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
+nbe15 = list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
+nbe63 = list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
 
-cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+cnv.file = c(nbe11[1], nbe15[1], nbe63[1])
+snv.file = c(nbe11[2], nbe15[2], nbe63[2])
 
-input.files$cnv.file <- cnv.file
-input.files$snv.file <- snv.file
+input.files$cnv.file = cnv.file
+input.files$snv.file = snv.file
 
 # Make an example input file with paths to cnv and snv file along with other meta data
-lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+lachesis_input = tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 # Example with template file with paths to multiple cnv/snv files as an input

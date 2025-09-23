@@ -49,10 +49,10 @@ readCNV()
 Convert a user-specified bed-file with copy number information into a standardized format. Perform various quality checks on the file input and return the clean and standardized data-frame. If column identifiers for chromosomal positions and allele-specific copy number information are not provided, the function attempts to identify these columns based on standard nomenclature. If total copy number information is provided but allele-specific information is missing, the function assumes that the number of B alleles is the rounded off of half the total copy number.
 }
 \examples{
-aceseq_cn <- system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-cn_data <- readCNV(aceseq_cn)
-ascat_cn <- system.file("extdata", "ASCAT/S98.segments.txt", package = "LACHESIS")
-cn_data <- readCNV(ascat_cn)
+aceseq_cn = system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
+cn_data = readCNV(aceseq_cn)
+ascat_cn = system.file("extdata", "ASCAT/S98.segments.txt", package = "LACHESIS")
+cn_data = readCNV(ascat_cn)
 }
 \author{
 {Verena Körber}

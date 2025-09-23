@@ -26,9 +26,6 @@ estimateClonality(
 
 \item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}.}
 }
-\value{
-a data.table with per-SNV clonality assignment
-}
 \description{
 Assigns clonality status to every SNV based on the variant allele frequency distribution. The function uses maximum a posteriori assignment of single variants to either "subclonal", "clonal", "early clonal" or "late clonal" (if distinguishable). The likelihood is computed according to a binomial distribution; prior probabilities are empirically determined based on the relative SNV burden per clonal state.
 }

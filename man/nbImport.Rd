@@ -42,7 +42,7 @@ nbImport(
 
 \item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}.}
 
-\item{seed}{Integer. Optional, changes the global RNG state, it will be documented in the log file.}
+\item{seed}{Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.}
 }
 \value{
 a data.table
