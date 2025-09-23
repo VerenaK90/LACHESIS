@@ -322,7 +322,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
             clonality_list[[i]] <- snvClonality
             if (!is.null(output.dir)) {
                 data.table::fwrite(snvClonality, file = file.path(output.dir, x$ID, paste0("06_SNV_timing_per_SNV_", x$ID, ".txt")), quote = FALSE, col.names = TRUE, sep = "\t")
-                plotNB(nb = nb, snvClonality = snvClonality, samp.name = x$ID, output.file = paste(output.dir, x$ID, "02_VAF_histogram_strat.pdf", sep = "/"), ref.build = ref.build, ...)
+                plotNB(nb = nb, snvClonality = snvClonality, samp.name = x$ID, output.file = paste(output.dir, x$ID, "02_VAF_histogram_strat.pdf", sep = "/"), ref.build = ref.build, max.cn = max.cn, min.cn = min.cn, ...)
                 plotClonality(snvClonality = snvClonality, nbObj = nb, sig.assign = sig.assign, output.file = paste(output.dir, x$ID, "07_SNV_timing_per_SNV.pdf", sep = "/"), ...)
             }
 
@@ -471,7 +471,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.f
             clonality_list[[i]] <- snvClonality
             if (!is.null(output.dir)) {
                 data.table::fwrite(snvClonality, file = file.path(output.dir, ids[i], paste0("06_SNV_timing_per_SNV_", ids[i], ".txt")), quote = FALSE, col.names = TRUE, sep = "\t")
-                plotNB(nb = nb, snvClonality = snvClonality, samp.name = ids[i], output.file = paste(output.dir, ids[i], "02_VAF_histogram_strat.pdf", sep = "/"), ref.build = ref.build, ...)
+                plotNB(nb = nb, snvClonality = snvClonality, samp.name = ids[i], output.file = paste(output.dir, ids[i], "02_VAF_histogram_strat.pdf", sep = "/"), ref.build = ref.build, max.cn = max.cn, min.cn = min.cn, ...)
                 plotClonality(snvClonality = snvClonality, nbObj = nb, sig.assign = sig.assign, output.file = paste(output.dir, ids[i], "07_SNV_timing_per_SNV.pdf", sep = "/"), ...)
             }
 
