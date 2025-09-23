@@ -30,11 +30,11 @@ Windows 10, Version 22H2
 
 #### R dependencies
 
-&Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; has been tested on R v4.3.1 and v4.4.1 and requires installation of the packages data.table (1.15.4), ggplot (3.5.1), tidyr (1.3.1), vcfR (1.15.0).
+&Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; was tested on R v4.5.1 and requires installation of the packages data.table (1.15.4), ggplot (≥3.5.1), tidyr (1.3.1), vcfR (1.15.0).
 
 ## Version
 
-1.0.0
+0.99.0
 
 ## Citation
 
