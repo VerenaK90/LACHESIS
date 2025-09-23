@@ -1308,7 +1308,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 
     survival.fit.plot <- survminer::ggsurvplot_df(
         surv_summary(survival.fit, data = lachesis.categorized),
-        title = surv.title, conf.int = TRUE, color = "strata", censor.shape = 124,
+        title = surv.title, conf.int = FALSE, color = "strata", censor.shape = 124,
         palette = surv.palette, xlab = "Time", ylab = surv.ylab,
         legend.labs = c("Early MRCA", "Late MRCA"),
         break.time.by = surv.time.breaks
