@@ -83,6 +83,7 @@
 #' @import tidyr
 #' @import ggplot2
 #' @importFrom utils packageVersion
+#' @importFrom stats setNames
 #' @return a data.table
 #' @export
 

@@ -153,6 +153,7 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
 #' plotClonality(snvClonality, nbObj = nb, sig.assign = TRUE)
 #'
 #' @import ggplot2
+#' @importFrom stats setNames
 #' @export
 
 plotClonality <- function(snvClonality = snvClonality, nbObj = NULL,
