@@ -33,6 +33,8 @@
 #' @return a data.table
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom Biostrings getSeq
+#' @importFrom stats setNames
+#' @importFrom grDevices colorRampPalette
 #' @export
 
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
