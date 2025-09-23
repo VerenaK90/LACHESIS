@@ -99,7 +99,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                      seed = NULL, filter.value = "PASS", sig.assign = FALSE,
                      sig.file = NULL, assign.method = "sample", sig.select = NULL,
                      min.p = NULL, driver.file = NULL, ...) {
-    ID <- cnv.file <- snv.file <- fwrite <- NULL
+    ID <- cnv.file <- snv.file <- fwrite <- known_driver_gene <- Sample <- Clonality <- NULL
 
     if (is.null(input.files) & is.null(cnv.files)) {
         stop("Missing input file!")
@@ -407,7 +407,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                         "02_VAF_histogram_strat.pdf",
                         sep = "/"
                     ),
-                    ref.build = ref.build, ...
+                    ref.build = ref.build, max.cn = max.cn, min.cn = min.cn, ...
                 )
                 plotClonality(
                     snvClonality = snvClonality, nbObj = nb,
@@ -646,7 +646,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                         "02_VAF_histogram_strat.pdf",
                         sep = "/"
                     ),
-                    ref.build = ref.build, ...
+                    ref.build = ref.build, max.cn = max.cn, min.cn = min.cn, ...
                 )
                 plotClonality(
                     snvClonality = snvClonality, nbObj = nb,
@@ -1070,7 +1070,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
                                      clin.suppress.outliers = FALSE,
                                      clin.log.densities = FALSE,
                                      output.file = NULL) {
-    ECA_time_mean <- NULL
+    ECA_time_mean <- MRCA_time_mean <- NULL
 
     if (!clin.par %in% colnames(lachesis)) {
         stop(clin.par, " not found!")
@@ -1211,6 +1211,8 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
                          surv.time.breaks = NULL, surv.time.scale = 1,
                          surv.title = "Survival probability",
                          surv.ylab = "Survival") {
+  MRCA_time_mean <- ECA_time_mean <- ..surv.time <- ..surv.event <- NULL
+
     if (is.null(lachesis)) {
         stop("Error: 'lachesis' dataset must be provided.")
     }
@@ -1406,6 +1408,8 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
                              surv.time = "OS.time", surv.event = "OS") {
+  MRCA_time_mean <- ..surv.time <- ..surv.event <- NULL
+
     if (is.null(lachesis)) {
         stop("Error: 'lachesis' dataset must be provided.")
     }
