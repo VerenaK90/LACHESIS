@@ -12,11 +12,11 @@
 #' @param srtcounts Text angle if `vaf.show.counts` is TRUE. Default 45
 #' @param output.file Optional, will save the plot.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
+#' @return VAF histogram
 #' @examples
 #' strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 #' s_data <- readVCF(vcf = strelka_vcf, vcf.source = "strelka", ignore.XY = FALSE)
 #' plotVAFdistr(s_data)
-#' @return data.table of frequency table
 #' @importFrom graphics axis box grid hist mtext par text title
 #' @export
 plotVAFdistr <- function(vaf = NULL, vaf.interval = 0.05, t_sample = NULL,

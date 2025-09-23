@@ -50,6 +50,9 @@ plotMutationDensities(
 
 \item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
+\value{
+graphs with mutation densitiy at ECA and MRCA as well as evolutionary timeline plot
+}
 \description{
 Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95\% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.
 }

@@ -758,6 +758,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' @param binwidth optional, the binwidth in the histogram.
 #' @param output.file optional, the file to which the plot will be stored.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
+#' @return graph with cohort overview of SNV densities at ECA/ MRCA
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -1039,6 +1040,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #' @param clin.suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
 #' @param clin.log.densities plot logarithmic densities. Default `FALSE`.
 #' @param output.file optional; the file to which the plot will be stored.
+#' @return graph with SNV density at ECA/ MRCA copared to clinical parameters
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -1171,6 +1173,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #' @param surv.title main title.
 #' @param surv.ylab y-axis label, defaults to `Survival`.
 #' @param output.dir link to directory in which output is to be stored.
+#' @return survival graphs
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -1376,6 +1379,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 #' @param surv.time column name containing survival time; defaults to `OS.time`.
 #' @param surv.event column name containing event; defaults to `OS`.
 #' @param output.dir link to directory in which output is to be stored.
+#' @return data.table with binary assignment early/ late
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
