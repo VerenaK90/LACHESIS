@@ -39,7 +39,7 @@ plotVAFdistr(
 \item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
 \value{
-VAF histogram
+data.table of frequency table
 }
 \description{
 Plot frequency distribution of variant allele frequencies
