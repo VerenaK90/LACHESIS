@@ -120,7 +120,7 @@ readVCF <- function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka",
                 )
             }), stringsAsFactors = FALSE)
         } else {
-            stop("Error: Please provide vcf file with FORMAT or INFO column.")
+            stop("Please provide vcf file with FORMAT or INFO column.")
         }
 
         # Make a df of all necessary columns

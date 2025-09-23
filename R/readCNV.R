@@ -177,10 +177,9 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
                              tcn.col = NULL) {
     if (is.data.frame(cn.info) || is.data.table(cn.info)) {
         cn.info <- data.table::setDT(cn.info)
-        print("datatable")
     } else if (is.character(cn.info)) {
         if (!file.exists(cn.info)) {
-            stop(paste("Please provide a valid CNV file path.", cn.info, "does not exist."))
+            stop("Please provide a valid CNV file path.", cn.info, "does not exist.")
         } else {
             cn.info <- data.table::fread(file = cn.info, sep = "\t", header = TRUE)
         }

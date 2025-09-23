@@ -1411,7 +1411,7 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
                              surv.time = "OS.time", surv.event = "OS") {
     if (is.null(lachesis)) {
-        stop("Error: 'lachesis' dataset must be provided.")
+        stop("'lachesis' dataset must be provided.")
     }
     entities <- c("neuroblastoma")
     entity <- match.arg(arg = entity, choices = entities, several.ok = FALSE)
