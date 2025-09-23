@@ -29,20 +29,27 @@ knitr::opts_chunk$set(
     dev = "CairoPNG",
     message = FALSE, error = FALSE, warning = TRUE
 )
-```
+```	
 
 # Installation
 
-To install this package, start R (version "4.5") and enter:
+To install this package, start R (version "4.4") and enter:
 
 ```{r install, eval=FALSE}
 if (!require("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
 }
 
-BiocManager::install("LACHESIS")
+devtools::install_github("VerenaK90/LACHESIS")
 ```
 
+<!-- I took this out for now as we are not yet on Bioconductor -->
+<!-- ```{r install, eval=FALSE} -->
+<!-- if (!require("BiocManager", quietly = TRUE)) -->
+<!--     install.packages("BiocManager") -->
+
+<!-- BiocManager::install("LACHESIS") -->
+<!-- ``` -->
 For older versions of R, please refer to the appropriate [Bioconductor release.](https://bioconductor.org/about/release-announcements/)
 
 # Citation
@@ -97,7 +104,7 @@ Additionally, if the function was applied to a cohort, the following files will 
 
 There are two ways to perform analyses using LACHESIS: either by utilizing the sub-functions individually or by calling the wrapper function. All of the functions presented in the main workflow are also invoked by the wrapper function. In addition, the wrapper function summarizes results across samples, allowing cohort analysis to be performed.
 
-```{r structure, echo=FALSE, fig.show='hold', out.width="100%"}
+```{r, echo=FALSE, fig.show='hold', out.width="100%"}
 knitr::include_graphics(system.file("extdata", "LACHESIS_package_structure.png", package = "LACHESIS"))
 ```
 
@@ -115,11 +122,11 @@ If total copy number information is available but the number of A and B alleles 
 
 #### Input 
 
-```{r readCNV_function, eval = FALSE}
+```
 readCNV(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL)
 ```
 
-```{r readCNV_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 readcnv_input <- data.frame(
@@ -141,7 +148,7 @@ knitr::kable(readcnv_input, col.names = c("Input", "Definition"), escape = FALSE
 
 A `data.table` containing the following information:
 
-```{r readCNV_output, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 readcnv_output <- data.frame(
@@ -161,7 +168,7 @@ kable(readcnv_output, col.names = c("Output", "Definition"), escape = FALSE)
 
 #### Example using output from ACESeq as copy number information
 
-```{r readCNV_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 aceseq_cn <- system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
 cn_data <- LACHESIS::readCNV(aceseq_cn)
 head(cn_data, n = 1)
@@ -169,7 +176,7 @@ head(cn_data, n = 1)
 
 #### Example using output from ASCAT as copy number information
 
-```{r readCNV_example2, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 ascat_cn <- system.file("extdata", "ASCAT/S98.segments.txt", package = "LACHESIS")
 cn_data <- LACHESIS::readCNV(ascat_cn)
 head(cn_data, n = 1)
@@ -181,11 +188,11 @@ The `readVCF` function is used to import a VCF file and extract key genomic info
 
 #### Input 
 
-```{r readVCF_function, eval=FALSE}
+```
 readVCF(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL, info.af = "AF", info.dp = "DP", filter.value = "PASS")
 ```
 
-```{r readVCF_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 readvcf_input <- data.frame(
@@ -210,7 +217,7 @@ knitr::kable(readvcf_input, col.names = c("Input", "Definition"), escape = FALSE
 
 A `data.table` containing the following information:
 
-```{r readVCF_output, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 readvcf_output <- data.frame(
@@ -232,7 +239,7 @@ knitr::kable(readvcf_output, col.names = c("Output", "Definition"), escape = FAL
 
 #### Example: SNV calls obtained with Mutect
 
-```{r readVCF_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 mutect_vcf <- system.file("extdata", "mutect.somatic.vcf.gz", package = "LACHESIS")
 m_data <- LACHESIS::readVCF(vcf = mutect_vcf, vcf.source = "mutect", filter.value = ".")
 head(m_data, n = 1)
@@ -240,7 +247,7 @@ head(m_data, n = 1)
 
 #### Example: SNV calls obtained with Strelka
 
-```{r readVCF_example2, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = strelka_vcf, vcf.source = "strelka", filter.value = "PASS")
 head(s_data, n = 1)
@@ -248,7 +255,7 @@ head(s_data, n = 1)
 
 #### Example: SNV calls obtained with the dkfz SNV calling workflow
 
-```{r readVCF_example3, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 dkfz_vcf <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 d_data <- LACHESIS::readVCF(vcf = dkfz_vcf, vcf.source = "dkfz")
 head(d_data, n = 1)
@@ -261,11 +268,11 @@ The `plotVAFdistr` function generates a VAF histogram of somatic SNVs. If `showd
 
 #### Input  
 
-```{r plotVAF_function, eval = FALSE}
+```
 plotVAFdistr(vaf = NULL, vaf.interval = 0.05, t_sample = NULL, vaf.show.counts = FALSE, vaf.show.density = TRUE, vaf.col = "#34495e", vaf.border = "#bdc3c7", srtcounts = 45, output.file = NULL)
 ```
 
-```{r plotVAF_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 plotvaf_input <- data.frame(
@@ -288,7 +295,7 @@ knitr::kable(plotvaf_input, col.names = c("Input", "Definition"), escape = FALSE
 
 #### Example
 
-```{r plotVAF_example1, message=FALSE, warning=FALSE, fig.cap="Figure 1: VAF distribution of SSNVs"}
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 1: VAF distribution of SSNVs"}
 strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = strelka_vcf, vcf.source = "strelka")
 head(s_data, n = 1)
@@ -301,11 +308,10 @@ The function `nbImport` integrates CNV and SNV information into a single datatab
 
 #### Input  
 
-```{r nbImport_function, eval = FALSE}
-nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL)
 ```
-
-```{r nbImport_input, echo=FALSE}
+nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL) 
+```
+```{r, echo=FALSE}
 library(knitr)
 
 nb_import_input <- data.frame(
@@ -337,7 +343,7 @@ knitr::kable(nb_import_input, col.names = c("Input", "Definition"), escape = FAL
 
 A `data.table` containing the following information:
 
-```{r nbImport_output, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 nb_import_output <- data.frame(
@@ -365,7 +371,7 @@ knitr::kable(nb_import_output, col.names = c("Output", "Definition"), escape = F
 
 #### Example using all variants from vcf file
 
-```{r nbImport_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -375,7 +381,7 @@ nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 
 #### Example using variants assosciated with specific SBS mutational signatures from vcf file
 
-```{r nbImport_example2, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -392,11 +398,11 @@ The bottom plots show VAF histograms of SNVs, stratified by copy number and mino
 
 #### Input 
 
-```{r plotNB_function, eval = FALSE}
+```
 plotNB(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE)
 ```
 
-```{r plotNB_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 plotnb_input <- data.frame(
@@ -423,7 +429,7 @@ knitr::kable(plotnb_input, col.names = c("Input", "Definition"), escape = FALSE)
 
 #### Example using all variants from vcf file
 
-```{r plotNB_example1, message=FALSE, warning=FALSE, fig.cap="Figure 2: *top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 2: *top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -439,7 +445,7 @@ LACHESIS::plotNB(nb = nb, snvClonality = snvClonality)
 
 #### Example using variants assosciated with specific SBS mutational signatures from vcf file
 
-```{r plotNB_example2, message=FALSE, warning=FALSE, fig.cap="Figure 2: *top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 2: *top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -461,11 +467,11 @@ This function counts the number of clonal mutations residing on a single or mult
 
 #### Input
 
-```{r clonalmutcount_function, eval = FALSE}
-clonalMutationCounter(nbObj = NULL, min.cn = 1, max.cn = 4, chromosomes = c(1:22))
+```
+clonalMutationCounter(nbObj = NULL, min.cn = 1, max.cn = 4, chromosomes = c(1:22)) 
 ```
 
-```{r clonalmutcount_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 process_clonal_input <- data.frame(
@@ -485,7 +491,7 @@ knitr::kable(process_clonal_input, col.names = c("Input", "Definition"), escape 
 
 A `data.table` containing the following information:
 
-```{r clonalmutcount_output, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 process_clonal_output <- data.frame(
@@ -507,7 +513,7 @@ knitr::kable(process_clonal_output, col.names = c("Column name", "Definition"), 
 
 #### Example
 
-```{r clonalmutcount_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -521,13 +527,13 @@ head(cl_muts, n = 1)
 
 This function translates the clonal mutation counts obtained with `clonalMutationCounter` into "molecular time". The normalized counts correspond to the number of mutations accumulated between conception/gastrulation and MRCA/copy number gain on a single DNA copy. 
 
-#### Input
+#### 
 
-```{r normalizeCounts_function, eval=FALSE}
+```{r, eval=FALSE}
 normalizeCounts(countObj)
 ```
 
-```{r normalizeCounts_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 normalize_counts_input <- data.frame(
@@ -544,7 +550,7 @@ knitr::kable(normalize_counts_input, col.names = c("Input", "Definition"), escap
 
 A `data.table` containing the following information:
 
-```{r normalizeCounts_output, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 normalize_counts_output <- data.frame(
@@ -575,7 +581,7 @@ knitr::kable(normalize_counts_output, col.names = c("Column name", "Definition")
 
 #### Example
 
-```{r normalizeCounts_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -594,11 +600,11 @@ This function estimates mutation densities at MRCA and, if present, ECA from the
 
 #### Input Parameters 
 
-```{r MRCA_function, eval = FALSE}
+```
 MRCA(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL)
 ```
 
-```{r MRCA_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 mrca_input <- data.frame(
@@ -620,7 +626,7 @@ knitr::kable(mrca_input, col.names = c("Input", "Definition"), escape = FALSE)
 * **SNV_timing_per_segment_ID.txt:** purity, ploidy, and the estimated mean, lower, and upper bounds for the timing of the tumor's MRCA and ECA (if detected).
 
 * **MRCA_densities_ID.txt:** per-segment mutation time, differentiated by minor and major copy number (A and B). For each segment,
-```{r MRCA_output, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 mrca_dens_df <- data.frame(
@@ -673,7 +679,7 @@ knitr::kable(mrca_dens_df, col.names = c("Column Name", "Definition"), align = "
 
 #### Example
 
-```{r MRCA_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -691,11 +697,11 @@ This function visualizes the results of the MRCA analysis. The top plot presents
 
 #### Input 
 
-```{r plotMutDens_function, eval = FALSE}
+```
 plotMutationDensities(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.xaxis = NULL, mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL)
 ```
 
-```{r plotMutDens_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 plotmrca_input <- data.frame(
@@ -721,7 +727,7 @@ knitr::kable(plotmrca_input, col.names = c("Input", "Definition"), escape = FALS
 
 #### Example
 
-```{r plotMutDens_example1, message=FALSE, warning=FALSE, fig.cap="Figure 3: *top plots* - Distribution of non-amplified and amplified clonal mutation densities across segments, *bottom plot* - Evolutionary timeline showing mutation densities at chromosomal gains (mean and 95% CI) and at the tumor's ECA and MRCA (mean and 95% CI of)"}
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 3: *top plots* - Distribution of non-amplified and amplified clonal mutation densities across segments, *bottom plot* - Evolutionary timeline showing mutation densities at chromosomal gains (mean and 95% CI) and at the tumor's ECA and MRCA (mean and 95% CI of)"}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -739,11 +745,11 @@ This function determines the clonality status of each SNV, classifying them as c
  
 #### Input 
 
-```{r estimateClonality_function, eval = FALSE}
+```
 estimateClonality(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = NULL)
 ```
 
-```{r estimateClonality_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 estimateClonality_input <- data.frame(
@@ -763,7 +769,7 @@ knitr::kable(estimateClonality_input, col.names = c("Input", "Definition"), esca
 
 #### Example
 
-```{r estimateClonality_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -781,11 +787,11 @@ This function visualizes the output from estimateClonality, providing an overvie
 
 #### Input 
 
-```{r plotClonality_function, eval = FALSE}
+```
 plotClonality(snvClonality = snvClonality, nb = NULL, sig.assign = FALSE, output.file = NULL)
 ```
 
-```{r plotClonality_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 estimateClonality_input <- data.frame(
@@ -803,7 +809,7 @@ knitr::kable(estimateClonality_input, col.names = c("Input", "Definition"), esca
 
 #### Example
 
-```{r plotClonality_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -824,23 +830,21 @@ Input can be specified as vectors or in a tab-delimited **sample-specification f
 
 #### Input 
 
-```{r LACHESIS_function, eval = FALSE}
-LACHESIS(
-    input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.files = NULL, snv.files = NULL,
-    vcf.source = NULL, purity = NULL, ploidy = NULL, cnv.chr.col = NULL, cnv.start.col = NULL,
-    cnv.end.col = NULL, cnv.A.col = NULL, cnv.B.col = NULL, cnv.tcn.col = NULL, age = NULL,
-    OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL,
-    ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01,
-    min.depth = 30, vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0,
-    fp.sd = 0, excl.chr = NULL, ref_build = "hg19", ...
-)
+```
+LACHESIS(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL, cnv.files = NULL, snv.files = NULL, 
+                      vcf.source = NULL, purity = NULL, ploidy = NULL, cnv.chr.col = NULL, cnv.start.col = NULL, 
+                      cnv.end.col = NULL, cnv.A.col = NULL, cnv.B.col = NULL, cnv.tcn.col = NULL, age = NULL,
+                      OS.time = NULL, OS = NULL, EFS.time = NULL, EFS = NULL, output.dir = NULL, 
+                      ignore.XY = TRUE, min.cn = 1, max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01, 
+                      min.depth = 30, vcf.info.af = "AF", vcf.info.dp = "DP", min.seg.size = 10^7, fp.mean = 0, 
+                      fp.sd = 0, excl.chr = NULL, ref_build = "hg19", ...)
 ```
 
 #### Output
 
 A `data.table` containing the following information:
 
-```{r LACHESIS_output, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 lachesis_output <- data.frame(
@@ -870,7 +874,7 @@ knitr::kable(lachesis_output, col.names = c("Column Name", "Definition"), align 
 
 #### Example with vectors
 
-```{r LACHESIS_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 aceseq_cn <- system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
@@ -879,11 +883,11 @@ head(lachesis, n = 1)
 
 #### Example with tab-delimited sample-specification file
 
-```{r LACHESIS_example2, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 lachesis_input <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 ```
 
-```{r LACHESIS_example2_1, echo=FALSE}
+```{r, echo=FALSE}
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 input.files <- data.table::fread(input.files)
 
@@ -903,20 +907,20 @@ lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = "
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 ```
 
-<!-- ```{r LACHESIS_example2_3} -->
+<!-- ```{r} -->
 <!-- #contents of the template -->
 <!-- lachesis_input |> data.table::fread() |> head() -->
 <!-- ``` -->
 
 
-```{r LACHESIS_example2_4, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 head(lachesis, n = 1)
 ```
 
 #### Example with multiple sample and data frame input
 
-```{r LACHESIS_example3, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 nbe11_vcf <- system.file("extdata", "NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 nbe11_cn <- read.delim(system.file("extdata", "NBE11/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
 nbe15_vcf <- system.file("extdata", "NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -933,11 +937,11 @@ The function `plotLACHESIS` plots cumulative distributions of SSNV densities at 
 
 #### Input 
 
-```{r plotLACHESIS_function, eval = FALSE}
+```
 plotLachesis(lachesis = NULL, lach.suppress.outliers = FALSE, lach.log.densities = FALSE, lach.col.multi = "#176A02", lach.border = NULL, binwidth = NULL, lach.col.zero = "#4FB12B", output.file = NULL)
 ```
 
-```{r plotLACHESIS_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 plotlachesis_input <- data.frame(
@@ -959,11 +963,11 @@ knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = 
 
 #### Example
 
-```{r plotLACHESIS_example1, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 lachesis_input <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 ```
 
-```{r plotLACHESIS_example1_1, echo=FALSE}
+```{r, echo=FALSE}
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 input.files <- data.table::fread(input.files)
 
@@ -983,7 +987,7 @@ lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = "
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 ```
 
-```{r plotLACHESIS_example1_2, message=FALSE, warning=FALSE, fig.cap="Figure 4: Cumulative distribution of SSNV densities in ECA (dark green) and MRCA (light green)"}
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 4: Cumulative distribution of SSNV densities in ECA (dark green) and MRCA (light green)"}
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 LACHESIS::plotLachesis(lachesis)
 ```
@@ -994,11 +998,11 @@ This function takes SNV densities as input and correlates them with clinical dat
 
 #### Input 
 
-```{r plotClinCor_function, eval = FALSE}
-plotClinicalCorrelations(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE, output.file = NULL)
+```
+plotClinicalCorrelations(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE,  output.file = NULL)
 ```
 
-```{r plotClinCor_input, echo=FALSE}
+```{r, echo=FALSE}
 library(knitr)
 
 plotclin_input <- data.frame(
@@ -1017,7 +1021,7 @@ knitr::kable(plotclin_input, col.names = c("Input", "Definition"), escape = FALS
 
 #### Example 
 
-```{r plotClinCor_example1, message=FALSE, warning=FALSE, fig.cap="Figure 5: Correlation between age at diagnosis and SNV densities at ECA and MRCA"}
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 5: Correlation between age at diagnosis and SNV densities at ECA and MRCA"}
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
@@ -1030,11 +1034,11 @@ The function `plotSurvival` plots correlation between SNV density timing at MRCA
 
 #### Input
 
-```{r plotSurvival_function, eval = FALSE}
-plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = "OS.time", surv.event = "OS", surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
+```
+plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = 'OS.time', surv.event = 'OS', surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
 ```
 
-```{r plotSurvival_input, echo=FALSE}
+```{r, echo=FALSE}
 plotlachesis_input <- data.frame(
     Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*surv.time*", "*surv.event*", "*surv.palette*", "*surv.time.breaks*", "*surv.time.scale*", "*surv.title*", "*surv.ylab*"),
     Column2 = c(
@@ -1056,7 +1060,7 @@ knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = 
 
 #### Example
 
-```{r plotSurvival_example1, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"}
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"}
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
@@ -1069,11 +1073,11 @@ The function `classifyLACHESIS` classifies a tumor's start of clonal outgrowth d
 
 #### Input
 
-```{r classifyLACHESIS_function, eval = FALSE}
-classifyLACHESIS(lachesis, mrca.cutpoint = NULL, output.dir = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = "OS.time", surv.event = "OS")
+```
+classifyLACHESIS(lachesis, mrca.cutpoint = NULL, output.dir = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = 'OS.time', surv.event = 'OS')
 ```
 
-```{r classifyLACHESIS_input, echo=FALSE}
+```{r, echo=FALSE}
 plotlachesis_input <- data.frame(
     Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*entity*", "*infer.cutpoint*", "*surv.time*", "*surv.event*"),
     Column2 = c(
@@ -1092,7 +1096,7 @@ knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = 
 
 #### Example
 
-```{r classifyLACHESIS_example1, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"}
+```{r, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"}
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
@@ -1133,22 +1137,22 @@ knitr::include_graphics(system.file("extdata", "VAF_negative_example.png", packa
 
 see [Importing Copy Number Information](#importing-copy-number-information-readcnv) for details
 
-```{r warning_1, eval = FALSE}
+```
 warning("Removing x segments with start > end")
 ```
 This warning indicates that there are rows inside the provided cnv file where the end position is less than the start position. Corresponding genomic segments will be removed from the data. 
 
-```{r warning_2, eval = FALSE}
+```
 warning("Less than 10% of the genome with valid copy number information.")
 ```
 The total length of all valid genomic segments in the cnv file is less than 300 million base pairs (3*10^8 bp). The function assumes a default human genome size of 3 × 10⁹ bp. 
 
-```{r warning_3, eval = FALSE}
+```
 warning("No *x* identifier provided, assuming *y*")
 ```
 The user should specify the column names or index for the cnv file (cnv.x.col/ x.col). If no identifiers are provided, the function will attempt to identify the relevant columns using standard nomenclature. Please verify that the expected data for x is located in column y.
 
-```{r warning_4, eval = FALSE}
+```
 warning("Allele information is not provided and will be assumed 1:1 in disomic regions, 2:1 in trisomic regions, 2:2 in tetrasomic regions, ... .")
 ```
 This warning appears when no major allele column (cnv.A.col/ A.col) is specified or cannot be inferred using standard nomenclature. LACHESIS will assume that the total copy number arose through the minimal number of genomic changes. However, this assumption may lead to incorrect results in some cases.
@@ -1158,7 +1162,7 @@ To ensure accuracy, we strongly recommend providing allele-specific copy number 
 
 see [Assigning copy number states to single nucleotide variants](#assining-copy-number-states-to-single-nucleotide-variants-nbimport) for details
 
-```{r warning_5, eval = FALSE}
+```
 warning("Removed x variants with no copy number overlaps")
 ```
 After integrating overlapping snv and cnv data, x variants with empty cnv start column were removed. 
@@ -1167,7 +1171,7 @@ After integrating overlapping snv and cnv data, x variants with empty cnv start 
 
 see [Estimating Mutation Densities at ECA/MRCA](#estimating-mutation-densities-at-ecamrca-mrca) for details
 
-```{r warning_6, eval = FALSE}
+```
 warning(sum(workObj$MRCA_qual == "FAIL"), " segments did not conform to the mutation density at MRCA.")
 ```
 
@@ -1176,32 +1180,32 @@ warning(sum(workObj$MRCA_qual == "FAIL"), " segments did not conform to the muta
 
 see [LACHESIS Wrapper Function](#lachesis-wrapper-function) for details
 
-```{r warning_7, eval = FALSE}
+```
 warning("No sample name provided for samples x; sample name was set to 1 - y")
 ```
 This warning message specifies samples where no ID was provided, the total number of missing IDs (y) was calculated and IDs were specified as numeric values (1, 2, 3, ..., y). 
 
-```{r warning_8, eval = FALSE}
+```
 warning("No CNV/ SNV file provided for sample(s); sample(s) will be excluded")
 ```
 The cnv/ snv file is missing for the specified sample, therefor it was excluded from the analysis. Please refer to [Input Data](#input-data) for details on data requirements. 
 
-```{r warning_9, eval = FALSE}
+```
 warning("No output directory specified. Per-sample output will be discarded.")
 ```
 If the output directory (output.dir) was not specified, [LACHESIS Output](#package-output) will not be displayed or saved.
 
-```{r warning_10, eval = FALSE}
+```
 warning("Insufficient data for sample ", x$ID)
 ```
 This warning appears if the datatable generated at [nbImport](#output-2) is empty.
 
-```{r warning_11, eval = FALSE}
+```
 warning("No column identifier  provided for samples x; column name will be inferred")
 ```
 The parameter vcf.tumor.ids should be specified by the user, it will be passed to [readVCF](#importing-variant-information-readvcf) as t.sample, indicating the tumor sample name.
 
-```{r warning_12, eval = FALSE}
+```
 warning("Too few segments to estimate MRCA density for sample x.")
 ```
 The datatable generated at [normalizeCounts](#output-4) only has one row, no reliable estimation of MRCA density is possible. 
@@ -1210,7 +1214,7 @@ The datatable generated at [normalizeCounts](#output-4) only has one row, no rel
 
 see [Plotting Cohort Analysis](#plotting-cohort-analysis-plotlachesis) for details
 
-```{r warning_13, eval = FALSE}
+```
 warning("Cannot produce summary statistics for a single case. Returning null.")
 ```
 This warning messages indicates that the data for a single patient was specified to LACHESIS and therefore cumulative distributions of SSNV densities at ECA and MRCA across a cohort can not be plotted. 
@@ -1219,12 +1223,12 @@ This warning messages indicates that the data for a single patient was specified
 
 see [Plotting Cohort Analysis](#plotting-cohort-analysis-plotlachesis), [Plotting Clincal Correlations](#plotting-clincal-correlations-plotclinicalcorrelations), [Plotting Survival](#plotting-survival-plotsurvival) for details
 
-```{r warning_14, eval = FALSE}
+```
 warning("Removing x samples with missing MRCA density estimate.")
 ```
 The column *MRCA_time_mean* of [LACHESIS wrapper function](#output-7) output for the specified samples is empty; these samples will not be considered for further analysis. 
 
-```{r warning_15, eval = FALSE}
+```
 warning("No sample with MRCA density estimate provided. Returning zero.")
 ```
 [LACHESIS wrapper function](#output-7) output is empty; no further analysis will be performed 
@@ -1233,12 +1237,12 @@ warning("No sample with MRCA density estimate provided. Returning zero.")
 
 see [Plotting Survival](#plotting-survival-plotsurvival) for details
 
-```{r warning_16, eval = FALSE}
+```
 warning("Removing x samples with missing survival time.")
 ```
 The column named according to parameter `surv.time` of [LACHESIS wrapper function](#output-7) output for specified samples is empty; these samples will not be considered for further analysis. 
 
-```{r warning_17, eval = FALSE}
+```
 warning("No survival events in cohort Returning zero.")
 ```
 The column named according to parameter `surv.event` of [LACHESIS wrapper function](#output-7) is empty; no further analysis will be performed. 

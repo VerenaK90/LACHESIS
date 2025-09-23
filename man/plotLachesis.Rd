@@ -35,9 +35,6 @@ plotLachesis(
 
 \item{...}{further arguments and parameters passed to other LACHESIS functions.}
 }
-\value{
-graph with cohort overview of SNV densities at ECA/ MRCA
-}
 \description{
 Visualizes results from \code{\link{LACHESIS}}. Top plot, histograms of mean mutation densities; bottom plots, cumulative distribution of mean mutation densities with 95\% confidence intervals.
 }
