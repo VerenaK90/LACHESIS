@@ -2,8 +2,8 @@
 
 <img align="left" src="man/figures/LACHESIS_logo.svg" alt="LACHESIS logo" width="180"></img>
 
-![R-CMD-check](https://github.com/VerenaK90/LACHESIS/workflows/R-CMD-check/badge.svg)
-![Bioc-check](https://github.com/VerenaK90/LACHESIS/workflows/Bioconductor-check/badge.svg)
+[![R-CMD-check](https://github.com/VerenaK90/LACHESIS/workflows/R-CMD-check/badge.svg)](https://github.com/VerenaK90/LACHESIS/actions)
+[![Bioc-check](https://github.com/VerenaK90/LACHESIS/workflows/Bioconductor-check/badge.svg)](https://github.com/VerenaK90/LACHESIS/actions)
 
 &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; (LACHESIS) is an R package to infer tumor evolution during malignant tranformation from bulk whole genome sequencing data. It uses single nucleotide variants and (ideally allele-specific) copy number information as input to compute mutation densities at clonal chromosomal gains and at the tumor's most recent common ancestor. Additionally, &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; tests whether there is evidence for an early common ancestor, oncogenic events acquired prior to malignant transformation. &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma; also provides modalities to compare tumor evolution across patient collectives, and to correlate evolutionary timings with outcome. Please refer to our [vignette](/vignettes/vignette_LACHESIS.Rmd) for further information. 
 
