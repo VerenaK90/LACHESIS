@@ -43,7 +43,7 @@ relative SNV burden per clonal state.
 }
 \examples{
 # Example using variants associated with specific SBS mutational signatures
-from vcf file
+# from vcf file
 snvs <- system.file("extdata", "NBE15",
 "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")

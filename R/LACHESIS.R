@@ -106,7 +106,7 @@
 #' input.files$snv.file <- snv.file
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
-#' meta data
+#' # meta data
 #' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
 #' fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
@@ -887,7 +887,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' input.files$snv.file <- snv.file
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
-#'  meta data
+#' # meta data
 #' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
 #' fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
@@ -1189,7 +1189,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #' input.files$snv.file <- snv.file
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
-#' meta data
+#' # meta data
 #' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
 #' fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
@@ -1341,7 +1341,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #' input.files$snv.file <- snv.file
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
-#' meta data
+#' # meta data
 #' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
 #' fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
@@ -1576,7 +1576,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 #' input.files$snv.file <- snv.file
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
-#' meta data
+#' # meta data
 #' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
 #' fileext = ".tsv")
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")

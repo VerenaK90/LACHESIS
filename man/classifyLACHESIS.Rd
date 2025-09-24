@@ -63,7 +63,7 @@ input.files$cnv.file <- cnv.file
 input.files$snv.file <- snv.file
 
 # Make an example input file with paths to cnv and snv file along with other
-meta data
+# meta data
 lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
 fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
