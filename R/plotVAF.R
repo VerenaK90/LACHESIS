@@ -11,11 +11,17 @@
 #' @param vaf.border Border color, default "#bdc3c7"
 #' @param srtcounts Text angle if `vaf.show.counts` is TRUE. Default 45
 #' @param output.file Optional, will save the plot.
-#' @param ... further arguments and parameters passed to other LACHESIS functions.
+#' @param ... further arguments and parameters passed to other
+#' LACHESIS functions.
 #' @return VAF histogram
 #' @examples
-#' strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
-#' s_data <- readVCF(vcf = strelka_vcf, vcf.source = "strelka", ignore.XY = FALSE)
+#' strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz",
+#'     package = "LACHESIS"
+#' )
+#' s_data <- readVCF(
+#'     vcf = strelka_vcf, vcf.source = "strelka",
+#'     ignore.XY = FALSE
+#' )
 #' plotVAFdistr(s_data)
 #' @importFrom graphics axis box grid hist mtext par text title
 #' @export
@@ -51,7 +57,10 @@ plotVAFdistr <- function(vaf = NULL, vaf.interval = 0.05, t_sample = NULL,
     }
     title(main = t_sample)
 
-    mtext(side = 1, text = paste0("VAF (interval: ", vaf.interval, ")"), line = 2)
+    mtext(
+        side = 1, text = paste0("VAF (interval: ", vaf.interval, ")"),
+        line = 2
+    )
     mtext(side = 2, text = "Frequency", line = 2.5)
 
     if (vaf.show.density) {
@@ -63,7 +72,10 @@ plotVAFdistr <- function(vaf = NULL, vaf.interval = 0.05, t_sample = NULL,
         grid(nx = 5)
         box(lty = 1, lwd = 0.1)
         mtext(text = "Density", side = 2, cex = 0.7)
-        axis(side = 1, at = seq(0, 1, 0.2), cex.axis = 0.65, line = -1, tick = FALSE)
+        axis(
+            side = 1, at = seq(0, 1, 0.2), cex.axis = 0.65, line = -1,
+            tick = FALSE
+        )
     }
 
     data.table::data.table(breaks = h$breaks, counts = c(0, h$counts))

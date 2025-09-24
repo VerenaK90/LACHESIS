@@ -36,7 +36,8 @@ plotVAFdistr(
 
 \item{output.file}{Optional, will save the plot.}
 
-\item{...}{further arguments and parameters passed to other LACHESIS functions.}
+\item{...}{further arguments and parameters passed to other
+LACHESIS functions.}
 }
 \value{
 VAF histogram
@@ -45,7 +46,9 @@ VAF histogram
 Plot frequency distribution of variant allele frequencies
 }
 \examples{
-strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
-s_data <- readVCF(vcf = strelka_vcf, vcf.source = "strelka", ignore.XY = FALSE)
+strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz",
+package = "LACHESIS")
+s_data <- readVCF(vcf = strelka_vcf, vcf.source = "strelka",
+ignore.XY = FALSE)
 plotVAFdistr(s_data)
 }

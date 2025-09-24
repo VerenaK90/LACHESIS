@@ -1,25 +1,44 @@
 #' Plot normalized mutation density at copy number gain and MRCA per segment
 #' @description
-#' Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.
+#' Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean
+#' mutation densities; bottom plots, timeline of early tumor evolution,
+#' showing mutation densities (mean and 95% CI) of individual chromosomal gains
+#' and mutation densities at ECA and MRCA.
 #' @param mrcaObj output generated from \code{\link{MRCA}}
 #' @param samp.name sample name, optional
 #' @param min.seg.size minimal segment size to plot
-#' @param mut.col.zero optional, the bar color for densities of mutations present on single copies.
-#' @param mut.col.multi  optional, the bar color for densities of mutations present on multiple copies.
+#' @param mut.col.zero optional, the bar color for densities of mutations
+#' present on single copies.
+#' @param mut.col.multi  optional, the bar color for densities of mutations
+#' present on multiple copies.
 #' @param mut.border optional, the line color
-#' @param mut.show.density optional; if `TRUE`, the density distribution of mutation densities on single copies will be shown in the histogram of mutation densities on multiple copies.
+#' @param mut.show.density optional; if `TRUE`, the density distribution of
+#' mutation densities on single copies will be shown in the histogram of
+#' mutation densities on multiple copies.
 #' @param mut.breaks optional; the number of bins in the histogram.
-#' @param mut.xaxis optional; cutoff value for x-axis in evolutionary timeline plot in SNVs/Mb
-#' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception on the evolutionary timeline.
-#' @param mut.snv.rate optional; rate of accumulated SNVs per day in a diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)
+#' @param mut.xaxis optional; cutoff value for x-axis in evolutionary timeline
+#' plot in SNVs/Mb
+#' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
+#' on the evolutionary timeline.
+#' @param mut.snv.rate optional; rate of accumulated SNVs per day in a
+#' diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)
 #' @param output.file optional; will save the plot.
-#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
-#' @param ... further arguments and parameters passed to other LACHESIS functions.
-#' @return graphs with mutation densitiy at ECA and MRCA as well as evolutionary timeline plot
+#' @param ref.build Reference genome. Default `hg19`.
+#' Can be `hg18`, `hg19` or `hg38`.
+#' @param ... further arguments and parameters passed to other
+#' LACHESIS functions.
+#' @return graphs with mutation densitiy at ECA and MRCA as well as
+#' evolutionary timeline plot
 #' @examples
-#' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#' snvs <- system.file("extdata", "NBE15",
+#'     "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+#'     package = "LACHESIS"
+#' )
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-#' aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+#' aceseq_cn <- system.file("extdata", "NBE15",
+#'     "NBE15_comb_pro_extra2.51_1.txt",
+#'     package = "LACHESIS"
+#' )
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' cl_muts <- clonalMutationCounter(nb)
@@ -27,23 +46,26 @@
 #' mrca <- MRCA(norm_muts)
 #' plotMutationDensities(mrca)
 #' @export
-#' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon segments
+#' @importFrom graphics abline Axis box grid hist mtext par rect text title
+#' arrows legend points polygon segments
 #' @importFrom stats setNames
 
 plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
                                   min.seg.size = 10^7, ref.build = "hg19",
-                                  mut.col.zero = "#4FB12B", mut.col.multi = "#176A02",
-                                  mut.border = NULL, mut.show.density = TRUE,
-                                  mut.breaks = NULL, mut.xaxis = NULL,
-                                  mut.show.realtime = FALSE, mut.snv.rate = 3.2,
-                                  output.file = NULL, ...) {
-    Seglength <- . <- A <- B <- variable <- value <- lines <- density <- chrom <- TCN <- Seglength <- 
-      n_mut_A <- n_mut_B <- n_mut_total_clonal <- density_total_mean <- density_A_mean <- density_B_mean <- 
-      density_total_lower <- density_total_upper <- density_A_lower <- density_A_upper <- 
-      density_B_lower <- density_B_upper <- p_total_to_mrca <- p_A_to_mrca <- p_B_to_mrca <- 
-      p_adj_total_to_mrca <- p_adj_A_to_mrca <- p_adj_B_to_mrca <- MRCA_qual <- p_A_to_eca <- p_B_to_eca <-
-      p_adj_A_to_eca <- p_adj_B_to_eca <- A_time <- B_time <- centromere <- chr_region <- i.centromere <- 
-      Start <- End <- NULL
+                                  mut.col.zero = "#4FB12B",
+                                  mut.col.multi = "#176A02", mut.border = NULL,
+                                  mut.show.density = TRUE, mut.breaks = NULL,
+                                  mut.xaxis = NULL, mut.show.realtime = FALSE,
+                                  mut.snv.rate = 3.2, output.file = NULL, ...) {
+    Seglength <- . <- A <- B <- variable <- value <- lines <- density <-
+        chrom <- TCN <- Seglength <- n_mut_A <- n_mut_B <- n_mut_total_clonal <-
+        density_total_mean <- density_A_mean <- density_B_mean <-
+        density_total_lower <- density_total_upper <- density_A_lower <-
+        density_A_upper <- density_B_lower <- density_B_upper <-
+        p_total_to_mrca <- p_A_to_mrca <- p_B_to_mrca <- p_adj_total_to_mrca <-
+        p_adj_A_to_mrca <- p_adj_B_to_mrca <- MRCA_qual <- p_A_to_eca <-
+        p_B_to_eca <- p_adj_A_to_eca <- p_adj_B_to_eca <- A_time <- B_time <-
+        centromere <- chr_region <- i.centromere <- Start <- End <- NULL
 
     if (is.null(mrcaObj)) {
         stop("Missing input. Please provide the output generated by MRCA()")
@@ -79,7 +101,8 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
         )
     )
 
-    # subset on segments larger min.seg.size; for plotting CNVs restrict to non-normal copy numbers
+    # subset on segments larger min.seg.size; for plotting CNVs restrict to
+    # non-normal copy numbers
     to.plot <- to.plot[Seglength > min.seg.size &
         !(variable == "density_total_A" & A == 1) &
         !(variable == "density_total_B" & B == 1), ]
@@ -130,8 +153,11 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
         )
 
         # add density of MRCA
-        if (mut.show.density == TRUE & nrow(to.plot[variable == "density_total_mean"]) > 1) {
-            lines(density(to.plot[variable == "density_total_mean", value]), lty = 2)
+        if (mut.show.density == TRUE &
+            nrow(to.plot[variable == "density_total_mean"]) > 1) {
+            lines(density(to.plot[variable == "density_total_mean", value]),
+                lty = 2
+            )
         }
 
         title(main = paste("Multi-copy SNV densities"), cex.main = 1.2)
@@ -183,30 +209,41 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
 
     if (mut.show.realtime) {
         weeks_pc <- c(12, 27, 38, 64, 90, 116)
-        snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2) # Converting SNVs per day to SNVs per Mb starting from Gastrulation (-2 weeks), assuming haploid genome of 3300Mb
+        # Converting SNVs per day to SNVs per Mb starting from
+        # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
+        snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
         realtime_labels <- c("12wk", "27wk", "38wk", "6mo", "12mo", "18mo")
         axis(
-            side = 3, at = c(x.min, snvs_per_mb, x.max), labels = c("", realtime_labels, ""),
+            side = 3, at = c(x.min, snvs_per_mb, x.max),
+            labels = c("", realtime_labels, ""),
             cex.axis = 0.7
         )
-        segments(x0 = x.min, y0 = par("usr")[4], x1 = x.max, y1 = par("usr")[4], xpd = NA)
+        segments(
+            x0 = x.min, y0 = par("usr")[4], x1 = x.max, y1 = par("usr")[4],
+            xpd = NA
+        )
         mtext("Estimated time (weeks post conception and months postnatal)",
             side = 3,
             line = 2, cex = 0.7
         )
 
         title(
-            main = paste("Evolutionary timeline of chromosomal gains"), cex.main = 1.2,
+            main = paste("Evolutionary timeline of chromosomal gains"),
+            cex.main = 1.2,
             line = 3.2
         )
     } else {
-        title(main = paste("Evolutionary timeline of chromosomal gains"), cex.main = 1.2)
+        title(
+            main = paste("Evolutionary timeline of chromosomal gains"),
+            cex.main = 1.2
+        )
     }
 
     # ECA:
     polygon(
         c(
-            attr(mrcaObj, "ECA_time_lower"), rep(attr(mrcaObj, "ECA_time_upper"), 2),
+            attr(mrcaObj, "ECA_time_lower"),
+            rep(attr(mrcaObj, "ECA_time_upper"), 2),
             attr(mrcaObj, "ECA_time_lower")
         ), c(rep(y.min, 2), rep(y.max, 2)),
         col = mut.col.multi, border = NA
@@ -216,14 +253,18 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
     # MRCA:
     polygon(
         c(
-            attr(mrcaObj, "MRCA_time_lower"), rep(attr(mrcaObj, "MRCA_time_upper"), 2),
+            attr(mrcaObj, "MRCA_time_lower"),
+            rep(attr(mrcaObj, "MRCA_time_upper"), 2),
             attr(mrcaObj, "MRCA_time_lower")
         ), c(rep(y.min, 2), rep(y.max, 2)),
         col = mut.col.zero, border = NA
     )
     abline(v = attr(mrcaObj, "MRCA_time_mean"), lty = 2)
 
-    signs <- c("ECA" = 19, "MRCA" = 17, "ECA/MRCA" = 15, "not mapped to ECA or MRCA" = 1)
+    signs <- c(
+        "ECA" = 19, "MRCA" = 17, "ECA/MRCA" = 15,
+        "not mapped to ECA or MRCA" = 1
+    )
 
     mrcaObj <- mrcaObj[order(as.numeric(mrcaObj$chrom)), ]
 
@@ -240,13 +281,17 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
             pch = signs[mrcaObj[A > 1, A_time]]
         )
         arrows(
-            x0 = mrcaObj[A > 1, density_A_lower], y0 = seq_len(mrcaObj[, sum(A > 1)]),
-            x1 = mrcaObj[A > 1, density_A_upper], y1 = seq_len(mrcaObj[, sum(A > 1)]),
-            code = 3, angle = 90, length = 0, col = chrom_colors[mrcaObj[A > 1, chrom]],
+            x0 = mrcaObj[A > 1, density_A_lower],
+            y0 = seq_len(mrcaObj[, sum(A > 1)]),
+            x1 = mrcaObj[A > 1, density_A_upper],
+            y1 = seq_len(mrcaObj[, sum(A > 1)]),
+            code = 3, angle = 90, length = 0,
+            col = chrom_colors[mrcaObj[A > 1, chrom]],
             lwd = 1
         )
         text(
-            x = mrcaObj[A > 1, density_A_upper], y = seq_len(mrcaObj[, sum(A > 1)]),
+            x = mrcaObj[A > 1, density_A_upper],
+            y = seq_len(mrcaObj[, sum(A > 1)]),
             labels = chr_label[mrcaObj$A > 1], cex = 0.6, pos = 4
         )
         legend("topright",
@@ -268,14 +313,16 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
             x0 = mrcaObj[B > 1 & B != A, density_B_lower],
             y0 = seq(y.max.a + 1, y.max.a + mrcaObj[, sum(B > 1 & B != A)]),
             x1 = mrcaObj[B > 1 & B != A, density_B_upper],
-            y1 = seq(y.max.a + 1, y.max.a + mrcaObj[, sum(B > 1 & B != A)]), code = 3,
+            y1 = seq(y.max.a + 1, y.max.a + mrcaObj[, sum(B > 1 & B != A)]),
+            code = 3,
             angle = 90, length = 0,
             col = chrom_colors[mrcaObj[B > 1 & B != A, chrom]], lwd = 1
         )
         text(
             x = mrcaObj[B > 1 & B != A, density_B_upper],
             y = seq(y.max.a + 1, y.max.a + mrcaObj[, sum(B > 1 & B != A)]),
-            labels = paste0(chr_label[mrcaObj$B > 1 & mrcaObj$B != mrcaObj$A], " B allele"),
+            labels = paste0(chr_label[mrcaObj$B > 1 &
+                mrcaObj$B != mrcaObj$A], " B allele"),
             cex = 0.6, pos = 4
         )
     }
