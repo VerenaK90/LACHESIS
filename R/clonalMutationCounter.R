@@ -86,8 +86,11 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4,
         all.muts <- nbObj[splt]
 
         if (nrow(measured.muts) == 0) {
-            warning("No clonal VAFs for TCN = ", TCN, ", A = ", A, ", on
-                    chromosome ", splt[, "chrom"])
+            tmp1 <- splt[, "chrom"]
+            warning(sprintf(
+            "No clonal VAFs for TCN = %s, A = %s on chromosome %s",
+            TCN, A, tmp1))
+            rm(tmp1)
 
             splt$n_mut_A <- 0
             splt$n_mut_B <- 0
