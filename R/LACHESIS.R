@@ -353,7 +353,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             snv <- readVCF(
                 vcf = x$snv.file, vcf.source = x$vcf.source,
                 t.sample = x$vcf.tumor.id, min.depth = min.depth,
-                min.vaf = min.vaf, info.af = vcf.info.af,
+                min.vaf = min.vaf, info.af = vcf.info.af, ignore.XY = ignore.XY,
                 info.dp = vcf.info.dp, filter.value = filter.value
             )
 
@@ -612,7 +612,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             snv <- readVCF(
                 vcf = snv.files[i], vcf.source = vcf.source[i],
                 t.sample = vcf.tumor.ids[i], min.depth = min.depth,
-                min.vaf = min.vaf, info.af = vcf.info.af,
+                min.vaf = min.vaf, info.af = vcf.info.af, ignore.XY = ignore.XY,
                 info.dp = vcf.info.dp, filter.value = filter.value
             )
 
