@@ -13,7 +13,7 @@ dkfz_vcf <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_1
 # Test mutect VCF if file exists
 if (file.exists(mutect_vcf)) {
   mutect_data <- readVCF(vcf = mutect_vcf, vcf.source = "mutect", filter.value = ".")
-  expect_true(is.data.table(mutect_data))
+  expect_true(data.table::is.data.table(mutect_data))
   expect_true(all(c("chrom", "pos", "ref", "alt", "t_vaf", "t_depth") %in% colnames(mutect_data)))
   expect_true(all(mutect_data$t_vaf >= 0 & mutect_data$t_vaf <= 1))
   expect_true(all(mutect_data$t_depth >= 0))
@@ -22,7 +22,7 @@ if (file.exists(mutect_vcf)) {
 # Test strelka VCF if file exists
 if (file.exists(strelka_vcf)) {
   strelka_data <- readVCF(vcf = strelka_vcf, vcf.source = "strelka")
-  expect_true(is.data.table(strelka_data))
+  expect_true(data.table::is.data.table(strelka_data))
   expect_true(all(c("chrom", "pos", "ref", "alt", "t_vaf", "t_depth") %in% colnames(strelka_data)))
   expect_true(all(strelka_data$t_vaf >= 0 & strelka_data$t_vaf <= 1))
 }
@@ -30,7 +30,7 @@ if (file.exists(strelka_vcf)) {
 # Test DKFZ VCF if file exists
 if (file.exists(dkfz_vcf)) {
   dkfz_data <- readVCF(vcf = dkfz_vcf, vcf.source = "dkfz")
-  expect_true(is.data.table(dkfz_data))
+  expect_true(data.table::is.data.table(dkfz_data))
   expect_true(all(c("chrom", "pos", "ref", "alt", "t_vaf", "t_depth") %in% colnames(dkfz_data)))
 }
 

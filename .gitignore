@@ -2,6 +2,7 @@
 .Rproj.user/
   .Rproj.user/
   .Rhistory
+.Rbuildignore
 .RData
 .Rapp.history
 .Renviron
