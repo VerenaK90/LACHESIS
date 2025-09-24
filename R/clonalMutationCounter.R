@@ -41,7 +41,7 @@ clonalMutationCounter <- function(nbObj = NULL, min.cn = 1, max.cn = 4,
     }
 
     # Initiate the count object for all genotypes present in the data and
-    fulfilling TCN >= min.cn & TCN <= max.cn
+    # fulfilling TCN >= min.cn & TCN <= max.cn
     data.table::setDT(x = nbObj, key = c("chrom", "TCN", "A", "B"))
     countObj <- unique(nbObj[chrom %in% chromosomes & TCN >= min.cn & TCN <=
                                max.cn],
