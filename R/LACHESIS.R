@@ -784,7 +784,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
     # Plot clonality distribution of SNVs
     clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
     if (!is.null(output.dir)) {
-        output.file <- paste0(output.dir, "SNV_timing_per_SNV_cohort.txt")
+        output.file <- paste(output.dir, "SNV_timing_per_SNV_cohort.txt",
+                              sep = "/")
         fwrite(clonality_cohort, output.file, sep = "\t")
 
         clonality_colors <- c(
