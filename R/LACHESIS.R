@@ -822,7 +822,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 axis.text.y = element_text(size = 8)
             )
 
-        pdf(paste(output.dir, "Driver_mutations_cohort.pdf"))
+        pdf(paste(output.dir, "Driver_mutations_cohort.pdf", sep = "/"))
         print(p1)
         dev.off()
     }
