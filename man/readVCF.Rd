@@ -13,7 +13,9 @@ readVCF(
   t.sample = NULL,
   info.af = "AF",
   info.dp = "DP",
-  filter.value = "PASS"
+  filter.value = "PASS",
+  filter.biallelic = TRUE,
+  filter.indels = TRUE
 )
 }
 \arguments{
@@ -34,6 +36,10 @@ readVCF(
 \item{info.dp}{The string encoding the read depth field in the FORMAT column. Defaults to \code{DP}and will be ignored if \code{vcf.source} != \code{sentieon}.}
 
 \item{filter.value}{The FILTER column value for variants that passed the filtering, defaults to PASS}
+
+\item{filter.biallelic}{Remove biallelic variants. Default TRUE}
+
+\item{filter.indels}{Remove indels. Default TRUE}
 }
 \value{
 a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf

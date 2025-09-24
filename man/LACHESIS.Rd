@@ -185,16 +185,20 @@ segment, and either the total copy number or the number of A- and B-alleles
 \examples{
 # An example file with sample annotations and meta data
 input.files <- system.file("extdata", "Sample_template.txt",
-package = "LACHESIS")
+    package = "LACHESIS"
+)
 input.files <- data.table::fread(input.files)
 
 # cnv and snv files for example tumors
 nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
-full.names = TRUE)
+    full.names = TRUE
+)
 nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
-full.names = TRUE)
+    full.names = TRUE
+)
 nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
-full.names = TRUE)
+    full.names = TRUE
+)
 
 cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -204,8 +208,10 @@ input.files$snv.file <- snv.file
 
 # Make an example input file with paths to cnv and snv file along with other
 # meta data
-lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
-fileext = ".tsv")
+lachesis_input <- tempfile(
+    pattern = "lachesis", tmpdir = tempdir(),
+    fileext = ".tsv"
+)
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 # Example with template file with paths to multiple cnv/snv files as an input
@@ -213,29 +219,50 @@ lachesis <- LACHESIS(input.files = lachesis_input)
 
 # Example with a single sample input
 strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz",
-package = "LACHESIS")
+    package = "LACHESIS"
+)
 aceseq_cn <- system.file("extdata",
-"ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn,
-snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83,
-ploidy = 2.59)
+    "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt",
+    package = "LACHESIS"
+)
+lachesis <- LACHESIS(
+    ids = "NBE11", cnv.files = aceseq_cn,
+    snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83,
+    ploidy = 2.59
+)
 
 # Example with multiple sample and data frame input
 nbe11_vcf <- system.file("extdata",
-"NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
-nbe11_cn <- read.delim(system.file("extdata",
-"NBE11/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS"), sep = "\t",
- header = TRUE)
+    "NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf",
+    package = "LACHESIS"
+)
+nbe11_cn <- read.delim(
+    system.file("extdata",
+        "NBE11/NBE11_comb_pro_extra2.59_0.83.txt",
+        package = "LACHESIS"
+    ),
+    sep = "\t",
+    header = TRUE
+)
 nbe15_vcf <- system.file("extdata",
-"NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
-nbe15_cn <- read.delim(system.file("extdata",
-"NBE15/NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS"), sep = "\t",
-header = TRUE)
-lachesis <- LACHESIS(ids = c("NBE11", "NBE15"), cnv.files =
-list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf),
-vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51),
-cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3),
-cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37))
+    "NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+    package = "LACHESIS"
+)
+nbe15_cn <- read.delim(
+    system.file("extdata",
+        "NBE15/NBE15_comb_pro_extra2.51_1.txt",
+        package = "LACHESIS"
+    ),
+    sep = "\t",
+    header = TRUE
+)
+lachesis <- LACHESIS(
+    ids = c("NBE11", "NBE15"), cnv.files =
+        list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf),
+    vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51),
+    cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3),
+    cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37)
+)
 
 }
 \seealso{

@@ -67,10 +67,14 @@ of B alleles is the rounded off of half the total copy number.
 }
 \examples{
 aceseq_cn <- system.file("extdata",
-"ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
+    "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt",
+    package = "LACHESIS"
+)
 cn_data <- readCNV(aceseq_cn)
 ascat_cn <- system.file("extdata",
-"ASCAT/S98.segments.txt", package = "LACHESIS")
+    "ASCAT/S98.segments.txt",
+    package = "LACHESIS"
+)
 cn_data <- readCNV(ascat_cn)
 }
 \author{

@@ -73,36 +73,52 @@ copy number and minor/major allele count.
 \examples{
 # Example using all variants from vcf file
 snvs <- system.file("extdata", "NBE15",
-"snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+    "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+    package = "LACHESIS"
+)
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15",
-"NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+    "NBE15_comb_pro_extra2.51_1.txt",
+    package = "LACHESIS"
+)
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 cl_muts <- clonalMutationCounter(nb)
 norm_muts <- normalizeCounts(cl_muts)
 mrca <- MRCA(norm_muts)
-snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15",
-purity = 1)
+snvClonality <- estimateClonality(
+    nbObj = nb, mrcaObj = mrca, ID = "NBE15",
+    purity = 1
+)
 plotNB(nb = nb, snvClonality = snvClonality)
 
 # Example using variants assosciated with specific SBS mutational signatures
 # from vcf file
 snvs <- system.file("extdata", "NBE15",
-"snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+    "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+    package = "LACHESIS"
+)
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15",
-"NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+    "NBE15_comb_pro_extra2.51_1.txt",
+    package = "LACHESIS"
+)
 c_data <- readCNV(aceseq_cn)
 sig.filepath <- system.file("extdata",
-"NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
-nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
-sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath)
+    "NBE15_Decomposed_MutationType_Probabilities.txt",
+    package = "LACHESIS"
+)
+nb <- nbImport(
+    cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
+    sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath
+)
 cl_muts <- clonalMutationCounter(nb)
 norm_muts <- normalizeCounts(cl_muts)
 mrca <- MRCA(norm_muts)
-snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15",
-purity = 1)
+snvClonality <- estimateClonality(
+    nbObj = nb, mrcaObj = mrca, ID = "NBE15",
+    purity = 1
+)
 plotNB(nb = nb, snvClonality = snvClonality, sig.show = TRUE)
 
 }

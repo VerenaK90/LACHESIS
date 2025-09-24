@@ -54,17 +54,22 @@ survival between tumors with high and low SNV densities
 }
 \examples{
 # An example file with sample annotations and meta data
-input.files <- system.file("extdata", "Sample_template.txt", package =
-"LACHESIS")
+input.files <- system.file("extdata", "Sample_template.txt",
+    package =
+        "LACHESIS"
+)
 input.files <- data.table::fread(input.files)
 
 # cnv and snv files for example tumors
 nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
-full.names = TRUE)
+    full.names = TRUE
+)
 nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
-full.names = TRUE)
+    full.names = TRUE
+)
 nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
-full.names = TRUE)
+    full.names = TRUE
+)
 
 cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -74,8 +79,10 @@ input.files$snv.file <- snv.file
 
 # Make an example input file with paths to cnv and snv file along with other
 # meta data
-lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
-fileext = ".tsv")
+lachesis_input <- tempfile(
+    pattern = "lachesis", tmpdir = tempdir(),
+    fileext = ".tsv"
+)
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 # Example with template file with paths to multiple cnv/snv files as an input
