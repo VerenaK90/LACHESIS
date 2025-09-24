@@ -266,21 +266,24 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         )
 
         if (any(is.na(sample.specs[, ID]))) {
+          tmp1 <- sample.specs[, which(is.na(ID))]
+          tmp2 <- sample.specs[, sum(is.na(ID))]
             warning(
-                "No sample name provided for samples ",
-                sample.specs[, which(is.na(ID))],
-                "; sample name was set to 1 - ", sample.specs[, sum(is.na(ID))]
+                "No sample name provided for samples ", tmp1, ";
+                sample name was set to 1 - ", tmp2
             )
+          rm(tmp1, tmp2)
             sample.specs[, ID := as.character(ID)][is.na(ID),
                                                    ID := which(is.na(ID))]
         }
 
         if (any(is.na(sample.specs[, cnv.file]))) {
+          tmp1 <- toString(sample.specs[, ID[which(is.na(cnv.file))]])
             warning(
-                "No CNV file provided for sample(s) ",
-                toString(sample.specs[, ID[which(is.na(cnv.file))]]),
-                "; sample(s) will be excluded"
+                "No CNV file provided for sample(s) ", tmp1, ";
+                sample(s) will be excluded"
             )
+          rm(tmp1)
             sample.specs[!is.na(cnv.file), ]
             if (nrow(sample.specs) == 0) {
                 stop("No files retained! Stopping analysis.")
@@ -288,11 +291,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         }
 
         if (any(is.na(sample.specs[, snv.file]))) {
-            warning(
-                "No SNV file provided for sample(s) ",
-                toString(sample.specs[, ID[which(is.na(snv.file))]]),
-                "; sample(s) will be excluded"
-            )
+          tmp1 <- toString(sample.specs[, ID[which(is.na(snv.file))]])
+            warning(sprintf(
+            "No SNV file provided for sample(s) %s; sample(s) will be excluded",
+            tmp1
+            ))
+          rm(tmp1)
             sample.specs[!is.na(snv.file), ]
             if (nrow(sample.specs) == 0) {
                 stop("No files retained! Stopping analysis.")
@@ -317,9 +321,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (is.null(x$vcf.tumor.ids)) {
                 x$vcf.tumor.ids <- x$ID
             } else if (any(is.na(x$vcf.tumor.ids))) {
-                warning(
-                    "No column identifier provided for sample ",
-                    which(is.na(x$vcf.tumor.ids)), "; will be inferred."
+              tmp1 <- which(is.na(x$vcf.tumor.ids))
+                warning(sprintf(
+                "No column ID provided for sample %s; will be inferred.",
+                tmp1)
                 )
                 x$vcf.tumor.ids[is.na(x$vcf.tumor.ids)] <- x$id[
                   is.na(x$vcf.tumor.ids)]
@@ -332,8 +337,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                     showWarnings = FALSE
                 ) # Create per-sample output directory
             } else {
-                warning("No output directory specified. LACHESIS output will be
-                        discarded.")
+                warning("No output directory specified.
+                LACHESIS output will be discarded.")
             }
 
             cnv <- readCNV(
@@ -543,20 +548,25 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         rm(sample.specs.spl)
     } else {
         if (any(is.na(ids))) {
-            warning(
-                "No sample name provided for samples ", which(is.na(ids)),
-                "; sample name was set to 1 - ", sum(is.na(ids))
-            )
-            ids[is.na(ids)] <- which(is.na(ids))
+          tmp1 <- which(is.na(ids))
+          tmp2 <- sum(is.na(ids))
+            warning(sprintf(
+                "No sample name provided for samples %s;
+                sample name was set to 1 - %s", tmp1, tmp2
+            ))
+            ids[is.na(ids)] <- tmp1
+            rm(tmp1, tmp2)
         }
         if (is.null(vcf.tumor.ids)) {
             warning("No column identifiers provided.")
             vcf.tumor.ids <- ids
         } else if (any(is.na(vcf.tumor.ids))) {
+          tmp1 <- which(is.na(vcf.tumor.ids))
             warning(
-                "No column identifier  provided for samples ",
-                which(is.na(vcf.tumor.ids)), "; column name will be inferred"
+                "No column ID provided for samples %s;
+                column name will be inferred"
             )
+          rm(tmp1)
             vcf.tumor.ids[is.na(vcf.tumor.ids)] <- ids[is.na(vcf.tumor.ids)]
         }
 
@@ -569,19 +579,25 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                     showWarnings = FALSE
                 ) # Create per-sample output directory
             } else {
-                warning("No output directory specified. LACHESIS output will be
-                        discarded.")
+                warning("No output directory specified.
+                LACHESIS output will be discarded.")
             }
 
             if (is.na(cnv.files)[i]) {
-                warning("No CNV file provided for sample ", ids[i], "; sample
-                        will be excluded")
-                next
+              tmp1 <- ids[1]
+              warning(sprintf(
+              "No CNV file provided for sample %s; sample will be excluded",
+              tmp1))
+              rm(tmp1)
+              next
             }
             if (is.na(snv.files)[i]) {
-                warning("No SNV file provided for sample ", ids[i], "; sample
-                        will be excluded")
-                next
+              tmp1 <- ids[1]
+              warning(sprintf(
+              "No SNV file provided for sample %s; sample will be excluded",
+              tmp1))
+              rm(tmp1)
+              next
             }
 
             cnv <- readCNV(
@@ -645,15 +661,18 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             )
             norm.counts <- normalizeCounts(countObj = raw.counts)
             if (nrow(norm.counts) == 1) {
-                warning("Too few segments to estimate MRCA density for sample ",
-                        ids[i], ".")
-                mrca <- ""
-                attr(mrca, "MRCA_time_mean") <- NA
-                attr(mrca, "MRCA_time_upper") <- NA
-                attr(mrca, "MRCA_time_lower") <- NA
-                attr(mrca, "ECA_time_mean") <- NA
-                attr(mrca, "ECA_time_lower") <- NA
-                attr(mrca, "ECA_time_upper") <- NA
+              tmp1 <- ids[i]
+              warning(sprintf(
+                  "Too few segments to estimate MRCA density for sample %s.",
+                  tmp1))
+              rm(tmp1)
+              mrca <- ""
+              attr(mrca, "MRCA_time_mean") <- NA
+              attr(mrca, "MRCA_time_upper") <- NA
+              attr(mrca, "MRCA_time_lower") <- NA
+              attr(mrca, "ECA_time_mean") <- NA
+              attr(mrca, "ECA_time_lower") <- NA
+              attr(mrca, "ECA_time_upper") <- NA
             } else {
                 mrca <- MRCA(
                     normObj = norm.counts, min.seg.size = min.seg.size,
@@ -889,18 +908,20 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         stop("Missing input. Please provide the output generated by LACHESIS()")
     }
     if (nrow(lachesis) == 1) {
-        warning("Cannot produce summary statistics for a single case. Returning
-                null.")
+        warning(
+        "Cannot produce summary statistics for a single case. Returning null.")
         return()
     }
     if (any(is.na(lachesis$MRCA_time_mean))) {
-        warning("Removing ", sum(is.na(lachesis$MRCA_time_mean)), " samples with
-                missing MRCA density estimate.")
+      tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
+        warning(sprintf(
+          "Removing %s samples with missing MRCA density estimate.", tmp1))
         lachesis <- lachesis[!is.na(MRCA_time_mean), ]
+        rm(tmp1)
     }
     if (nrow(lachesis) == 0) {
-        warning("No sample with MRCA density estimate provided. Returning
-                zero.")
+        warning(
+        "No sample with MRCA density estimate provided. Returning zero.")
         return(NULL)
     }
     if (!is.null(output.file)) {
@@ -1193,13 +1214,15 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
         stop("Missing input. Please provide the output generated by LACHESIS()")
     }
     if (any(is.na(lachesis$MRCA_time_mean))) {
-        warning("Removing ", sum(is.na(lachesis$MRCA_time_mean)), " samples with
-                missing MRCA density estimate.")
+        tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
+        warning(sprintf(
+          "Removing %s samples with missing MRCA density estimate.", tmp1))
+        rm(tmp1)
         lachesis <- lachesis[!is.na(MRCA_time_mean), ]
     }
     if (nrow(lachesis) == 0) {
-        warning("No sample with MRCA density estimate provided. Returning
-                zero.")
+        warning(
+        "No sample with MRCA density estimate provided. Returning zero.")
         return(NULL)
     }
     if (!is.null(output.file)) {
@@ -1349,8 +1372,10 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     }
 
     if (any(is.na(lachesis$MRCA_time_mean))) {
-        warning("Removing ", sum(is.na(lachesis$MRCA_time_mean)), " samples with
-                missing MRCA density estimate.")
+        tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
+        warning(sprintf(
+        "Removing %s samples with missing MRCA density estimate.", tmp1))
+        rm(tmp1)
         lachesis <- lachesis[!is.na(MRCA_time_mean), ]
     }
 
@@ -1363,20 +1388,23 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     }
 
     if (any(is.na(lachesis[, ..surv.time]))) {
-        warning("Removing ", sum(is.na(lachesis[, surv.time])), " samples with
-                missing survival time.")
+        tmp1 <- sum(is.na(lachesis[, surv.time]))
+        warning(sprintf("Removing %s samples with missing survival time.",
+                        tmp1))
+        rm(tmp1)
         lachesis <- lachesis[!is.na(get(surv.time)), .SD]
     }
 
     if (any(is.na(lachesis[, ..surv.event]))) {
-        warning("Removing ", sum(is.na(lachesis[, surv.event])), " samples with
-                missing survival event.")
+      tmp1 <- sum(is.na(lachesis[, surv.event]))
+        warning(sprintf(
+          "Removing %s samples with missing survival event.", tmp1))
         lachesis <- lachesis[!is.na(get(surv.event)), .SD]
     }
 
     if (nrow(lachesis) == 0) {
-        warning("No sample with MRCA density estimate provided. Returning
-                zero.")
+        warning(
+        "No sample with MRCA density estimate provided. Returning zero.")
         return(NULL)
     }
 
@@ -1576,16 +1604,16 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
 
     if (infer.cutpoint == TRUE & (sum(!(is.na(lachesis[, ..surv.event]))) < 2 |
         sum(lachesis[, ..surv.event] != 0, na.rm = TRUE) < 2)) {
-        stop("Please provide survival information if inferring cutpoint de
-             novo.")
+        stop(
+        "Please provide survival information if inferring cutpoint de novo.")
     }
     message("Classifying ", entity, " samples.")
 
     if (infer.cutpoint == TRUE) {
         message("MRCA cutpoint will be newly inferred.")
     } else if (is.null(mrca.cutpoint)) {
-        message("Samples will be classified according to established MRCA
-                cutpoint for ", entity, ".")
+        message("Samples will be classified according to established
+        MRCA cutpoint for ", entity, ".")
     } else if (infer.cutpoint == FALSE & is.null(mrca.cutpoint)) {
         message("Please provide cutpoint or set `infer.cutpoint`=`TRUE`")
     } else if (infer.cutpoint == FALSE) {
