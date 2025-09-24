@@ -41,7 +41,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                      sig.assign = FALSE, assign.method = "sample", ID = NULL,
                      sig.file = NULL, sig.select = NULL, min.p = NULL,
                      ref.build = "hg19", seed = NULL) {
-     end <- start <- sequence_context <- chrom <- i.end <- i.start <- TCN <- NULL
+    end <- start <- sequence_context <- chrom <- i.end <- i.start <- TCN <- NULL
 
     if (any(is.null(cnv), is.null(snv))) {
         stop("Missing snv and cnv inputs!")
@@ -98,7 +98,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                                assign.method = "sample", ID = NULL,
                                sig.select = NULL, min.p = NULL, ref.build = NULL,
                                seed = NULL) {
-  strand <- ref <- sequence_context <- chrom <- i.start <- i.end <- Sample <- MutationType <- alt <- NULL
+    strand <- ref <- sequence_context <- chrom <- i.start <- i.end <- Sample <- MutationType <- alt <- NULL
 
     if (is.null(sv)) {
         stop("Missing 'sv' input data!")
@@ -325,6 +325,8 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
 
     label_subset <- contig_lens_dt[seq(1, .N, by = 2)]
 
+    tcn_max <- segs[, max(TCN)]
+
     cnv_plot <- ggplot() +
         geom_rect(
             data = segs, aes(
@@ -337,7 +339,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
         ) +
         scale_fill_identity() +
         geom_hline(
-            yintercept = seq_len(max.cn), linetype = "dashed",
+            yintercept = seq_len(tcn_max), linetype = "dashed",
             color = nb.col.abline, size = 0.3
         ) +
         geom_vline(
@@ -348,7 +350,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
             breaks = label_subset$mid,
             labels = label_subset$Chromosome, expand = c(0, 0)
         ) +
-        scale_y_continuous(breaks = c(0, seq_len(max.cn))) +
+        scale_y_continuous(breaks = c(0, seq_len(tcn_max))) +
         labs(
             x = "Chromosome", y = "Total CN",
             title = ifelse(is.null(samp.name), attr(nb, "t.sample"), samp.name)
@@ -457,23 +459,50 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
         pdf(output.file, width = 7, height = 9)
     }
 
-    # Copy number plot and clonality histograms
-    clonality_plot <- do.call(
-        .grid_arrange_shared_legend,
-        c(clonality_plots,
-            ncol = 2,
-            nrow = ceiling(length(clonality_plots) / 2)
+    # Copy number plot and clonality histogram
+    if (length(clonality_plots) > 0) {
+        first_page_clonality_plots <- clonality_plots[seq_len(min(6, length(clonality_plots)))]
+        first_page_clonality_grob <- gridExtra::arrangeGrob(
+            grobs = first_page_clonality_plots,
+            ncol = 2, nrow = 3
         )
-    )
-    first_page <- gridExtra::arrangeGrob(cnv_plot, clonality_plot,
-        ncol = 1,
-        heights = c(0.4, 0.6)
-    )
-    grid::grid.draw(first_page)
+        first_page <- gridExtra::arrangeGrob(
+            cnv_plot,
+            first_page_clonality_grob,
+            ncol = 1,
+            heights = c(0.33, 0.67)
+        )
+        grid::grid.draw(first_page)
+
+        ## Additional page for clonality plots if >6
+        if (length(clonality_plots) > 6) {
+            second_page_clonality_plots <- clonality_plots[-seq_len(6)]
+            second_page_clonality_grobs <- gridExtra::marrangeGrob(
+                grobs = second_page_clonality_plots,
+                ncol = 2, nrow = 4,
+                top = NULL
+            )
+            for (i in seq_along(second_page_clonality_grobs)) {
+                grid::grid.newpage()
+                grid::grid.draw(second_page_clonality_grobs[[i]])
+            }
+        }
+    } else {
+        grid::grid.draw(cnv_plot)
+    }
 
     # Optional signature histograms
     if (sig.show && length(signature_plots) > 0) {
-        do.call(gridExtra::grid.arrange, c(signature_plots, ncol = 2))
+        signature_pages <- gridExtra::marrangeGrob(
+            grobs = signature_plots,
+            ncol = 2, nrow = 4,
+            top = NULL
+        )
+        ## Additional page for signature plots if >8
+        for (i in seq_along(signature_pages)) {
+            grid::grid.newpage()
+            grid::grid.draw(signature_pages[[i]])
+        }
     }
 
     if (!is.null(output.file)) {
