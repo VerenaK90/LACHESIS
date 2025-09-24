@@ -33,10 +33,14 @@
 #' @param tumor.id Tumor ID, optional.
 #' @examples
 #' aceseq_cn <- system.file("extdata",
-#' "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
+#'     "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt",
+#'     package = "LACHESIS"
+#' )
 #' cn_data <- readCNV(aceseq_cn)
 #' ascat_cn <- system.file("extdata",
-#' "ASCAT/S98.segments.txt", package = "LACHESIS")
+#'     "ASCAT/S98.segments.txt",
+#'     package = "LACHESIS"
+#' )
 #' cn_data <- readCNV(ascat_cn)
 #' @return A standardized data frame with copy number information per segment.
 #' readCNV()
@@ -80,8 +84,9 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     tmp1 <- nrow(cn.info)
     tmp2 <- length(unique(cn.info[[chr.col]]))
     message(sprintf(
-      "Read in %s segments with copy number information on %s chromosomes.",
-      tmp1, tmp2))
+        "Read in %s segments with copy number information on %s chromosomes.",
+        tmp1, tmp2
+    ))
     rm(tmp1, tmp2)
 
     # round copy number to multiples of 0.2
@@ -94,8 +99,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     cn.info[[tcn.col]] <- round(cn.info[[tcn.col]])
 
     tmp1 <- sum(is.na(cn.info[[tcn.col]]))
-    message(sprintf("Removing %s segments without copy number information...",
-            tmp1))
+    message(sprintf(
+        "Removing %s segments without copy number information...",
+        tmp1
+    ))
     rm(tmp1)
 
     cn.info <- cn.info[!is.na(cn.info[[tcn.col]]), ]
@@ -104,14 +111,15 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
         stop("No segments with copy number information provided.")
     }
 
-    tmp1 <-  sum(cn.info[[tcn.col]] > max.cn)
-    message("Removing ",tmp1, " segments with copy number > ", max.cn, "...")
+    tmp1 <- sum(cn.info[[tcn.col]] > max.cn)
+    message("Removing ", tmp1, " segments with copy number > ", max.cn, "...")
 
     cn.info <- cn.info[cn.info[[tcn.col]] <= max.cn & cn.info[[tcn.col]] > 0, ]
 
     if (nrow(cn.info) == 0) {
         stop(
-          "No segments with copy number information greater 0 and <= ", max.cn)
+            "No segments with copy number information greater 0 and <= ", max.cn
+        )
     }
 
     if (estimate.alleles) { # assume 1:1, 2:1, 2:2, ... configuration
@@ -126,12 +134,14 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     # for callers without subconal/clonal assignment,
     # remove subclonals based on maximal deviation of 0.2 for the
     # total CN (A+B), and based on a maximal deviation of 0.1 for each allele
-    cn.info <- cn.info[cn.info[[A.col]] %% 1 <= 0.1 |
-                         cn.info[[A.col]] %% 1 >= 0.9, ,
+    cn.info <- cn.info[
+        cn.info[[A.col]] %% 1 <= 0.1 |
+            cn.info[[A.col]] %% 1 >= 0.9, ,
         drop = FALSE
     ]
-    cn.info <- cn.info[cn.info[[B.col]] %% 1 <= 0.1 |
-                         cn.info[[B.col]] %% 1 >= 0.9, ,
+    cn.info <- cn.info[
+        cn.info[[B.col]] %% 1 <= 0.1 |
+            cn.info[[B.col]] %% 1 >= 0.9, ,
         drop = FALSE
     ]
     ## round the remaining copy numbers
@@ -182,18 +192,21 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     cn.info <- .merge_adjacent_segs(cn.info, merge.tolerance)
     tmp1 <- nrow(cn.info)
     tmp2 <- length(unique(cn.info$Chr))
-    message(sprintf("Retaining %s segments with copy number information on %s chromosomes.",
-            tmp1, tmp2))
+    message(sprintf(
+        "Retaining %s segments with copy number information on %s chromosomes.",
+        tmp1, tmp2
+    ))
     rm(tmp1, tmp2)
 
     if (any(cn.info$End < cn.info$Start)) {
-      tmp1 <- sum(cn.info$End < cn.info$Start)
+        tmp1 <- sum(cn.info$End < cn.info$Start)
         warning("Removing ", tmp1, " segments with start > end")
         cn.info <- cn.info[cn.info$Start <= cn.info$End, ]
     }
     if (sum(cn.info$End - cn.info$Start) < 3 * 10^8) {
         warning(
-          "Less than 10% of the genome with valid copy number information.")
+            "Less than 10% of the genome with valid copy number information."
+        )
     }
 
     attr(cn.info, "ID") <- tumor.id
@@ -204,8 +217,8 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
 .merge_adjacent_segs <- function(cn.info, merge.tolerance) {
     cn.info <- split(cn.info, cn.info$Chr) # split by chromosome
     cn.info <- lapply(cn.info, function(x) {
-      # merge segments if they have the same allele counts and if start and end
-      # are less than the merge.tolerance apart from each other
+        # merge segments if they have the same allele counts and if start and end
+        # are less than the merge.tolerance apart from each other
         to.keep <- 1 + which(!(x$Start[-1] - x$End[-length(x$End)] <
             merge.tolerance & x$A[-1] == x$A[-length(x$A)] &
             x$B[-1] == x$B[-length(x$B)]))
@@ -227,11 +240,14 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
         if (!file.exists(cn.info)) {
             tmp1 <- cn.info
             stop(
-              "Please provide a valid CNV file path.", tmp1, "does not exist.")
+                "Please provide a valid CNV file path.", tmp1, "does not exist."
+            )
             rm(tmp1)
         } else {
-            cn.info <- data.table::fread(file = cn.info, sep = "\t",
-                                         header = TRUE)
+            cn.info <- data.table::fread(
+                file = cn.info, sep = "\t",
+                header = TRUE
+            )
         }
     } else {
         stop("Please provide a file path, data.frame, or data.table for
@@ -239,7 +255,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     }
 
     estimate.alleles <- FALSE # will be set to TRUE if allele info is
-                              # not provided, see below
+    # not provided, see below
 
     if (is.null(chr.col) || is.na(chr.col)) {
         chr.col <- colnames(cn.info)[grepl("chr", colnames(cn.info),
@@ -316,10 +332,11 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
             } else if (!is.null(tcn.col) & !is.null(B.col)) {
                 cn.info$A <- cn.info[[tcn.col]] - cn.info[[B.col]]
                 message(
-                  "A allele identifier not provided, computing A = TCN - B.")
+                    "A allele identifier not provided, computing A = TCN - B."
+                )
             } else {
                 estimate.alleles <- TRUE # Assume alleles as standard 1:1, 2:1
-                                         # or 2:2 configuration
+                # or 2:2 configuration
                 A.col <- "A"
                 warning("Allele information is not provided and will be assumed
                         1:1 in disomic regions, 2:1 in trisomic regions,
@@ -353,7 +370,8 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
             } else if (!is.null(tcn.col) & !estimate.alleles) {
                 cn.info$B <- cn.info[[tcn.col]] - cn.info[[A.col]]
                 message(
-                  "B allele identifier not provided, computing B = TCN - A.")
+                    "B allele identifier not provided, computing B = TCN - A."
+                )
             } else {
                 B.col <- "B"
             }
@@ -377,7 +395,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     if (is.null(tcn.col) || is.na(tcn.col)) {
         if (!is.null(A.col) & !is.null(B.col)) {
             cn.info$TCN <- as.numeric(cn.info[[A.col]]) +
-              as.numeric(cn.info[[B.col]])
+                as.numeric(cn.info[[B.col]])
             tcn.col <- "TCN"
             message("Total copy number computed as A + B.")
         } else {
@@ -396,7 +414,8 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
                 )] # try to match with standard nomenclature
             if (length(tcn.col) == 0) {
                 stop(
-                  "TCN identifier is not provided and could not be inferred!")
+                    "TCN identifier is not provided and could not be inferred!"
+                )
             }
             tcn.col <- tcn.col[1]
             warning("TCN identifier is not provided, assuming ", tcn.col)
@@ -419,7 +438,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     if (!is.character(cn.info[[chr.col]])) {
         stop("Chromosome information must be string or numeric.")
     } else if (!(is.character(cn.info[[tcn.col]]) |
-                 is.numeric(cn.info[[tcn.col]]))) {
+        is.numeric(cn.info[[tcn.col]]))) {
         stop("Total copy number must be string or numeric.")
     } else if (!is.numeric(cn.info[[start.col]])) {
         stop("Start position must be numeric.")

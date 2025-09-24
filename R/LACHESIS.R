@@ -88,16 +88,20 @@
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt",
-#' package = "LACHESIS")
+#'     package = "LACHESIS"
+#' )
 #' input.files <- data.table::fread(input.files)
 #'
 #' # cnv and snv files for example tumors
 #' nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #'
 #' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 #' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -107,8 +111,10 @@
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
 #' # meta data
-#' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
-#' fileext = ".tsv")
+#' lachesis_input <- tempfile(
+#'     pattern = "lachesis", tmpdir = tempdir(),
+#'     fileext = ".tsv"
+#' )
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
@@ -116,29 +122,50 @@
 #'
 #' # Example with a single sample input
 #' strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz",
-#' package = "LACHESIS")
+#'     package = "LACHESIS"
+#' )
 #' aceseq_cn <- system.file("extdata",
-#' "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
-#' lachesis <- LACHESIS(ids = "NBE11", cnv.files = aceseq_cn,
-#' snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83,
-#' ploidy = 2.59)
+#'     "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt",
+#'     package = "LACHESIS"
+#' )
+#' lachesis <- LACHESIS(
+#'     ids = "NBE11", cnv.files = aceseq_cn,
+#'     snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83,
+#'     ploidy = 2.59
+#' )
 #'
 #' # Example with multiple sample and data frame input
 #' nbe11_vcf <- system.file("extdata",
-#' "NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
-#' nbe11_cn <- read.delim(system.file("extdata",
-#' "NBE11/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS"), sep = "\t",
-#'  header = TRUE)
+#'     "NBE11/snvs_NBE11_somatic_snvs_conf_8_to_10.vcf",
+#'     package = "LACHESIS"
+#' )
+#' nbe11_cn <- read.delim(
+#'     system.file("extdata",
+#'         "NBE11/NBE11_comb_pro_extra2.59_0.83.txt",
+#'         package = "LACHESIS"
+#'     ),
+#'     sep = "\t",
+#'     header = TRUE
+#' )
 #' nbe15_vcf <- system.file("extdata",
-#' "NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
-#' nbe15_cn <- read.delim(system.file("extdata",
-#' "NBE15/NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS"), sep = "\t",
-#' header = TRUE)
-#' lachesis <- LACHESIS(ids = c("NBE11", "NBE15"), cnv.files =
-#' list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf),
-#' vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51),
-#' cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3),
-#' cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37))
+#'     "NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+#'     package = "LACHESIS"
+#' )
+#' nbe15_cn <- read.delim(
+#'     system.file("extdata",
+#'         "NBE15/NBE15_comb_pro_extra2.51_1.txt",
+#'         package = "LACHESIS"
+#'     ),
+#'     sep = "\t",
+#'     header = TRUE
+#' )
+#' lachesis <- LACHESIS(
+#'     ids = c("NBE11", "NBE15"), cnv.files =
+#'         list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf),
+#'     vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51),
+#'     cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3),
+#'     cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37)
+#' )
 #'
 #' @seealso \code{\link{MRCA}} \code{\link{clonalMutationCounter}}
 #' \code{\link{normalizeCounts}}
@@ -164,7 +191,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                      assign.method = "sample", sig.select = NULL, min.p = NULL,
                      driver.file = NULL, ...) {
     ID <- cnv.file <- snv.file <- fwrite <- known_driver_gene <- Sample <-
-      Clonality <- NULL
+        Clonality <- NULL
 
     if (is.null(input.files) & is.null(cnv.files)) {
         stop("Missing input file!")
@@ -266,24 +293,26 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         )
 
         if (any(is.na(sample.specs[, ID]))) {
-          tmp1 <- sample.specs[, which(is.na(ID))]
-          tmp2 <- sample.specs[, sum(is.na(ID))]
+            tmp1 <- sample.specs[, which(is.na(ID))]
+            tmp2 <- sample.specs[, sum(is.na(ID))]
             warning(
                 "No sample name provided for samples ", tmp1, ";
                 sample name was set to 1 - ", tmp2
             )
-          rm(tmp1, tmp2)
-            sample.specs[, ID := as.character(ID)][is.na(ID),
-                                                   ID := which(is.na(ID))]
+            rm(tmp1, tmp2)
+            sample.specs[, ID := as.character(ID)][
+                is.na(ID),
+                ID := which(is.na(ID))
+            ]
         }
 
         if (any(is.na(sample.specs[, cnv.file]))) {
-          tmp1 <- toString(sample.specs[, ID[which(is.na(cnv.file))]])
+            tmp1 <- toString(sample.specs[, ID[which(is.na(cnv.file))]])
             warning(
                 "No CNV file provided for sample(s) ", tmp1, ";
                 sample(s) will be excluded"
             )
-          rm(tmp1)
+            rm(tmp1)
             sample.specs[!is.na(cnv.file), ]
             if (nrow(sample.specs) == 0) {
                 stop("No files retained! Stopping analysis.")
@@ -291,12 +320,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         }
 
         if (any(is.na(sample.specs[, snv.file]))) {
-          tmp1 <- toString(sample.specs[, ID[which(is.na(snv.file))]])
+            tmp1 <- toString(sample.specs[, ID[which(is.na(snv.file))]])
             warning(sprintf(
-            "No SNV file provided for sample(s) %s; sample(s) will be excluded",
-            tmp1
+                "No SNV file provided for sample(s) %s; sample(s) will be excluded",
+                tmp1
             ))
-          rm(tmp1)
+            rm(tmp1)
             sample.specs[!is.na(snv.file), ]
             if (nrow(sample.specs) == 0) {
                 stop("No files retained! Stopping analysis.")
@@ -321,13 +350,14 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (is.null(x$vcf.tumor.ids)) {
                 x$vcf.tumor.ids <- x$ID
             } else if (any(is.na(x$vcf.tumor.ids))) {
-              tmp1 <- which(is.na(x$vcf.tumor.ids))
+                tmp1 <- which(is.na(x$vcf.tumor.ids))
                 warning(sprintf(
-                "No column ID provided for sample %s; will be inferred.",
-                tmp1)
-                )
+                    "No column ID provided for sample %s; will be inferred.",
+                    tmp1
+                ))
                 x$vcf.tumor.ids[is.na(x$vcf.tumor.ids)] <- x$id[
-                  is.na(x$vcf.tumor.ids)]
+                    is.na(x$vcf.tumor.ids)
+                ]
             }
             message("Computing SNV density for sample ", x$ID)
 
@@ -420,7 +450,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             )
 
             cohort.densities <- merge(cohort.densities, this.tumor.density,
-                                      all = TRUE)
+                all = TRUE
+            )
 
             # Output the result for this sample
             if (!is.null(output.dir)) {
@@ -430,7 +461,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                     "ECA_time_upper"
                 )
                 mrca.densities <- transpose(data.table(unlist(attributes(mrca)[
-                  mrca_colnames])))
+                    mrca_colnames
+                ])))
                 setnames(mrca.densities, mrca_colnames)
                 data.table::fwrite(mrca.densities,
                     file = file.path(
@@ -548,8 +580,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         rm(sample.specs.spl)
     } else {
         if (any(is.na(ids))) {
-          tmp1 <- which(is.na(ids))
-          tmp2 <- sum(is.na(ids))
+            tmp1 <- which(is.na(ids))
+            tmp2 <- sum(is.na(ids))
             warning(sprintf(
                 "No sample name provided for samples %s;
                 sample name was set to 1 - %s", tmp1, tmp2
@@ -561,12 +593,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             warning("No column identifiers provided.")
             vcf.tumor.ids <- ids
         } else if (any(is.na(vcf.tumor.ids))) {
-          tmp1 <- which(is.na(vcf.tumor.ids))
+            tmp1 <- which(is.na(vcf.tumor.ids))
             warning(
                 "No column ID provided for samples %s;
                 column name will be inferred"
             )
-          rm(tmp1)
+            rm(tmp1)
             vcf.tumor.ids[is.na(vcf.tumor.ids)] <- ids[is.na(vcf.tumor.ids)]
         }
 
@@ -584,20 +616,22 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             }
 
             if (is.na(cnv.files)[i]) {
-              tmp1 <- ids[1]
-              warning(sprintf(
-              "No CNV file provided for sample %s; sample will be excluded",
-              tmp1))
-              rm(tmp1)
-              next
+                tmp1 <- ids[1]
+                warning(sprintf(
+                    "No CNV file provided for sample %s; sample will be excluded",
+                    tmp1
+                ))
+                rm(tmp1)
+                next
             }
             if (is.na(snv.files)[i]) {
-              tmp1 <- ids[1]
-              warning(sprintf(
-              "No SNV file provided for sample %s; sample will be excluded",
-              tmp1))
-              rm(tmp1)
-              next
+                tmp1 <- ids[1]
+                warning(sprintf(
+                    "No SNV file provided for sample %s; sample will be excluded",
+                    tmp1
+                ))
+                rm(tmp1)
+                next
             }
 
             cnv <- readCNV(
@@ -661,18 +695,19 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             )
             norm.counts <- normalizeCounts(countObj = raw.counts)
             if (nrow(norm.counts) == 1) {
-              tmp1 <- ids[i]
-              warning(sprintf(
-                  "Too few segments to estimate MRCA density for sample %s.",
-                  tmp1))
-              rm(tmp1)
-              mrca <- ""
-              attr(mrca, "MRCA_time_mean") <- NA
-              attr(mrca, "MRCA_time_upper") <- NA
-              attr(mrca, "MRCA_time_lower") <- NA
-              attr(mrca, "ECA_time_mean") <- NA
-              attr(mrca, "ECA_time_lower") <- NA
-              attr(mrca, "ECA_time_upper") <- NA
+                tmp1 <- ids[i]
+                warning(sprintf(
+                    "Too few segments to estimate MRCA density for sample %s.",
+                    tmp1
+                ))
+                rm(tmp1)
+                mrca <- ""
+                attr(mrca, "MRCA_time_mean") <- NA
+                attr(mrca, "MRCA_time_upper") <- NA
+                attr(mrca, "MRCA_time_lower") <- NA
+                attr(mrca, "ECA_time_mean") <- NA
+                attr(mrca, "ECA_time_lower") <- NA
+                attr(mrca, "ECA_time_upper") <- NA
             } else {
                 mrca <- MRCA(
                     normObj = norm.counts, min.seg.size = min.seg.size,
@@ -687,7 +722,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                         "ECA_time_lower", "ECA_time_upper"
                     )
                     mrca.densities <- transpose(data.table(unlist(
-                      attributes(mrca)[mrca_colnames])))
+                        attributes(mrca)[mrca_colnames]
+                    )))
                     setnames(mrca.densities, mrca_colnames)
                     data.table::fwrite(mrca.densities,
                         file = file.path(
@@ -777,7 +813,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             )
 
             cohort.densities <- merge(cohort.densities, this.tumor.density,
-                                      all = TRUE)
+                all = TRUE
+            )
         }
     }
 
@@ -785,7 +822,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
     clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
     if (!is.null(output.dir)) {
         output.file <- paste(output.dir, "SNV_timing_per_SNV_cohort.txt",
-                              sep = "/")
+            sep = "/"
+        )
         fwrite(clonality_cohort, output.file, sep = "\t")
 
         clonality_colors <- c(
@@ -840,8 +878,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
     # Save log file as tsv
     if (!is.null(output.dir) && !is.null(input.files)) {
         timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
-        output.file <- paste0(output.dir, "/LACHESIS_logfile_", timestamp,
-                              ".tsv")
+        output.file <- paste0(
+            output.dir, "/LACHESIS_logfile_", timestamp,
+            ".tsv"
+        )
         fwrite(log.file.data.cohort, output.file, sep = "\t")
     }
 
@@ -869,16 +909,20 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt",
-#' package = "LACHESIS")
+#'     package = "LACHESIS"
+#' )
 #' input.files <- data.table::fread(input.files)
 #'
 #' # cnv and snv files for example tumors
 #' nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #'
 #' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 #' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -888,8 +932,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
 #' # meta data
-#' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
-#' fileext = ".tsv")
+#' lachesis_input <- tempfile(
+#'     pattern = "lachesis", tmpdir = tempdir(),
+#'     fileext = ".tsv"
+#' )
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
@@ -910,19 +956,22 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     }
     if (nrow(lachesis) == 1) {
         warning(
-        "Cannot produce summary statistics for a single case. Returning null.")
+            "Cannot produce summary statistics for a single case. Returning null."
+        )
         return()
     }
     if (any(is.na(lachesis$MRCA_time_mean))) {
-      tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
+        tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
         warning(sprintf(
-          "Removing %s samples with missing MRCA density estimate.", tmp1))
+            "Removing %s samples with missing MRCA density estimate.", tmp1
+        ))
         lachesis <- lachesis[!is.na(MRCA_time_mean), ]
         rm(tmp1)
     }
     if (nrow(lachesis) == 0) {
         warning(
-        "No sample with MRCA density estimate provided. Returning zero.")
+            "No sample with MRCA density estimate provided. Returning zero."
+        )
         return(NULL)
     }
     if (!is.null(output.file)) {
@@ -943,13 +992,15 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
                 min(log10(to.plot$MRCA_time_mean))) / 20
         } else {
             binwidth <- (max(to.plot$MRCA_time_mean) -
-                           min(to.plot$MRCA_time_mean)) / 20
+                min(to.plot$MRCA_time_mean)) / 20
         }
     }
 
     lo_mat <- matrix(data = c(1, 2, 3, 4), nrow = 2, ncol = 2, byrow = TRUE)
-    graphics::layout(mat = lo_mat, widths = c(1, 2, 1, 2),
-                     heights = c(1, 1, 1, 1))
+    graphics::layout(
+        mat = lo_mat, widths = c(1, 2, 1, 2),
+        heights = c(1, 1, 1, 1)
+    )
 
     par(mar = c(3, 4, 3, 1))
 
@@ -1027,8 +1078,10 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         col = lach.col.zero, border = NA
     )
 
-    plot.ecdf(lachesis$MRCA_time_mean, col = "black", add = TRUE,
-              verticals = TRUE)
+    plot.ecdf(lachesis$MRCA_time_mean,
+        col = "black", add = TRUE,
+        verticals = TRUE
+    )
 
     title(main = paste("SNV densities at MRCA"), cex.main = 1)
 
@@ -1083,8 +1136,10 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
             xlim = c(0, 1.05 * max(to.plot[, ECA_time_mean],
                 na.rm = TRUE
             )),
-            breaks = seq(0, max(to.plot[, ECA_time_mean], na.rm = TRUE) * 1.05,
-                         binwidth),
+            breaks = seq(
+                0, max(to.plot[, ECA_time_mean], na.rm = TRUE) * 1.05,
+                binwidth
+            ),
             col = lach.col.multi, border = lach.border, main = NA,
             xlab = NA, ylab = NA
         )
@@ -1145,8 +1200,10 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
             nrow(lachesis[!is.na(ECA_time_mean), ]),
         col = lach.col.multi, border = NA
     )
-    plot.ecdf(lachesis$ECA_time_mean, col = "black", add = TRUE,
-              verticals = TRUE)
+    plot.ecdf(lachesis$ECA_time_mean,
+        col = "black", add = TRUE,
+        verticals = TRUE
+    )
 
     title(main = paste("SNV densities at ECA"), cex.main = 1)
 
@@ -1171,16 +1228,20 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt",
-#' package = "LACHESIS")
+#'     package = "LACHESIS"
+#' )
 #' input.files <- data.table::fread(input.files)
 #'
 #' # cnv and snv files for example tumors
 #' nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #'
 #' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 #' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -1190,8 +1251,10 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
 #' # meta data
-#' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
-#' fileext = ".tsv")
+#' lachesis_input <- tempfile(
+#'     pattern = "lachesis", tmpdir = tempdir(),
+#'     fileext = ".tsv"
+#' )
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
@@ -1217,13 +1280,15 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
     if (any(is.na(lachesis$MRCA_time_mean))) {
         tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
         warning(sprintf(
-          "Removing %s samples with missing MRCA density estimate.", tmp1))
+            "Removing %s samples with missing MRCA density estimate.", tmp1
+        ))
         rm(tmp1)
         lachesis <- lachesis[!is.na(MRCA_time_mean), ]
     }
     if (nrow(lachesis) == 0) {
         warning(
-        "No sample with MRCA density estimate provided. Returning zero.")
+            "No sample with MRCA density estimate provided. Returning zero."
+        )
         return(NULL)
     }
     if (!is.null(output.file)) {
@@ -1322,17 +1387,22 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #' @return survival graphs
 #' @examples
 #' # An example file with sample annotations and meta data
-#' input.files <- system.file("extdata", "Sample_template.txt", package =
-#' "LACHESIS")
+#' input.files <- system.file("extdata", "Sample_template.txt",
+#'     package =
+#'         "LACHESIS"
+#' )
 #' input.files <- data.table::fread(input.files)
 #'
 #' # cnv and snv files for example tumors
 #' nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #'
 #' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 #' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -1342,8 +1412,10 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
 #' # meta data
-#' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
-#' fileext = ".tsv")
+#' lachesis_input <- tempfile(
+#'     pattern = "lachesis", tmpdir = tempdir(),
+#'     fileext = ".tsv"
+#' )
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
@@ -1366,7 +1438,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
                          surv.time.breaks = NULL, surv.time.scale = 1,
                          surv.title = "Survival probability",
                          surv.ylab = "Survival") {
-  MRCA_time_mean <- ECA_time_mean <- ..surv.time <- ..surv.event <- NULL
+    MRCA_time_mean <- ECA_time_mean <- ..surv.time <- ..surv.event <- NULL
 
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")
@@ -1375,7 +1447,8 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     if (any(is.na(lachesis$MRCA_time_mean))) {
         tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
         warning(sprintf(
-        "Removing %s samples with missing MRCA density estimate.", tmp1))
+            "Removing %s samples with missing MRCA density estimate.", tmp1
+        ))
         rm(tmp1)
         lachesis <- lachesis[!is.na(MRCA_time_mean), ]
     }
@@ -1390,22 +1463,26 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 
     if (any(is.na(lachesis[, ..surv.time]))) {
         tmp1 <- sum(is.na(lachesis[, surv.time]))
-        warning(sprintf("Removing %s samples with missing survival time.",
-                        tmp1))
+        warning(sprintf(
+            "Removing %s samples with missing survival time.",
+            tmp1
+        ))
         rm(tmp1)
         lachesis <- lachesis[!is.na(get(surv.time)), .SD]
     }
 
     if (any(is.na(lachesis[, ..surv.event]))) {
-      tmp1 <- sum(is.na(lachesis[, surv.event]))
+        tmp1 <- sum(is.na(lachesis[, surv.event]))
         warning(sprintf(
-          "Removing %s samples with missing survival event.", tmp1))
+            "Removing %s samples with missing survival event.", tmp1
+        ))
         lachesis <- lachesis[!is.na(get(surv.event)), .SD]
     }
 
     if (nrow(lachesis) == 0) {
         warning(
-        "No sample with MRCA density estimate provided. Returning zero.")
+            "No sample with MRCA density estimate provided. Returning zero."
+        )
         return(NULL)
     }
 
@@ -1423,8 +1500,10 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
             variables = c("MRCA_time_mean")
         )
 
-        mrca.cutpoint <- as.numeric(mrca.cutpoint.obj$cutpoint["MRCA_time_mean",
-                                                               "cutpoint"])
+        mrca.cutpoint <- as.numeric(mrca.cutpoint.obj$cutpoint[
+            "MRCA_time_mean",
+            "cutpoint"
+        ])
     }
 
     # Categorizing according to MRCA
@@ -1433,7 +1512,8 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
         as.numeric(lachesis.categorized[[surv.time]]) / surv.time.scale
     lachesis.categorized$MRCA_timing <-
         ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "early",
-               "late")
+            "late"
+        )
     lachesis.categorized$MRCA_timing <-
         factor(lachesis.categorized$MRCA_timing, levels = c("early", "late"))
 
@@ -1464,7 +1544,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     )
 
     p_value <- 1 - stats::pchisq(survival.diff$chisq, length(survival.diff$n) -
-                                   1)
+        1)
     p.value.pos <- max(survival.fit$time) * (1 / 6)
 
     survival.fit.plot <- survminer::ggsurvplot_df(
@@ -1507,8 +1587,10 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
             p_value = p_value
         )
 
-        mrca.cutpoint.rounded <- formatC(mrca.cutpoint, format = "f",
-                                         digits = 2)
+        mrca.cutpoint.rounded <- formatC(mrca.cutpoint,
+            format = "f",
+            digits = 2
+        )
         data.table::fwrite(mrca.cutpoint.dt,
             file = file.path(output.dir, paste0(
                 "cutpoint_estimate_",
@@ -1558,16 +1640,20 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt",
-#' package = "LACHESIS")
+#'     package = "LACHESIS"
+#' )
 #' input.files <- data.table::fread(input.files)
 #'
 #' # cnv and snv files for example tumors
 #' nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
-#' full.names = TRUE)
+#'     full.names = TRUE
+#' )
 #'
 #' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 #' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -1577,8 +1663,10 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 #'
 #' # Make an example input file with paths to cnv and snv file along with other
 #' # meta data
-#' lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
-#' fileext = ".tsv")
+#' lachesis_input <- tempfile(
+#'     pattern = "lachesis", tmpdir = tempdir(),
+#'     fileext = ".tsv"
+#' )
 #' data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
@@ -1591,7 +1679,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
                              surv.time = "OS.time", surv.event = "OS") {
-  MRCA_time_mean <- ..surv.time <- ..surv.event <- NULL
+    MRCA_time_mean <- ..surv.time <- ..surv.event <- NULL
 
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")
@@ -1606,7 +1694,8 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
     if (infer.cutpoint == TRUE & (sum(!(is.na(lachesis[, ..surv.event]))) < 2 |
         sum(lachesis[, ..surv.event] != 0, na.rm = TRUE) < 2)) {
         stop(
-        "Please provide survival information if inferring cutpoint de novo.")
+            "Please provide survival information if inferring cutpoint de novo."
+        )
     }
     message("Classifying ", entity, " samples.")
 
@@ -1629,8 +1718,10 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
             event = surv.event,
             variables = c("MRCA_time_mean")
         )
-        mrca.cutpoint <- as.numeric(mrca.cutpoint$cutpoint["MRCA_time_mean",
-                                                           "cutpoint"])
+        mrca.cutpoint <- as.numeric(mrca.cutpoint$cutpoint[
+            "MRCA_time_mean",
+            "cutpoint"
+        ])
     } else if (is.null(mrca.cutpoint)) {
         mrca.cutpoint <- .getCutpoint(entity)
     }
@@ -1638,8 +1729,8 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
     # Categorizing according to MRCA
     lachesis.categorized <- lachesis
     lachesis.categorized$MRCA_timing <-
-      ifelse(lachesis.categorized$MRCA_time_mean <
-        mrca.cutpoint, "early", "late")
+        ifelse(lachesis.categorized$MRCA_time_mean <
+            mrca.cutpoint, "early", "late")
     lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing,
         levels = c("early", "late")
     )
