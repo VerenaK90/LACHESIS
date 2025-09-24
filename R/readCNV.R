@@ -94,8 +94,8 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     cn.info[[tcn.col]] <- round(cn.info[[tcn.col]])
 
     tmp1 <- sum(is.na(cn.info[[tcn.col]]))
-    message(sprintf("Removing %s segments without copy number information..."),
-            tmp1)
+    message(sprintf("Removing %s segments without copy number information...",
+            tmp1))
     rm(tmp1)
 
     cn.info <- cn.info[!is.na(cn.info[[tcn.col]]), ]
