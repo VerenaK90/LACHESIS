@@ -38,6 +38,9 @@ plotSurvival(
 
 \item{surv.ylab}{y-axis label, defaults to \code{Survival}.}
 }
+\value{
+survival graphs
+}
 \description{
 Takes SNV density timing as computed by \code{LACHESIS} as input and compares survival between tumors with high and low SNV densities
 }

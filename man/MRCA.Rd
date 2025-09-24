@@ -25,7 +25,6 @@ MRCA(
 }
 \value{
 a data table reporting the assignment of individual segments to ECA or MRCA. Mutation densities at ECA and MRCA, and the bootstrapped 95\% CIs are stored as attributes. The columns in the data table report the following information:
-\itemize{
 \item{\code{chrom}}{Chromsoome}
 \item{\code{TCN}}{Total copy number}
 \item{\code{A}}{Number of A alleles}
@@ -59,6 +58,10 @@ a data table reporting the assignment of individual segments to ECA or MRCA. Mut
 \item{\code{A_time}}{Time of A allele gain (can be "ECA", "MRCA", "ECA/MRCA" if assignment is unclear, or "not mapped to ECA or MRCA" if density does not agree with either ECA or MRCA).}
 \item{\code{B_time}}{Time of B allele gain (can be "ECA", "MRCA", "ECA/MRCA" if assignment is unclear, or "not mapped to ECA or MRCA" if density does not agree with either ECA or MRCA).}
 }
+\description{
+This function takes the normalized clonal mutation counts obtained with \code{\link{normalizeCounts}}to estimate mutation densities at MRCA and an earlier common ancestor, ECA.
+}
+\examples{
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -67,7 +70,4 @@ nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 cl_muts <- clonalMutationCounter(nb)
 norm_muts <- normalizeCounts(cl_muts)
 mrca <- MRCA(norm_muts)
-}
-\description{
-This function takes the normalized clonal mutation counts obtained with \code{\link{normalizeCounts}}to estimate mutation densities at MRCA and an earlier common ancestor, ECA.
 }

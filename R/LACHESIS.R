@@ -35,7 +35,7 @@
 #' @param fp.sd optional, the standard deviation of the false positive rate of clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param excl.chr a vector of chromosomes that should be excluded from the quantification. e.g., due to reporter constructs in animal models.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
-#' @param seed Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.
+#' @param seed Integer. Optional, changes the global RNG state, it will be documented in the log file.
 #' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS.
 #' @param sig.assign Logical. If TRUE, each variant will be assigned to the most likely mutational signature.
 #' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
@@ -83,6 +83,7 @@
 #' @import tidyr
 #' @import ggplot2
 #' @importFrom utils packageVersion
+#' @importFrom stats setNames
 #' @return a data.table
 #' @export
 
@@ -114,7 +115,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
     }
 
     if (is.null(seed)) {
-        seed <- sample.int(.Machine$integer.max, 1)
+        if (exists(".Random.seed", envir = .GlobalEnv)) {
+            seed <- sum(.Random.seed)
+        } else {
+            stop("No seed specified, please specify the seed parameter or initialize the RNG in the global environment.")
+        }
     }
 
     incl.chr <- setdiff(c(1:22), excl.chr)
@@ -758,6 +763,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' @param binwidth optional, the binwidth in the histogram.
 #' @param output.file optional, the file to which the plot will be stored.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
+#' @return graph with cohort overview of SNV densities at ECA/ MRCA
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -1039,6 +1045,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #' @param clin.suppress.outliers shall outliers (defined as the 2.5% tumors with lowest and highest densities) be plotted? Default `TRUE`.
 #' @param clin.log.densities plot logarithmic densities. Default `FALSE`.
 #' @param output.file optional; the file to which the plot will be stored.
+#' @return graph with SNV density at ECA/ MRCA copared to clinical parameters
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -1171,6 +1178,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #' @param surv.title main title.
 #' @param surv.ylab y-axis label, defaults to `Survival`.
 #' @param output.dir link to directory in which output is to be stored.
+#' @return survival graphs
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -1214,7 +1222,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
   MRCA_time_mean <- ECA_time_mean <- ..surv.time <- ..surv.event <- NULL
 
     if (is.null(lachesis)) {
-        stop("Error: 'lachesis' dataset must be provided.")
+        stop("'lachesis' dataset must be provided.")
     }
 
     if (any(is.na(lachesis$MRCA_time_mean))) {
@@ -1223,11 +1231,11 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     }
 
     if (!surv.time %in% colnames(lachesis)) {
-        stop("Error: please provide a valid column name for `surv.time`.")
+        stop("Please provide a valid column name for `surv.time`.")
     }
 
     if (!surv.event %in% colnames(lachesis)) {
-        stop("Error: please provide a valid column name for `surv.event`.")
+        stop("Please provide a valid column name for `surv.event`.")
     }
 
     if (any(is.na(lachesis[, ..surv.time]))) {
@@ -1302,7 +1310,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 
     survival.fit.plot <- survminer::ggsurvplot_df(
         surv_summary(survival.fit, data = lachesis.categorized),
-        title = surv.title, conf.int = TRUE, color = "strata", censor.shape = 124,
+        title = surv.title, conf.int = FALSE, color = "strata", censor.shape = 124,
         palette = surv.palette, xlab = "Time", ylab = surv.ylab,
         legend.labs = c("Early MRCA", "Late MRCA"),
         break.time.by = surv.time.breaks
@@ -1378,6 +1386,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 #' @param surv.time column name containing survival time; defaults to `OS.time`.
 #' @param surv.event column name containing event; defaults to `OS`.
 #' @param output.dir link to directory in which output is to be stored.
+#' @return data.table with binary assignment early/ late
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
@@ -1411,7 +1420,7 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
   MRCA_time_mean <- ..surv.time <- ..surv.event <- NULL
 
     if (is.null(lachesis)) {
-        stop("Error: 'lachesis' dataset must be provided.")
+        stop("'lachesis' dataset must be provided.")
     }
     entities <- c("neuroblastoma")
     entity <- match.arg(arg = entity, choices = entities, several.ok = FALSE)

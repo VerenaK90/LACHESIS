@@ -23,6 +23,9 @@ plotClinicalCorrelations(
 
 \item{output.file}{optional; the file to which the plot will be stored.}
 }
+\value{
+graph with SNV density at ECA/ MRCA copared to clinical parameters
+}
 \description{
 Takes SNV densities as computed by \code{LACHESIS} as input and correlates them with clinical data such as age at diagnosis, survival data etc.
 }

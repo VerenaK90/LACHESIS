@@ -12,7 +12,7 @@
 #' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
 #' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
-#' @param seed Integer. Can be user-specified or an automatically generated random seed, it will be documented in the log file.
+#' @param seed Integer. Optional, changes the global RNG state, it will be documented in the log file.
 #'
 #' @examples
 #' # Example using all variants from vcf file
@@ -33,6 +33,8 @@
 #' @return a data.table
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom Biostrings getSeq
+#' @importFrom stats setNames
+#' @importFrom grDevices colorRampPalette
 #' @export
 
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
@@ -246,6 +248,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 #' @param output.file optional, will save the plot.
 #' @param sig.show plot stratified VAF histogram with assigned mutational signatures.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
+#' @return copy number plot, VAF histograms stratified by copynumber and clonality; if specified, VAF histograms stratified by copynumber and signature
 #' @examples
 #' # Example using all variants from vcf file
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -377,7 +380,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
             p_clonality <- ggplot(tcn, aes(x = t_vaf, fill = Clonality)) +
                 geom_histogram(
                     bins = nb.breaks, color = NA,
-                    position = "stack", show.legend = T
+                    position = "stack", show.legend = TRUE
                 ) +
                 scale_fill_manual(
                     values = clonality_colors,
@@ -386,7 +389,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
                         "Postcnv" = "Clonal\n- Post-CNV",
                         "C" = "Clonal\n- NOS",
                         "SC" = "Subclonal"
-                    ), drop = F
+                    ), drop = FALSE
                 ) +
                 scale_x_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1)) +
                 labs(
@@ -422,9 +425,9 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
                 p_signature <- ggplot(tcn, aes(x = t_vaf, fill = Signature)) +
                     geom_histogram(
                         bins = nb.breaks, color = NA,
-                        position = "stack", show.legend = T
+                        position = "stack", show.legend = TRUE
                     ) +
-                    scale_fill_manual(values = sig.colors, drop = F) +
+                    scale_fill_manual(values = sig.colors, drop = FALSE) +
                     scale_x_continuous(breaks = seq(0, 1, 0.2)) +
                     labs(
                         x = "VAF", y = "No. of SNVs",

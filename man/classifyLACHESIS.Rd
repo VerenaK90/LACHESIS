@@ -29,6 +29,9 @@ classifyLACHESIS(
 
 \item{surv.event}{column name containing event; defaults to \code{OS}.}
 }
+\value{
+data.table with binary assignment early/ late
+}
 \description{
 Takes SNV density timing as computed by \code{LACHESIS} as input and classifies the tumors in the cohort.
 }

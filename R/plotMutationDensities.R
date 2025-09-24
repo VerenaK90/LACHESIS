@@ -15,6 +15,7 @@
 #' @param output.file optional; will save the plot.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
 #' @param ... further arguments and parameters passed to other LACHESIS functions.
+#' @return graphs with mutation densitiy at ECA and MRCA as well as evolutionary timeline plot
 #' @examples
 #' snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
@@ -26,7 +27,8 @@
 #' mrca <- MRCA(norm_muts)
 #' plotMutationDensities(mrca)
 #' @export
-#' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon
+#' @importFrom graphics abline Axis box grid hist mtext par rect text title arrows legend points polygon segments
+#' @importFrom stats setNames
 
 plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
                                   min.seg.size = 10^7, ref.build = "hg19",
