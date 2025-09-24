@@ -2,7 +2,8 @@
 % Please edit documentation in R/LACHESIS.R
 \name{plotClinicalCorrelations}
 \alias{plotClinicalCorrelations}
-\title{Correlate SNV density at ECA/MRCA with clinical parameters such as age, OS, etc.}
+\title{Correlate SNV density at ECA/MRCA with clinical parameters such as age, OS,
+etc.}
 \usage{
 plotClinicalCorrelations(
   lachesis = NULL,
@@ -17,7 +18,8 @@ plotClinicalCorrelations(
 
 \item{clin.par}{the clinical parameter used for correlation. Default \code{Age}.}
 
-\item{clin.suppress.outliers}{shall outliers (defined as the 2.5\% tumors with lowest and highest densities) be plotted? Default \code{TRUE}.}
+\item{clin.suppress.outliers}{shall outliers (defined as the 2.5\% tumors with
+lowest and highest densities) be plotted? Default \code{TRUE}.}
 
 \item{clin.log.densities}{plot logarithmic densities. Default \code{FALSE}.}
 
@@ -27,17 +29,22 @@ plotClinicalCorrelations(
 graph with SNV density at ECA/ MRCA copared to clinical parameters
 }
 \description{
-Takes SNV densities as computed by \code{LACHESIS} as input and correlates them with clinical data such as age at diagnosis, survival data etc.
+Takes SNV densities as computed by \code{LACHESIS} as input and correlates them
+with clinical data such as age at diagnosis, survival data etc.
 }
 \examples{
 # An example file with sample annotations and meta data
-input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+input.files <- system.file("extdata", "Sample_template.txt",
+package = "LACHESIS")
 input.files <- data.table::fread(input.files)
 
 # cnv and snv files for example tumors
-nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
-nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
-nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
+full.names = TRUE)
+nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
+full.names = TRUE)
+nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+full.names = TRUE)
 
 cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -45,8 +52,10 @@ snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
 input.files$cnv.file <- cnv.file
 input.files$snv.file <- snv.file
 
-# Make an example input file with paths to cnv and snv file along with other meta data
-lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+# Make an example input file with paths to cnv and snv file along with other
+# meta data
+lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
+fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 # Example with template file with paths to multiple cnv/snv files as an input
