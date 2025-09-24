@@ -45,11 +45,15 @@ Körber et al., Neuroblastoma arises in early fetal development and its evolutio
 
 ## Installation
 
+```r
 devtools::install_github("VerenaK90/LACHESIS")
+````
 
 To install the vignette, run
 
-devtools::install_github("VerenaK90/LACHESIS", build_vignettes=TRUE).
+```r
+devtools::install_github("VerenaK90/LACHESIS", build_vignettes=TRUE)
+````
 
 The vignette can then be viewed by typing `vignette("Vignette", "LACHESIS")`. The package including its vignette can be installed within a few minutes.
 
