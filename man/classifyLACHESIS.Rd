@@ -2,7 +2,9 @@
 % Please edit documentation in R/LACHESIS.R
 \name{classifyLACHESIS}
 \alias{classifyLACHESIS}
-\title{Classify a tumor's start of clonal outgrowth during tumorigenesis as "early" or "late" (favorable/ unfavorable prognosis) depending on the mutation density at its MRCA}
+\title{Classify a tumor's start of clonal outgrowth during tumorigenesis as "early"
+or "late" (favorable/ unfavorable prognosis) depending on the mutation
+density at its MRCA}
 \usage{
 classifyLACHESIS(
   lachesis,
@@ -17,13 +19,17 @@ classifyLACHESIS(
 \arguments{
 \item{lachesis}{output generated from \code{\link{LACHESIS}}.}
 
-\item{mrca.cutpoint}{optional; value based on SNV_densities_cohort.pdf observation, will be used as inferred from a test data set if not specified by user.}
+\item{mrca.cutpoint}{optional; value based on SNV_densities_cohort.pdf
+observation, will be used as inferred from a test data set if not specified
+by user.}
 
 \item{output.dir}{link to directory in which output is to be stored.}
 
-\item{infer.cutpoint}{logical; should the MRCA cutpoint be inferred from the data?}
+\item{infer.cutpoint}{logical; should the MRCA cutpoint be inferred from the
+data?}
 
-\item{entity}{optional; the tumor entity if classifying according to a pre-defined threshold. Currently, only "neuroblastoma" is supported.}
+\item{entity}{optional; the tumor entity if classifying according to a
+pre-defined threshold. Currently, only "neuroblastoma" is supported.}
 
 \item{surv.time}{column name containing survival time; defaults to \code{OS.time}.}
 
@@ -33,17 +39,22 @@ classifyLACHESIS(
 data.table with binary assignment early/ late
 }
 \description{
-Takes SNV density timing as computed by \code{LACHESIS} as input and classifies the tumors in the cohort.
+Takes SNV density timing as computed by \code{LACHESIS} as input and classifies
+the tumors in the cohort.
 }
 \examples{
 # An example file with sample annotations and meta data
-input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+input.files <- system.file("extdata", "Sample_template.txt",
+package = "LACHESIS")
 input.files <- data.table::fread(input.files)
 
 # cnv and snv files for example tumors
-nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
-nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
-nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
+full.names = TRUE)
+nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
+full.names = TRUE)
+nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+full.names = TRUE)
 
 cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -51,8 +62,10 @@ snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
 input.files$cnv.file <- cnv.file
 input.files$snv.file <- snv.file
 
-# Make an example input file with paths to cnv and snv file along with other meta data
-lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+# Make an example input file with paths to cnv and snv file along with other
+meta data
+lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
+fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 # Example with template file with paths to multiple cnv/snv files as an input

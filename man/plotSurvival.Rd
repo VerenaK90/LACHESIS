@@ -20,7 +20,9 @@ plotSurvival(
 \arguments{
 \item{lachesis}{output generated from \code{\link{LACHESIS}}.}
 
-\item{mrca.cutpoint}{optional, MRCA density value to be used for survival stratification, will be computationally inferred to maximize survival differences if not specified by user.}
+\item{mrca.cutpoint}{optional, MRCA density value to be used for survival
+stratification, will be computationally inferred to maximize survival
+differences if not specified by user.}
 
 \item{output.dir}{link to directory in which output is to be stored.}
 
@@ -28,11 +30,16 @@ plotSurvival(
 
 \item{surv.event}{column name containing event; defaults to \code{OS}.}
 
-\item{surv.palette}{color palette to be used. Allowed values include "hue" for the default hue color scale; "grey" for grey color palettes; brewer palettes e.g. "RdBu", "Blues", ...; or custom color palette e.g. c("blue", "red").}
+\item{surv.palette}{color palette to be used. Allowed values include "hue"
+for the default hue color scale; "grey" for grey color palettes; brewer
+palettes e.g. "RdBu", "Blues", ...; or custom color palette e.g.
+c("blue", "red").}
 
-\item{surv.time.breaks}{numeric value controlling time axis breaks; defaults to \code{NULL}.}
+\item{surv.time.breaks}{numeric value controlling time axis breaks; defaults
+to \code{NULL}.}
 
-\item{surv.time.scale}{numeric value by which survival time is to be divided (e.g., 365 for converting days into years, 30 for months), defaults to \code{1}.}
+\item{surv.time.scale}{numeric value by which survival time is to be divided
+(e.g., 365 for converting days into years, 30 for months), defaults to \code{1}.}
 
 \item{surv.title}{main title.}
 
@@ -42,17 +49,22 @@ plotSurvival(
 survival graphs
 }
 \description{
-Takes SNV density timing as computed by \code{LACHESIS} as input and compares survival between tumors with high and low SNV densities
+Takes SNV density timing as computed by \code{LACHESIS} as input and compares
+survival between tumors with high and low SNV densities
 }
 \examples{
 # An example file with sample annotations and meta data
-input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+input.files <- system.file("extdata", "Sample_template.txt", package =
+"LACHESIS")
 input.files <- data.table::fread(input.files)
 
 # cnv and snv files for example tumors
-nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
-nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
-nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
+full.names = TRUE)
+nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
+full.names = TRUE)
+nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+full.names = TRUE)
 
 cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
 snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
@@ -60,8 +72,10 @@ snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
 input.files$cnv.file <- cnv.file
 input.files$snv.file <- snv.file
 
-# Make an example input file with paths to cnv and snv file along with other meta data
-lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = ".tsv")
+# Make an example input file with paths to cnv and snv file along with other
+meta data
+lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(),
+fileext = ".tsv")
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 # Example with template file with paths to multiple cnv/snv files as an input
