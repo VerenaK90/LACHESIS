@@ -378,7 +378,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
             p_clonality <- ggplot(tcn, aes(x = t_vaf, fill = Clonality)) +
                 geom_histogram(
                     bins = nb.breaks, color = NA,
-                    position = "stack", show.legend = T
+                    position = "stack", show.legend = TRUE
                 ) +
                 scale_fill_manual(
                     values = clonality_colors,
@@ -387,7 +387,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
                         "Postcnv" = "Clonal\n- Post-CNV",
                         "C" = "Clonal\n- NOS",
                         "SC" = "Subclonal"
-                    ), drop = F
+                    ), drop = FALSE
                 ) +
                 scale_x_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1)) +
                 labs(
@@ -423,9 +423,9 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 
                 p_signature <- ggplot(tcn, aes(x = t_vaf, fill = Signature)) +
                     geom_histogram(
                         bins = nb.breaks, color = NA,
-                        position = "stack", show.legend = T
+                        position = "stack", show.legend = TRUE
                     ) +
-                    scale_fill_manual(values = sig.colors, drop = F) +
+                    scale_fill_manual(values = sig.colors, drop = FALSE) +
                     scale_x_continuous(breaks = seq(0, 1, 0.2)) +
                     labs(
                         x = "VAF", y = "No. of SNVs",

@@ -80,7 +80,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0,
     bootstrapped.mrca.time <- vapply(seq_len(1000), function(x) {
         res <- sample(
             x = seq_len(nrow(workObj)), size = nrow(workObj),
-            prob = workObj[, Seglength], replace = T
+            prob = workObj[, Seglength], replace = TRUE
         )
         res <- workObj[res, sum(n_mut_total_clonal) / sum(Seglength)] * 10^6
         res <- res - res * rnorm(n = 1, mean = fp.mean, sd = fp.sd)
@@ -195,7 +195,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0,
             res <- sample(
                 x = seq_len(length(mut.counts.eca)),
                 size = length(mut.counts.eca),
-                prob = seg.length.eca, replace = T
+                prob = seg.length.eca, replace = TRUE
             )
             res <- sum(mut.counts.eca[res]) / sum(seg.length.eca[res]) * 10^6
         }, numeric(1))
@@ -328,7 +328,7 @@ MRCA <- function(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0,
         )))
         if (any(workObj$p_adj_A_to_mrca >= 0.01, na.rm = TRUE)) {
             workObj[p_adj_A_to_mrca >= 0.01, "p_adj_A_to_eca"] <-
-                adj.p[seq_len(sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm = T))]
+                adj.p[seq_len(sum(workObj$p_adj_A_to_mrca >= 0.01, na.rm = TRUE))]
             adj.p <- adj.p[-(seq_len(sum(workObj$p_adj_A_to_mrca >= 0.01,
                 na.rm = TRUE
             )))]

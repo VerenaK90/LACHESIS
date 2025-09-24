@@ -1220,7 +1220,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
                          surv.title = "Survival probability",
                          surv.ylab = "Survival") {
     if (is.null(lachesis)) {
-        stop("Error: 'lachesis' dataset must be provided.")
+        stop("'lachesis' dataset must be provided.")
     }
 
     if (any(is.na(lachesis$MRCA_time_mean))) {
@@ -1229,11 +1229,11 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     }
 
     if (!surv.time %in% colnames(lachesis)) {
-        stop("Error: please provide a valid column name for `surv.time`.")
+        stop("Please provide a valid column name for `surv.time`.")
     }
 
     if (!surv.event %in% colnames(lachesis)) {
-        stop("Error: please provide a valid column name for `surv.event`.")
+        stop("Please provide a valid column name for `surv.event`.")
     }
 
     if (any(is.na(lachesis[, ..surv.time]))) {
