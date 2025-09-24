@@ -2,7 +2,7 @@
 .Rproj.user/
   .Rproj.user/
   .Rhistory
-.Rhistory
+.Rbuildignore
 .RData
 .Rapp.history
 .Renviron
@@ -38,3 +38,5 @@ Meta/
 .settings/
   .cproject
 .directory
+/doc/
+/Meta/

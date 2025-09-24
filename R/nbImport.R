@@ -150,9 +150,19 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 
     if (!"sequence_context" %in% colnames(sv)) {
         genome <- switch(ref.build,
-            "hg18" = BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18,
+            "hg18" = {
+                if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg18", quietly = TRUE)) {
+                    stop("BSgenome.Hsapiens.UCSC.hg18 is required for hg18. Install with: BiocManager::install('BSgenome.Hsapiens.UCSC.hg18')")
+                }
+                BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18
+            },
             "hg19" = BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19,
-            "hg38" = BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+            "hg38" = {
+                if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg38", quietly = TRUE)) {
+                    stop("BSgenome.Hsapiens.UCSC.hg38 is required for hg38. Install with: BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')")
+                }
+                BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+            }
         )
 
         # Mapping purine bases to reverse strand ("-")
