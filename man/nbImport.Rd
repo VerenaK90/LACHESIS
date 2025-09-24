@@ -28,43 +28,62 @@ nbImport(
 
 \item{ploidy}{average copy number in the tumor sample.}
 
-\item{sig.assign}{Logical. If TRUE, each variant will be assigned to a mutational signature.}
+\item{sig.assign}{Logical. If TRUE, each variant will be assigned to a
+mutational signature.}
 
-\item{assign.method}{Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.}
+\item{assign.method}{Method to assign signatures: "max" to assign the
+signature with the highest probability, "sample" to randomly assign based on
+signature probabilities.}
 
 \item{ID}{sample name.}
 
-\item{sig.file}{File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".}
+\item{sig.file}{File path to the SigAssignment output file, typically named
+"Decomposed_MutationType_Probabilities.txt".}
 
-\item{sig.select}{A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).}
+\item{sig.select}{A character vector of specific signatures to include in
+the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like
+mutational processes).}
 
-\item{min.p}{Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.}
+\item{min.p}{Numeric. The minimum probability threshold from the
+SigAssignment output that a variant must meet to be considered as matching a
+specific signature.}
 
-\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}.}
+\item{ref.build}{Reference genome. Default \code{hg19}.
+Can be \code{hg18}, \code{hg19} or \code{hg38}.}
 
-\item{seed}{Integer. Optional, changes the global RNG state, it will be documented in the log file.}
+\item{seed}{Integer. Optional, changes the global RNG state, it will be
+documented in the log file.}
 }
 \value{
 a data.table
 }
 \description{
-Merges CNVs and SNVs into a single data.table. Each variant is assigned to its corresponding copy number segment and status.
+Merges CNVs and SNVs into a single data.table. Each variant is assigned to
+its corresponding copy number segment and status.
 }
 \examples{
 # Example using all variants from vcf file
-snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+snvs <- system.file("extdata", "NBE15",
+"snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+aceseq_cn <- system.file("extdata", "NBE15",
+"NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 
-# Example using variants associated with specific SBS mutational signatures from vcf file
-snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+# Example using variants associated with specific SBS mutational signatures
+from vcf file
+snvs <- system.file("extdata", "NBE15",
+"snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+aceseq_cn <- system.file("extdata", "NBE15",
+"NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
-sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
-nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
+sig.filepath <- system.file("extdata",
+"NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
+nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
+sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath,
+sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
 }
 \seealso{
 \code{\link{plotNB}}

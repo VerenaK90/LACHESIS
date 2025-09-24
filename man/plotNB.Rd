@@ -27,17 +27,22 @@ plotNB(
 
 \item{snvClonality}{output generated from \code{\link{estimateClonality}}.}
 
-\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}.}
+\item{ref.build}{Reference genome. Default \code{hg19}.
+Can be \code{hg18}, \code{hg19} or \code{hg38}.}
 
-\item{min.cn}{maximum copy number to be included in the plotting. Defaults to 2.}
+\item{min.cn}{maximum copy number to be included in the plotting.
+Defaults to 2.}
 
-\item{max.cn}{maximum copy number to be included in the plotting. Defaults to 4.}
+\item{max.cn}{maximum copy number to be included in the plotting.
+Defaults to 4.}
 
-\item{nb.col.abline}{optional, the color code for the lines depicting clonality in the VAF histograms.}
+\item{nb.col.abline}{optional, the color code for the lines depicting
+clonality in the VAF histograms.}
 
 \item{nb.col.cn.2}{optional, the color code for tcn = 2 in the CNV plot.}
 
-\item{nb.col.cn}{optional, the color code for other copy numbers in the CNV plot.}
+\item{nb.col.cn}{optional, the color code for other copy numbers in the
+CNV plot.}
 
 \item{nb.col.hist}{optional, the color code for bars in the VAF histograms.}
 
@@ -49,40 +54,55 @@ plotNB(
 
 \item{output.file}{optional, will save the plot.}
 
-\item{sig.show}{plot stratified VAF histogram with assigned mutational signatures.}
+\item{sig.show}{plot stratified VAF histogram with assigned mutational
+signatures.}
 
-\item{...}{further arguments and parameters passed to other LACHESIS functions.}
+\item{...}{further arguments and parameters passed to other LACHESIS
+functions.}
 }
 \value{
-copy number plot, VAF histograms stratified by copynumber and clonality; if specified, VAF histograms stratified by copynumber and signature
+copy number plot, VAF histograms stratified by copynumber and
+clonality; if specified, VAF histograms stratified by copynumber and
+signature
 }
 \description{
-Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy numbers along the genome; bottom plots, VAF histograms of SNVs stratified by copy number and minor/major allele count.
+Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy
+numbers along the genome; bottom plots, VAF histograms of SNVs stratified by
+copy number and minor/major allele count.
 }
 \examples{
 # Example using all variants from vcf file
-snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+snvs <- system.file("extdata", "NBE15",
+"snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+aceseq_cn <- system.file("extdata", "NBE15",
+"NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 cl_muts <- clonalMutationCounter(nb)
 norm_muts <- normalizeCounts(cl_muts)
 mrca <- MRCA(norm_muts)
-snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15",
+purity = 1)
 plotNB(nb = nb, snvClonality = snvClonality)
 
-# Example using variants assosciated with specific SBS mutational signatures from vcf file
-snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+# Example using variants assosciated with specific SBS mutational signatures
+from vcf file
+snvs <- system.file("extdata", "NBE15",
+"snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+aceseq_cn <- system.file("extdata", "NBE15",
+"NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
-sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
-nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath)
+sig.filepath <- system.file("extdata",
+"NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
+nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
+sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath)
 cl_muts <- clonalMutationCounter(nb)
 norm_muts <- normalizeCounts(cl_muts)
 mrca <- MRCA(norm_muts)
-snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15", purity = 1)
+snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15",
+purity = 1)
 plotNB(nb = nb, snvClonality = snvClonality, sig.show = TRUE)
 
 }
