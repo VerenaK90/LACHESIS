@@ -309,7 +309,7 @@ nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL)
 library(knitr)
 
 nb_import_input <- data.frame(
-    Column1 = c("*cnv*", "*snv*", "*purity*", "*ploidy*", "*sig.assign*", "*assign.method*", "*ID*", "*sig.file*", "*sig.select*", "*min.p*", "*ref.build*", "*seed*"),
+    Column1 = c("*cnv*", "*snv*", "*purity*", "*ploidy*", "*sig.assign*", "*assign.method*", "*ID*", "*sig.file*", "*sig.select*", "*min.p*", "*ref.build*"),
     Column2 = c(
         "output of [readCNV](#output)",
         "output of [readVCF(#output-1)",
@@ -321,8 +321,7 @@ nb_import_input <- data.frame(
         "file path to the SigAssignment output file, typically named `Decomposed_MutationType_Probabilities.txt`",
         "character vector of specific signatures to include in the analysis (e.g., c(´SBS1´, ´SBS5´, ´SBS40´) to focus on clock-like mutational processes)",
         "minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature",
-        "reference genome: hg18, hg19 or hg38",
-        "User-specified or automatically generated random number, will be documented in the log file."
+        "reference genome: hg18, hg19 or hg38"
     )
 )
 
@@ -331,7 +330,7 @@ knitr::kable(nb_import_input, col.names = c("Input", "Definition"), escape = FAL
 
 ##### Assignment of mutational signatures
 
-[SigProfilerAssignment](https://github.com/AlexandrovLab/SigProfilerAssignment) is a tool developed by Alexandrov lab at UC San Diego. It assigns previously known mutational signatures to sequenced samples. The tool generates a file called "Decomposed_MutationType_Probabilities.txt" that can be used as sig.file for LACHESIS. 
+[SigProfilerAssignment](https://github.com/AlexandrovLab/SigProfilerAssignment) is a tool developed by Alexandrov lab at UC San Diego. It assigns previously known mutational signatures to sequenced samples. The tool generates a file called "Decomposed_MutationType_Probabilities.txt" that can be used as sig.file for LACHESIS. A global random seed (set.seed()) should be specified before running LACHESIS to create reproducable results.
 
 #### Output
 
@@ -376,6 +375,7 @@ nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #### Example using variants assosciated with specific SBS mutational signatures from vcf file
 
 ```{r nbImport_example2, message=FALSE, warning=FALSE}
+set.seed(123)
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -440,6 +440,7 @@ LACHESIS::plotNB(nb = nb, snvClonality = snvClonality)
 #### Example using variants assosciated with specific SBS mutational signatures from vcf file
 
 ```{r plotNB_example2, message=FALSE, warning=FALSE, fig.cap="Figure 2: *top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
+set.seed(123)
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
