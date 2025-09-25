@@ -28,38 +28,53 @@ plotMutationDensities(
 
 \item{min.seg.size}{minimal segment size to plot}
 
-\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or \code{hg38}.}
+\item{ref.build}{Reference genome. Default \code{hg19}.
+Can be \code{hg18}, \code{hg19} or \code{hg38}.}
 
-\item{mut.col.zero}{optional, the bar color for densities of mutations present on single copies.}
+\item{mut.col.zero}{optional, the bar color for densities of mutations
+present on single copies.}
 
-\item{mut.col.multi}{optional, the bar color for densities of mutations present on multiple copies.}
+\item{mut.col.multi}{optional, the bar color for densities of mutations
+present on multiple copies.}
 
 \item{mut.border}{optional, the line color}
 
-\item{mut.show.density}{optional; if \code{TRUE}, the density distribution of mutation densities on single copies will be shown in the histogram of mutation densities on multiple copies.}
+\item{mut.show.density}{optional; if \code{TRUE}, the density distribution of
+mutation densities on single copies will be shown in the histogram of
+mutation densities on multiple copies.}
 
 \item{mut.breaks}{optional; the number of bins in the histogram.}
 
-\item{mut.xaxis}{optional; cutoff value for x-axis in evolutionary timeline plot in SNVs/Mb}
+\item{mut.xaxis}{optional; cutoff value for x-axis in evolutionary timeline
+plot in SNVs/Mb}
 
-\item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception on the evolutionary timeline.}
+\item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception
+on the evolutionary timeline.}
 
-\item{mut.snv.rate}{optional; rate of accumulated SNVs per day in a diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)}
+\item{mut.snv.rate}{optional; rate of accumulated SNVs per day in a
+diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)}
 
 \item{output.file}{optional; will save the plot.}
 
-\item{...}{further arguments and parameters passed to other LACHESIS functions.}
+\item{...}{further arguments and parameters passed to other
+LACHESIS functions.}
 }
 \value{
-graphs with mutation densitiy at ECA and MRCA as well as evolutionary timeline plot
+graphs with mutation densitiy at ECA and MRCA as well as
+evolutionary timeline plot
 }
 \description{
-Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean mutation densities; bottom plots, timeline of early tumor evolution, showing mutation densities (mean and 95\% CI) of individual chromosomal gains and mutation densities at ECA and MRCA.
+Visualizes results from \code{\link{MRCA}}. Top plot, histograms of mean
+mutation densities; bottom plots, timeline of early tumor evolution,
+showing mutation densities (mean and 95\% CI) of individual chromosomal gains
+and mutation densities at ECA and MRCA.
 }
 \examples{
-snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+snvs <- system.file("extdata", "NBE15",
+"snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
-aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+aceseq_cn <- system.file("extdata", "NBE15",
+"NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- readCNV(aceseq_cn)
 nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 cl_muts <- clonalMutationCounter(nb)
