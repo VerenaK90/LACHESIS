@@ -47,8 +47,11 @@ Plot frequency distribution of variant allele frequencies
 }
 \examples{
 strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz",
-package = "LACHESIS")
-s_data <- readVCF(vcf = strelka_vcf, vcf.source = "strelka",
-ignore.XY = FALSE)
+    package = "LACHESIS"
+)
+s_data <- readVCF(
+    vcf = strelka_vcf, vcf.source = "strelka",
+    ignore.XY = FALSE
+)
 plotVAFdistr(s_data)
 }
