@@ -15,7 +15,8 @@ readVCF(
   info.dp = "DP",
   filter.value = "PASS",
   filter.biallelic = TRUE,
-  filter.indels = TRUE
+  filter.indels = TRUE,
+  ...
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ readVCF(
 \item{filter.biallelic}{Remove biallelic variants. Default TRUE}
 
 \item{filter.indels}{Remove indels. Default TRUE}
+
+\item{...}{further arguments and parameters passed to other
+LACHESIS functions.}
 }
 \value{
 a data.table with chrom, pos, ref, alt, t_ref_count, t_alt_count, t_depth, t_vaf
