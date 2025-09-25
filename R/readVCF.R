@@ -13,6 +13,8 @@
 #' @param filter.value The FILTER column value for variants that passed the filtering, defaults to PASS
 #' @param filter.biallelic Remove biallelic variants. Default TRUE
 #' @param filter.indels Remove indels. Default TRUE
+#' @param ... further arguments and parameters passed to other
+#' LACHESIS functions.
 #' @examples
 #' mutect_vcf <- system.file("extdata", "mutect.somatic.vcf.gz", package = "LACHESIS")
 #' m_data <- readVCF(vcf = mutect_vcf, vcf.source = "mutect", filter.value = ".")
@@ -27,7 +29,7 @@
 readVCF <- function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka",
                     min.vaf = 0.01, min.depth = 30, t.sample = NULL,
                     info.af = "AF", info.dp = "DP", filter.value = "PASS",
-                    filter.biallelic = TRUE, filter.indels = TRUE) {
+                    filter.biallelic = TRUE, filter.indels = TRUE, ...) {
     chrom <- t_vaf <- t_depth <- . <- pos <- ref <- alt <- t_ref_count <-
         t_alt_count <- NULL
 
