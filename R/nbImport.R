@@ -22,8 +22,6 @@
 #' specific signature.
 #' @param ref.build Reference genome. Default `hg19`.
 #' Can be `hg18`, `hg19` or `hg38`.
-#' @param seed Integer. Optional, changes the global RNG state, it will be
-#' documented in the log file.
 #'
 #' @examples
 #' # Example using all variants from vcf file
@@ -71,7 +69,7 @@
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                      sig.assign = FALSE, assign.method = "sample", ID = NULL,
                      sig.file = NULL, sig.select = NULL, min.p = NULL,
-                     ref.build = "hg19", seed = NULL) {
+                     ref.build = "hg19") {
     end <- start <- sequence_context <- chrom <- i.end <- i.start <- TCN <-
         NULL
 
@@ -80,10 +78,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     }
     if (any(is.null(purity), is.null(ploidy))) {
         stop("Missing purity and ploidy inputs!")
-    }
-
-    if (is.null(seed)) {
-        seed <- sample.int(.Machine$integer.max, 1)
     }
 
     colnames(cnv)[c(1, 2, 3)] <- c("chrom", "start", "end")
@@ -108,7 +102,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
         t.sample <- attributes(sv)$t.sample
         assign.result <- .assign_signatures(
             sv, sig.file, assign.method, ID,
-            sig.select, min.p, ref.build, seed
+            sig.select, min.p, ref.build
         )
         sv <- assign.result$sv
         sig.colors <- assign.result$sig.colors
@@ -130,7 +124,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 .assign_signatures <- function(sv = NULL, sig.file = NULL,
                                assign.method = "sample", ID = NULL,
                                sig.select = NULL, min.p = NULL,
-                               ref.build = NULL, seed = NULL) {
+                               ref.build = NULL) {
     strand <- ref <- sequence_context <- chrom <- i.start <- i.end <- Sample <-
         MutationType <- alt <- NULL
 
@@ -203,7 +197,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     )
 
     if (assign.method == "sample") {
-        set.seed(seed)
         tmp <- sv[,
             {
                 probs <- as.numeric(unlist(.SD, use.names = FALSE))
