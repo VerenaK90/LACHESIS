@@ -8,11 +8,16 @@
 #' @param sig.assign Logical. If TRUE, each variant will be assigned to a mutational signature.
 #' @param assign.method Method to assign signatures: "max" to assign the signature with the highest probability, "sample" to randomly assign based on signature probabilities.
 #' @param ID sample name.
-#' @param sig.file File path to the SigAssignment output file, typically named "Decomposed_MutationType_Probabilities.txt".
-#' @param sig.select A character vector of specific signatures to include in the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational processes).
-#' @param min.p Numeric. The minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature.
-#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or `hg38`.
-#' @param seed Integer. Optional, changes the global RNG state, it will be documented in the log file.
+#' @param sig.file File path to the SigAssignment output file, typically named
+#' "Decomposed_MutationType_Probabilities.txt".
+#' @param sig.select A character vector of specific signatures to include in
+#' the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like
+#' mutational processes).
+#' @param min.p Numeric. The minimum probability threshold from the
+#' SigAssignment output that a variant must meet to be considered as matching a
+#' specific signature.
+#' @param ref.build Reference genome. Default `hg19`.
+#' Can be `hg18`, `hg19` or `hg38`.
 #'
 #' @examples
 #' # Example using all variants from vcf file
@@ -40,18 +45,15 @@
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                      sig.assign = FALSE, assign.method = "sample", ID = NULL,
                      sig.file = NULL, sig.select = NULL, min.p = NULL,
-                     ref.build = "hg19", seed = NULL) {
-    end <- start <- sequence_context <- chrom <- i.end <- i.start <- TCN <- NULL
+                     ref.build = "hg19") {
+    end <- start <- sequence_context <- chrom <- i.end <- i.start <- TCN <-
+        NULL
 
     if (any(is.null(cnv), is.null(snv))) {
         stop("Missing snv and cnv inputs!")
     }
     if (any(is.null(purity), is.null(ploidy))) {
         stop("Missing purity and ploidy inputs!")
-    }
-
-    if (is.null(seed)) {
-        seed <- sample.int(.Machine$integer.max, 1)
     }
 
     colnames(cnv)[c(1, 2, 3)] <- c("chrom", "start", "end")
@@ -75,7 +77,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
         t.sample <- attributes(sv)$t.sample
         assign.result <- .assign_signatures(
             sv, sig.file, assign.method, ID,
-            sig.select, min.p, ref.build, seed
+            sig.select, min.p, ref.build
         )
         sv <- assign.result$sv
         sig.colors <- assign.result$sig.colors
@@ -96,9 +98,10 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 
 .assign_signatures <- function(sv = NULL, sig.file = NULL,
                                assign.method = "sample", ID = NULL,
-                               sig.select = NULL, min.p = NULL, ref.build = NULL,
-                               seed = NULL) {
-    strand <- ref <- sequence_context <- chrom <- i.start <- i.end <- Sample <- MutationType <- alt <- NULL
+                               sig.select = NULL, min.p = NULL,
+                               ref.build = NULL) {
+    strand <- ref <- sequence_context <- chrom <- i.start <- i.end <- Sample <-
+        MutationType <- alt <- NULL
 
     if (is.null(sv)) {
         stop("Missing 'sv' input data!")
@@ -158,7 +161,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     )
 
     if (assign.method == "sample") {
-        set.seed(seed)
         tmp <- sv[,
             {
                 probs <- as.numeric(unlist(.SD, use.names = FALSE))

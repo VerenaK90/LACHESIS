@@ -65,8 +65,6 @@
 #' quantification. e.g., due to reporter constructs in animal models.
 #' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or
 #' `hg38`.
-#' @param seed Integer. Optional, changes the global RNG state, it will be
-#' documented in the log file.
 #' @param filter.value The FILTER column value for variants that passed the
 #' filtering, defaults to PASS.
 #' @param sig.assign Logical. If TRUE, each variant will be assigned to the most
@@ -186,7 +184,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                      max.cn = 4, merge.tolerance = 10^5, min.vaf = 0.01,
                      min.depth = 30, vcf.info.af = "AF", vcf.info.dp = "DP",
                      min.seg.size = 10^7, fp.mean = 0, fp.sd = 0,
-                     excl.chr = NULL, ref.build = "hg19", seed = NULL,
+                     excl.chr = NULL, ref.build = "hg19",
                      filter.value = "PASS", sig.assign = FALSE, sig.file = NULL,
                      assign.method = "sample", sig.select = NULL, min.p = NULL,
                      driver.file = NULL, ...) {
@@ -202,15 +200,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (length(cnv.files) != length(snv.files)) {
                 stop("Please provide snv and cnv input for every sample!")
             }
-        }
-    }
-
-    if (is.null(seed)) {
-        if (exists(".Random.seed", envir = .GlobalEnv)) {
-            seed <- sum(.Random.seed)
-        } else {
-            stop("No seed specified, please specify the seed parameter or
-                 initialize the RNG in the global environment.")
         }
     }
 
@@ -283,8 +272,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             excl.chr = numeric(),
             ref.build = character(),
             cnv.file = character(),
-            snv.file = character(),
-            seed = numeric()
+            snv.file = character()
         )
 
         sample.specs <- data.table::fread(input.files,
@@ -384,14 +372,14 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 vcf = x$snv.file, vcf.source = x$vcf.source,
                 t.sample = x$vcf.tumor.id, min.depth = min.depth,
                 min.vaf = min.vaf, info.af = vcf.info.af, ignore.XY = ignore.XY,
-                info.dp = vcf.info.dp, filter.value = filter.value
+                info.dp = vcf.info.dp, filter.value = filter.value, ...
             )
 
             nb <- nbImport(
                 cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy,
                 sig.assign = sig.assign, assign.method = assign.method,
                 ID = x$ID, sig.file = sig.file, sig.select = sig.select,
-                min.p = min.p, ref.build = ref.build, seed = seed
+                min.p = min.p, ref.build = ref.build
             )
 
             if (nrow(nb) == 0) {
@@ -568,8 +556,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 excl.chr = excl.chr,
                 ref.build = ref.build,
                 cnv.file = x$cnv.file,
-                snv.file = x$snv.file,
-                seed = seed
+                snv.file = x$snv.file
             )
 
             log.file.data.cohort <- merge(log.file.data.cohort,
@@ -647,14 +634,14 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 vcf = snv.files[i], vcf.source = vcf.source[i],
                 t.sample = vcf.tumor.ids[i], min.depth = min.depth,
                 min.vaf = min.vaf, info.af = vcf.info.af, ignore.XY = ignore.XY,
-                info.dp = vcf.info.dp, filter.value = filter.value
+                info.dp = vcf.info.dp, filter.value = filter.value, ...
             )
 
             nb <- nbImport(
                 cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i],
                 sig.assign = sig.assign, assign.method = assign.method,
                 ID = ids[i], sig.file = sig.file, sig.select = sig.select,
-                min.p = min.p, ref.build = ref.build, seed = seed
+                min.p = min.p, ref.build = ref.build
             )
 
             if (nrow(nb) == 0) {
