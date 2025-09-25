@@ -84,20 +84,20 @@ readVCF <- function(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka",
         }
         message("Variants passing filter: ", nrow(v@fix))
 
-        if(filter.biallelic){
-          v <- v[vcfR::is.biallelic(x = v)] # Only keep biallelic variants
-          if (nrow(v) == 0) {
-            stop("No bi-allelic variants found!")
-          }
-          message("Bi-allelic variants    : ", nrow(v@fix))
+        if (filter.biallelic) {
+            v <- v[vcfR::is.biallelic(x = v)] # Only keep biallelic variants
+            if (nrow(v) == 0) {
+                stop("No bi-allelic variants found!")
+            }
+            message("Bi-allelic variants    : ", nrow(v@fix))
         }
 
-        if(filter.indels){
-          v <- v[!vcfR::is.indel(v)] # Remove INDELS (only SNVs)
-          if (nrow(v) == 0) {
-            stop("No single nucelotide variants found!")
-          }
-          message("single nucl. variants  : ", nrow(v@fix))
+        if (filter.indels) {
+            v <- v[!vcfR::is.indel(v)] # Remove INDELS (only SNVs)
+            if (nrow(v) == 0) {
+                stop("No single nucelotide variants found!")
+            }
+            message("single nucl. variants  : ", nrow(v@fix))
         }
 
         # convert vcf data to a data.frame
