@@ -26,26 +26,38 @@
 #' @examples
 #' # Example using all variants from vcf file
 #' snvs <- system.file("extdata", "NBE15",
-#' "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#'     "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+#'     package = "LACHESIS"
+#' )
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15",
-#' "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+#'     "NBE15_comb_pro_extra2.51_1.txt",
+#'     package = "LACHESIS"
+#' )
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #'
 #' # Example using variants associated with specific SBS mutational
 #' # signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15",
-#' "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#'     "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+#'     package = "LACHESIS"
+#' )
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15",
-#' "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+#'     "NBE15_comb_pro_extra2.51_1.txt",
+#'     package = "LACHESIS"
+#' )
 #' c_data <- readCNV(aceseq_cn)
 #' sig.filepath <- system.file("extdata",
-#' "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
-#' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
-#' sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath,
-#' sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
+#'     "NBE15_Decomposed_MutationType_Probabilities.txt",
+#'     package = "LACHESIS"
+#' )
+#' nb <- nbImport(
+#'     cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
+#'     sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath,
+#'     sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18")
+#' )
 #' @seealso \code{\link{plotNB}}
 #' @return a data.table
 #' @importFrom RColorBrewer brewer.pal
@@ -81,7 +93,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     }
 
     if (nrow(sv[is.na(start)])) {
-      tmp1 <- nrow(sv[is.na(start)])
+        tmp1 <- nrow(sv[is.na(start)])
         warning("Removed ", tmp1, " variants with no copy number overlaps")
         sv <- sv[!is.na(start)]
     }
@@ -279,36 +291,52 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 #' @examples
 #' # Example using all variants from vcf file
 #' snvs <- system.file("extdata", "NBE15",
-#' "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#'     "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+#'     package = "LACHESIS"
+#' )
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15",
-#' "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+#'     "NBE15_comb_pro_extra2.51_1.txt",
+#'     package = "LACHESIS"
+#' )
 #' c_data <- readCNV(aceseq_cn)
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #' cl_muts <- clonalMutationCounter(nb)
 #' norm_muts <- normalizeCounts(cl_muts)
 #' mrca <- MRCA(norm_muts)
-#' snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15",
-#' purity = 1)
+#' snvClonality <- estimateClonality(
+#'     nbObj = nb, mrcaObj = mrca, ID = "NBE15",
+#'     purity = 1
+#' )
 #' plotNB(nb = nb, snvClonality = snvClonality)
 #'
 #' # Example using variants assosciated with specific SBS mutational
 #' # signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15",
-#' "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
+#'     "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+#'     package = "LACHESIS"
+#' )
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
 #' aceseq_cn <- system.file("extdata", "NBE15",
-#' "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
+#'     "NBE15_comb_pro_extra2.51_1.txt",
+#'     package = "LACHESIS"
+#' )
 #' c_data <- readCNV(aceseq_cn)
 #' sig.filepath <- system.file("extdata",
-#' "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
-#' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
-#' sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath)
+#'     "NBE15_Decomposed_MutationType_Probabilities.txt",
+#'     package = "LACHESIS"
+#' )
+#' nb <- nbImport(
+#'     cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
+#'     sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath
+#' )
 #' cl_muts <- clonalMutationCounter(nb)
 #' norm_muts <- normalizeCounts(cl_muts)
 #' mrca <- MRCA(norm_muts)
-#' snvClonality <- estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NBE15",
-#' purity = 1)
+#' snvClonality <- estimateClonality(
+#'     nbObj = nb, mrcaObj = mrca, ID = "NBE15",
+#'     purity = 1
+#' )
 #' plotNB(nb = nb, snvClonality = snvClonality, sig.show = TRUE)
 #'
 #' @export
@@ -324,7 +352,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
                    samp.name = NULL, output.file = NULL,
                    sig.show = FALSE, ...) {
     chrom <- start <- t_vaf <- Clonality <- Signature <- End <-
-      End_Position_updated <- Start <- Start_Position_updated <- TCN <- NULL
+        End_Position_updated <- Start <- Start_Position_updated <- TCN <- NULL
 
     if (is.null(nb)) {
         stop("Missing input. Please provide the output from nbImport")
@@ -348,8 +376,10 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
 
     segs <- attr(nb, "cnv")
     segs <- segs[order(chrom, start)]
-    colnames(segs)[c(1, 2, 3)] <- c("Chromosome", "Start_Position",
-                                    "End_Position")
+    colnames(segs)[c(1, 2, 3)] <- c(
+        "Chromosome", "Start_Position",
+        "End_Position"
+    )
     segs <- .transformSegments(segmentedData = segs, build = ref.build)
 
     contig_lens <- cumsum(.getContigLens(build = ref.build))
@@ -417,8 +447,10 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
                 levels = c("Precnv", "Postcnv", "C", "SC")
             )
             if (nrow(tcn) == 0) next
-            max_count <- max(hist(tcn$t_vaf, breaks = nb.breaks,
-                                  plot = FALSE)$counts)
+            max_count <- max(hist(tcn$t_vaf,
+                breaks = nb.breaks,
+                plot = FALSE
+            )$counts)
             p_clonality <- ggplot(tcn, aes(x = t_vaf, fill = Clonality)) +
                 geom_histogram(
                     bins = nb.breaks, color = NA,
@@ -444,8 +476,10 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
                     plot.title = element_text(hjust = 0.5, face = "bold")
                 )
             if (!is.null(purity)) {
-                expected_vafs <- .expectedClVAF(CN = as.numeric(cn),
-                                                purity = purity)
+                expected_vafs <- .expectedClVAF(
+                    CN = as.numeric(cn),
+                    purity = purity
+                )
                 p_clonality <- p_clonality +
                     geom_vline(
                         xintercept = expected_vafs,
@@ -487,8 +521,10 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
                         legend.title = element_text(size = 9)
                     )
                 if (!is.null(purity)) {
-                    expected_vafs <- .expectedClVAF(CN = as.numeric(cn),
-                                                    purity = purity)
+                    expected_vafs <- .expectedClVAF(
+                        CN = as.numeric(cn),
+                        purity = purity
+                    )
                     p_signature <- p_signature +
                         geom_vline(
                             xintercept = expected_vafs,
@@ -507,7 +543,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
     # Copy number plot and clonality histogram
     if (length(clonality_plots) > 0) {
         first_page_clonality_plots <-
-          clonality_plots[seq_len(min(6, length(clonality_plots)))]
+            clonality_plots[seq_len(min(6, length(clonality_plots)))]
         first_page_clonality_grob <- do.call(
             .grid_arrange_shared_legend,
             c(first_page_clonality_plots,
@@ -544,8 +580,10 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
 
     # Optional signature histograms
     if (sig.show && length(signature_plots) > 0) {
-        signature_pages <- split(signature_plots,
-                                 ceiling(seq_along(signature_plots) / 8))
+        signature_pages <- split(
+            signature_plots,
+            ceiling(seq_along(signature_plots) / 8)
+        )
 
         for (signature_pages in signature_pages) {
             signature_grob <- do.call(
@@ -653,9 +691,9 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
         x.seg <- seg.spl[[i]]
         if (nrow(x.seg) > 0) {
             x.seg$Start_Position_updated <- x.seg$Start_Position +
-              chr.lens.sumsum[i - 1]
+                chr.lens.sumsum[i - 1]
             x.seg$End_Position_updated <- x.seg$End_Position +
-              chr.lens.sumsum[i - 1]
+                chr.lens.sumsum[i - 1]
         }
         seg.spl.transformed <- rbind(seg.spl.transformed, x.seg, fill = TRUE)
     }
@@ -679,8 +717,10 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
     plots <- list(...)
     position <- match.arg(position)
     g <- ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
-    legend <- g[[which(vapply(g, function(x) x$name,
-                              character(1)) == "guide-box")]]
+    legend <- g[[which(vapply(
+        g, function(x) x$name,
+        character(1)
+    ) == "guide-box")]]
     lheight <- sum(legend$height)
     lwidth <- sum(legend$width)
     gl <- lapply(plots, function(x) x + theme(legend.position = "none"))
