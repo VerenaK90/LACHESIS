@@ -34,7 +34,7 @@
 #' nb <- nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 #'
 #' # Example using variants associated with specific SBS mutational
-#' signatures from vcf file
+#' # signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15",
 #' "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
@@ -293,7 +293,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 #' plotNB(nb = nb, snvClonality = snvClonality)
 #'
 #' # Example using variants assosciated with specific SBS mutational
-#' signatures from vcf file
+#' # signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15",
 #' "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 #' s_data <- readVCF(vcf = snvs, vcf.source = "dkfz")
