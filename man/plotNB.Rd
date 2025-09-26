@@ -54,8 +54,8 @@ CNV plot.}
 
 \item{output.file}{optional, will save the plot.}
 
-\item{sig.show}{plot stratified VAF histogram with assigned mutational
-signatures.}
+\item{sig.show}{plot stratified VAF histogram with assigned
+mutational signatures.}
 
 \item{...}{further arguments and parameters passed to other LACHESIS
 functions.}
@@ -67,8 +67,8 @@ signature
 }
 \description{
 Visualizes results from  \code{\link{nbImport}}. Top plot, measured copy
-numbers along the genome; bottom plots, VAF histograms of SNVs stratified by
-copy number and minor/major allele count.
+numbers along the genome; bottom plots, VAF histograms of SNVs stratified
+by copy number and minor/major allele count.
 }
 \examples{
 # Example using all variants from vcf file
@@ -92,8 +92,8 @@ snvClonality <- estimateClonality(
 )
 plotNB(nb = nb, snvClonality = snvClonality)
 
-# Example using variants assosciated with specific SBS mutational signatures
-# from vcf file
+# Example using variants assosciated with specific SBS mutational
+# signatures from vcf file
 snvs <- system.file("extdata", "NBE15",
     "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
     package = "LACHESIS"
