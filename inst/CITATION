@@ -1,0 +1,16 @@
+citHeader("To cite package ‘LACHESIS’ in publications:")
+
+citEntry(
+  entry  = "Article",
+  title  = "Neuroblastoma arises in early fetal development and its evolutionary duration predicts outcome",
+  author = person(c("Körber","Stainczyk","Kurilov","Henrich","Hero","Brors","Westermann","Höfer"),
+                  role = rep("aut", 8)),
+  journal = "Nature Genetics",
+  year    = 2023,
+  month   = "Apr",
+  volume  = 55,
+  number  = 4,
+  pages   = "619-630",
+  doi     = "10.1038/s41588-023-01332-y",
+  url     = "https://www.nature.com/articles/s41588-023-01332-y"
+)
