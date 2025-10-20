@@ -56,7 +56,7 @@ To install the vignette, run
 devtools::install_github("VerenaK90/LACHESIS", build_vignettes=TRUE)
 ````
 
-The vignette can then be viewed by typing `vignette("Vignette", "LACHESIS")`. The package including its vignette can be installed within a few minutes.
+The vignette can then be viewed by typing `vignette("vignette_LACHESIS", "LACHESIS")`. The package including its vignette can be installed within a few minutes.
 
 ## License
 
