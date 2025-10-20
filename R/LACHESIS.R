@@ -208,12 +208,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
       several.ok = FALSE
     )
 
-    vcf.source <- match.arg(
-      arg = ref.build, choices = c("strelka", "mutect", "sentieon", "dkfz"),
-      several.ok = FALSE
-    )
-
-
     incl.chr <- setdiff(seq_len(22), excl.chr)
     if (!ignore.XY) {
         incl.chr <- c(incl.chr, "X", "Y")
@@ -346,6 +340,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (is.null(x$vcf.source)) {
                 stop("Please provide vcf source.")
             }
+            vcf.source <- match.arg(
+              arg = vcf.source, choices = c("strelka", "mutect", "sentieon", "dkfz"),
+              several.ok = FALSE
+            )
             if (is.null(x$vcf.tumor.ids)) {
                 x$vcf.tumor.ids <- x$ID
             } else if (any(is.na(x$vcf.tumor.ids))) {
@@ -632,6 +630,10 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 rm(tmp1)
                 next
             }
+            vcf.source[i] <- match.arg(
+                arg = vcf.source[i], choices = c("strelka", "mutect", "sentieon", "dkfz"),
+                several.ok = FALSE
+              )
 
             cnv <- readCNV(
                 cn.info = cnv.files[[i]], chr.col = cnv.chr.col[i],
