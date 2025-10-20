@@ -64,6 +64,11 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
         stop("Please specify tumor purity.")
     }
 
+    ref.build <- match.arg(
+      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+      several.ok = FALSE
+    )
+
     snvClonality <- merge(nbObj, mrcaObj[, .(
         chrom, TCN, A, B, p_sc, p_lc, p_ec,
         p_c, A_time, B_time

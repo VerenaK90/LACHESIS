@@ -74,6 +74,11 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
         pdf(output.file, width = 7, height = 6)
     }
 
+    ref.build <- match.arg(
+      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+      several.ok = FALSE
+    )
+
     # Add centromere position to mrcaObj
     chromInfo <- .getCentromeres(ref.build)
     setkey(mrcaObj, chrom)

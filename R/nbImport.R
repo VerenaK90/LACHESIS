@@ -8,8 +8,8 @@
 #' @param ploidy average copy number in the tumor sample.
 #' @param sig.assign Logical. If TRUE, each variant will be assigned to a
 #' mutational signature.
-#' @param assign.method Method to assign signatures: "max" to assign the
-#' signature with the highest probability, "sample" to randomly assign based on
+#' @param assign.method Method to assign signatures: `max` to assign the
+#' signature with the highest probability, `sample` to randomly assign based on
 #' signature probabilities.
 #' @param ID sample name.
 #' @param sig.file File path to the SigAssignment output file, typically named
@@ -79,6 +79,16 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     if (any(is.null(purity), is.null(ploidy))) {
         stop("Missing purity and ploidy inputs!")
     }
+
+    ref.build <- match.arg(
+      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+      several.ok = FALSE
+    )
+
+    assign.method <- match.arg(
+      arg = ref.build, choices = c("max", "sample"),
+      several.ok = FALSE
+    )
 
     colnames(cnv)[c(1, 2, 3)] <- c("chrom", "start", "end")
     data.table::setDT(x = cnv, key = c("chrom", "start", "end"))
@@ -366,7 +376,10 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
         stop("max.cn must be larger than min.cn")
     }
 
-
+    ref.build <- match.arg(
+      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+      several.ok = FALSE
+    )
     sig.colors <- attr(nb, "sig.colors")
     purity <- attr(nb, "purity")
     clonality_colors <- c(

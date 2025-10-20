@@ -19,7 +19,7 @@
 #' @param snv.files vector of snv files in same order as ids; should be in vcf
 #' format, will be ignored if `input.files` is specified.
 #' @param vcf.source Tool used for generating VCF file. Can be `strelka` or
-#' `mutect` or `dkfz`.
+#' `mutect` or `dkfz` or `sentieon`.
 #' @param purity vector tumor cell content in same order as ids; will be ignored
 #'  if `input.files` is specified.
 #' @param ploidy average copy number in the tumor sample in same order as ids;
@@ -203,6 +203,17 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         }
     }
 
+    ref.build <- match.arg(
+      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+      several.ok = FALSE
+    )
+
+    vcf.source <- match.arg(
+      arg = ref.build, choices = c("strelka", "mutect", "sentieon", "dkfz"),
+      several.ok = FALSE
+    )
+
+
     incl.chr <- setdiff(seq_len(22), excl.chr)
     if (!ignore.XY) {
         incl.chr <- c(incl.chr, "X", "Y")
@@ -371,8 +382,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             snv <- readVCF(
                 vcf = x$snv.file, vcf.source = x$vcf.source,
                 t.sample = x$vcf.tumor.id, min.depth = min.depth,
-                min.vaf = min.vaf, info.af = vcf.info.af, ignore.XY = ignore.XY,
-                info.dp = vcf.info.dp, filter.value = filter.value, ...
+                min.vaf = min.vaf, info.af = vcf.info.af,
+                ignore.XY = ignore.XY, info.dp = vcf.info.dp,
+                filter.value = filter.value, ...
             )
 
             nb <- nbImport(
