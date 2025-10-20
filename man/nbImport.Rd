@@ -30,8 +30,8 @@ nbImport(
 \item{sig.assign}{Logical. If TRUE, each variant will be assigned to a
 mutational signature.}
 
-\item{assign.method}{Method to assign signatures: "max" to assign the
-signature with the highest probability, "sample" to randomly assign based on
+\item{assign.method}{Method to assign signatures: \code{max} to assign the
+signature with the highest probability, \code{sample} to randomly assign based on
 signature probabilities.}
 
 \item{ID}{sample name.}

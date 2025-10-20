@@ -68,7 +68,7 @@ tab-delimited format, will be ignored if \code{input.files} is specified.}
 format, will be ignored if \code{input.files} is specified.}
 
 \item{vcf.source}{Tool used for generating VCF file. Can be \code{strelka} or
-\code{mutect} or \code{dkfz}.}
+\code{mutect} or \code{dkfz} or \code{sentieon}.}
 
 \item{purity}{vector tumor cell content in same order as ids; will be ignored
 if \code{input.files} is specified.}
