@@ -15,7 +15,8 @@ nbImport(
   sig.file = NULL,
   sig.select = NULL,
   min.p = NULL,
-  ref.build = "hg19"
+  ref.build = "hg19",
+  ...
 )
 }
 \arguments{
@@ -36,7 +37,9 @@ signature probabilities.}
 
 \item{ID}{sample name.}
 
-\item{sig.file}{File path to the SigAssignment output file, typically named
+\item{sig.file}{Either the output of \code{fit_to_signatures} from package
+\code{MutationPatterns}, or the file path to the output file from
+\code{SigProfilerAssignment}, typically named
 "Decomposed_MutationType_Probabilities.txt".}
 
 \item{sig.select}{A character vector of specific signatures to include in
@@ -91,6 +94,11 @@ nb <- nbImport(
     cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
     sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath,
     sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18")
+)
+nb.2 <- nbImport(
+    cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
+    sig.assign = TRUE, ID = "NBE15",
+    sig.select = c("SBS1", "SBS5", "SBS40", "SBS18")
 )
 }
 \seealso{

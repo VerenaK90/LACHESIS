@@ -166,7 +166,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
       be assigned using `MutationalPatterns` and signature version %s",
                       cosmic.version))
 
-      sig.data <- .compute_sig_probs(sv, ref.build, cosmic.version)
+      sig.data <- .compute_sig_probs(sv, ref.build, cosmic.version, ID)
     }else{
       sig.data <- data.table::fread(sig.file)
     }
@@ -306,7 +306,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     }
 }
 
-.compute_sig_probs <- function(sv, ref.build, cosmic.version){
+.compute_sig_probs <- function(sv, ref.build, cosmic.version, ID){
   # convert genome naming to MutationalPatterns; this is not supported for hg18.
   tryCatch(
     match.arg(ref.build,  c("hg19", "hg38"), several.ok = FALSE),
@@ -350,7 +350,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     fit$contribution[,1] / sum(fit$contribution[,1]))
   rel.contr.per.sig <- contr.per.sig/rowSums(contr.per.sig)
 
-  sig.data <- data.table::data.table(`Sample Names` = "Sample",
+  sig.data <- data.table::data.table(`Sample Names` = ID,
                                      MutationType = rownames(mut.mat),
                                      rel.contr.per.sig)
   return(sig.data)

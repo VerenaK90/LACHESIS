@@ -148,8 +148,10 @@ filtering, defaults to PASS.}
 \item{sig.assign}{Logical. If TRUE, each variant will be assigned to the most
 likely mutational signature.}
 
-\item{sig.file}{File path to the SigAssignment output file, typically named
-"Decomposed_MutationType_Probabilities.txt".}
+\item{sig.file}{The path to the output file from \code{SigProfilerAssignment},
+typically named "Decomposed_MutationType_Probabilities.txt". If \code{NULL} and
+\code{sig.assign = TRUE}, signatures will be assigned using functions from
+\code{MutationalPatterns}.}
 
 \item{assign.method}{Method to assign signatures: "max" to assign the
 signature with the highest probability, "sample" to randomly assign based on
