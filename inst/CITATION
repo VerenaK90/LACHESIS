@@ -12,7 +12,7 @@ citEntry(
     person("Benedikt", "Brors", role = "aut"),
     person("Frank", "Westermann", role = "aut"),
     person("Thomas", "Höfer", role = "aut")
-  )
+  ),
   journal = "Nature Genetics",
   year    = 2023,
   month   = "Apr",
