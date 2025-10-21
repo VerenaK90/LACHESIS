@@ -157,6 +157,15 @@ cn_data <- LACHESIS::readCNV(ascat_cn)
 head(cn_data, n = 1)
 ```
 
+
+#### Example using output from PURPLE as copy number information
+
+```{r readCNV_example3, message=FALSE, warning=FALSE}
+purple_cn <- system.file("extdata", "PURPLE/NB-S-599-T.purple.cnv.somatic.tsv", package = "LACHESIS")
+cn_data <- LACHESIS::readCNV(purple_cn)
+head(cn_data, n = 1)
+```
+
 ### Importing Variant Information (readVCF)  
 
 The `readVCF` function is used to import a VCF file and extract key genomic information such as read counts and VAFs. Supported tools to generate the VCF file are [Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/360037593851-Mutect2), [Strelka2](https://github.com/Illumina/strelka?tab=readme-ov-file), [Sentieon](https://support.sentieon.com/manual/) and the [DKFZ SNV Calling Workflow](https://github.com/DKFZ-ODCF/SNVCallingWorkflow).
@@ -671,7 +680,7 @@ knitr::kable(lachesis_output, col.names = c("Column Name", "Definition"), align 
 strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 aceseq_cn <- system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
-head(lachesis, n = 1)
+head(lachesis, n = 3)
 ```
 
 #### Example with tab-delimited sample-specification file
@@ -687,10 +696,10 @@ input.files <- data.table::fread(input.files)
 # cnv and snv files for example tumors
 nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
 nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
-nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"), full.names = TRUE)
 
-cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 
 input.files$cnv.file <- cnv.file
 input.files$snv.file <- snv.file
@@ -708,7 +717,7 @@ data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 ```{r LACHESIS_example2_4, message=FALSE, warning=FALSE}
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
-head(lachesis, n = 1)
+head(lachesis, n = 3)
 ```
 
 #### Example with multiple sample and data frame input
@@ -720,7 +729,7 @@ nbe15_vcf <- system.file("extdata", "NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.
 nbe15_cn <- read.delim(system.file("extdata", "NBE15/NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
 
 lachesis <- LACHESIS::LACHESIS(ids = c("NBE11", "NBE15"), cnv.files = list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf), vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51), cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3), cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37))
-head(lachesis, n = 1)
+head(lachesis, n = 3)
 ```
 
 
@@ -747,10 +756,10 @@ input.files <- data.table::fread(input.files)
 # cnv and snv files for example tumors
 nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
 nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
-nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"), full.names = TRUE)
 
-cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 
 input.files$cnv.file <- cnv.file
 input.files$snv.file <- snv.file
@@ -765,7 +774,7 @@ lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 LACHESIS::plotLachesis(lachesis)
 ```
 
-This graph provides a cohort-level overview, in this case of three late-MRCA samples (SNVs per Mb > 0.05). In all samples, an early ECA was detected, with two of them timed in the first trimester.
+This graph provides a cohort-level overview, illustrating two late-MRCA (SNVs per Mb > 0.05) and one early-MRCA sample. In the late-MRCA cases, an early ECA was detected, indicating a longer evolution rather than a later onset.
 
 ### Plotting Clinical Correlations (plotClinicalCorrelations)
 
@@ -804,9 +813,10 @@ plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
-LACHESIS::plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS")
+LACHESIS::plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS", mrca.cutpoint = 0.05)
 ```
 
+The timing of the MRCA serves as a robust predictor of event-free survival. Tumors with an early MRCA are linked to favorable overall survival outcomes, while late-MRCA tumors are more frequently associated with relapse.
 
 ### Classifying Tumor Evolution (classifyLACHESIS)
 

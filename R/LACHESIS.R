@@ -99,12 +99,12 @@
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file
@@ -925,12 +925,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file
@@ -1245,12 +1245,12 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file
@@ -1406,12 +1406,12 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file
@@ -1657,12 +1657,12 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file

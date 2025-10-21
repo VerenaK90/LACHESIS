@@ -15,13 +15,13 @@ Authors@R: c(
          family = "Eggle",
          role = c("aut"),
          email = "maximilia.eggle@kitz-heidelberg.de"))
-Description: This package provides modalities to analyze tumor evolution from whole genome sequencing data. In particular, it provides estimates of mutation densities at genomic segments and uses these to time the origin of the tumor.
+Description: This package provides modalities to analyze tumor evolution from whole genome sequencing data. In particular, it provides estimates of mutation densities at genomic segments and uses these to time the origin of the tumor. 
 License: GPL (>= 3)
 Copyright: Verena Körber, Anand Mayakonda, Maximilia Eggle (2025)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends:
-  R (>= 4.3)
+  R (>= 4.5)
 Imports:
   data.table, vcfR, tidyr, stats, utils, graphics, grDevices, ggplot2, gridExtra, survival, survminer, RColorBrewer, Biostrings
 Suggests:
