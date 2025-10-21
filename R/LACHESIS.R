@@ -341,7 +341,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 stop("Please provide vcf source.")
             }
             vcf.source <- match.arg(
-              arg = vcf.source, choices = c("strelka", "mutect", "sentieon", "dkfz"),
+              arg = x$vcf.source, choices = c("strelka", "mutect", "sentieon", "dkfz"),
               several.ok = FALSE
             )
             if (is.null(x$vcf.tumor.ids)) {
