@@ -72,7 +72,9 @@
 #' @param assign.method Method to assign signatures: "max" to assign the
 #' signature with the highest probability, "sample" to randomly assign based on
 #' signature probabilities.
-#' @param sig.file File path to the SigAssignment output file, typically named
+#' @param sig.file Either the output of `fit_to_signatures` from package
+#' `MutationPatterns`, or the file path to the output file from
+#' `SigProfilerAssignment`, typically named
 #' "Decomposed_MutationType_Probabilities.txt".
 #' @param sig.select A character vector of specific signatures to include in the
 #'  analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational
@@ -315,7 +317,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         if (any(is.na(sample.specs[, snv.file]))) {
             tmp1 <- toString(sample.specs[, ID[which(is.na(snv.file))]])
             warning(sprintf(
-                "No SNV file provided for sample(s) %s; sample(s) will be excluded",
+                "No SNV file provided for sample(s) %s; will be excluded",
                 tmp1
             ))
             rm(tmp1)
@@ -341,7 +343,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 stop("Please provide vcf source.")
             }
             vcf.source <- match.arg(
-              arg = x$vcf.source, choices = c("strelka", "mutect", "sentieon", "dkfz"),
+              arg = x$vcf.source, choices = c("strelka", "mutect",
+                                              "sentieon", "dkfz"),
               several.ok = FALSE
             )
             if (is.null(x$vcf.tumor.ids)) {
@@ -389,7 +392,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy,
                 sig.assign = sig.assign, assign.method = assign.method,
                 ID = x$ID, sig.file = sig.file, sig.select = sig.select,
-                min.p = min.p, ref.build = ref.build
+                min.p = min.p, ref.build = ref.build, ...
             )
 
             if (nrow(nb) == 0) {
@@ -624,14 +627,15 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (is.na(snv.files)[i]) {
                 tmp1 <- ids[1]
                 warning(sprintf(
-                    "No SNV file provided for sample %s; sample will be excluded",
+                    "No SNV file provided for sample %s; will be excluded",
                     tmp1
                 ))
                 rm(tmp1)
                 next
             }
             vcf.source[i] <- match.arg(
-                arg = vcf.source[i], choices = c("strelka", "mutect", "sentieon", "dkfz"),
+                arg = vcf.source[i], choices = c("strelka", "mutect",
+                                                 "sentieon", "dkfz"),
                 several.ok = FALSE
               )
 
@@ -655,7 +659,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i],
                 sig.assign = sig.assign, assign.method = assign.method,
                 ID = ids[i], sig.file = sig.file, sig.select = sig.select,
-                min.p = min.p, ref.build = ref.build
+                min.p = min.p, ref.build = ref.build, ...
             )
 
             if (nrow(nb) == 0) {
@@ -957,7 +961,8 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     }
     if (nrow(lachesis) == 1) {
         warning(
-            "Cannot produce summary statistics for a single case. Returning null."
+            "Cannot produce summary statistics for a single case.
+            Returning null."
         )
         return()
     }
