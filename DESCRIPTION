@@ -30,4 +30,4 @@ biocViews: Software, StatisticalMethod, TimeCourse, Sequencing, WholeGenome, Sur
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
 URL: https://github.com/VerenaK90/LACHESIS
-BugReports: https://github.com/VerenaK90/LACHESIS/issues
+BugReports: https://github.com/VerenaK90/LACHESIS/issues 
