@@ -75,10 +75,6 @@
 #' @importFrom Biostrings getSeq
 #' @importFrom stats setNames
 #' @importFrom grDevices colorRampPalette
-#' @importFrom GenomeInfoDb genome
-#' @importFrom MutationalPatterns get_known_signatures mut_matrix fit_to_signatures
-#' @importFrom IRanges IRanges
-#' @importFrom GenomicRanges GRanges
 #' @export
 
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
