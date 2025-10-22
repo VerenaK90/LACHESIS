@@ -13,7 +13,7 @@
 #' signature probabilities.
 #' @param ID sample name.
 #' @param sig.file Either the output of `fit_to_signatures` from package
-#' `MutationPatterns`, or the file path to the output file from
+#' `MutationalPatterns`, or the file path to the output file from
 #' `SigProfilerAssignment`, typically named
 #' "Decomposed_MutationType_Probabilities.txt".
 #' @param sig.select A character vector of specific signatures to include in
@@ -24,6 +24,10 @@
 #' specific signature.
 #' @param ref.build Reference genome. Default `hg19`.
 #' Can be `hg18`, `hg19` or `hg38`.
+#' @param cosmic.version COSMIC mutational signature reference.
+#' Can be "COSMIC", "COSMIC_v3.1", "COSMIC_v3.2"
+#' @param ... further arguments and parameters passed to other
+#' LACHESIS functions.
 #'
 #' @examples
 #' # Example using all variants from vcf file
@@ -80,7 +84,7 @@
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                      sig.assign = FALSE, assign.method = "sample", ID = NULL,
                      sig.file = NULL, sig.select = NULL, min.p = NULL,
-                     ref.build = "hg19", ...) {
+                     ref.build = "hg19", cosmic.version = "COSMIC_v.3.2", ...) {
     end <- start <- sequence_context <- chrom <- i.end <- i.start <- TCN <-
         NULL
 
@@ -123,7 +127,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
         t.sample <- attributes(sv)$t.sample
         assign.result <- .assign_signatures(
             sv, sig.file, assign.method, ID,
-            sig.select, min.p, ref.build
+            sig.select, min.p, ref.build, cosmic.version
         )
         sv <- assign.result$sv
         sig.colors <- assign.result$sig.colors
@@ -146,7 +150,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                                assign.method = "sample", ID = NULL,
                                sig.select = NULL, min.p = NULL,
                                ref.build = NULL,
-                               cosmic.version = "COSMIC_v.3.2", ...) {
+                               cosmic.version = NULL) {
     strand <- ref <- sequence_context <- chrom <- i.start <- i.end <- Sample <-
         MutationType <- alt <- NULL
 

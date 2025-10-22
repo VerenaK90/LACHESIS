@@ -16,6 +16,7 @@ nbImport(
   sig.select = NULL,
   min.p = NULL,
   ref.build = "hg19",
+  cosmic.version = "COSMIC_v.3.2",
   ...
 )
 }
@@ -38,7 +39,7 @@ signature probabilities.}
 \item{ID}{sample name.}
 
 \item{sig.file}{Either the output of \code{fit_to_signatures} from package
-\code{MutationPatterns}, or the file path to the output file from
+\code{MutationalPatterns}, or the file path to the output file from
 \code{SigProfilerAssignment}, typically named
 "Decomposed_MutationType_Probabilities.txt".}
 
@@ -52,6 +53,12 @@ specific signature.}
 
 \item{ref.build}{Reference genome. Default \code{hg19}.
 Can be \code{hg18}, \code{hg19} or \code{hg38}.}
+
+\item{cosmic.version}{COSMIC mutational signature reference.
+Can be "COSMIC", "COSMIC_v3.1", "COSMIC_v3.2"}
+
+\item{...}{further arguments and parameters passed to other
+LACHESIS functions.}
 }
 \value{
 a data.table
