@@ -1426,7 +1426,8 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
-#' plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS")
+#' plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS",
+#'     mrca.cutpoint = 0.05)
 #'
 #' @export
 #' @import ggplot2
