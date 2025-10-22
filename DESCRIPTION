@@ -23,9 +23,9 @@ Roxygen: list(markdown = TRUE)
 Depends:
   R (>= 4.5)
 Imports:
-  data.table, vcfR, tidyr, stats, utils, graphics, grDevices, ggplot2, gridExtra, survival, survminer, RColorBrewer, Biostrings, GenomeInfoDb, GenomicRanges, IRanges, MutationalPatterns
+  data.table, vcfR, tidyr, stats, utils, graphics, grDevices, ggplot2, gridExtra, survival, survminer, RColorBrewer, Biostrings
 Suggests:
-  BSgenome.Hsapiens.UCSC.hg18, BSgenome.Hsapiens.UCSC.hg38, BSgenome.Hsapiens.UCSC.hg19, BiocStyle, Cairo, rmarkdown, knitr, R.utils, tinytest
+  BSgenome.Hsapiens.UCSC.hg18, BSgenome.Hsapiens.UCSC.hg38, BSgenome.Hsapiens.UCSC.hg19, BiocStyle, Cairo, rmarkdown, knitr, R.utils, tinytest, GenomeInfoDb, GenomicRanges, IRanges, MutationalPatterns
 biocViews: Software, StatisticalMethod, TimeCourse, Sequencing, WholeGenome, Survival, SomaticMutation
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3

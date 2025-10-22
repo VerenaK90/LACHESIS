@@ -313,6 +313,9 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 }
 
 .compute_sig_probs <- function(sv, ref.build, cosmic.version, ID){
+  if(!requireNamespace("MutationalPatterns",
+                       quietly = TRUE))
+    stop("Please install MutationalPatterns.")
   # convert genome naming to MutationalPatterns; this is not supported for hg18.
   tryCatch(
     match.arg(ref.build,  c("hg19", "hg38"), several.ok = FALSE),
