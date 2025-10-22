@@ -12,10 +12,10 @@
 #' signature with the highest probability, `sample` to randomly assign based on
 #' signature probabilities.
 #' @param ID sample name.
-#' @param sig.file Either the output of `fit_to_signatures` from package
-#' `MutationalPatterns`, or the file path to the output file from
-#' `SigProfilerAssignment`, typically named
-#' "Decomposed_MutationType_Probabilities.txt".
+#' @param sig.file The path to the output file from `SigProfilerAssignment`,
+#' typically named "Decomposed_MutationType_Probabilities.txt". If `NULL` and
+#' `sig.assign = TRUE`, signatures will be assigned using functions from
+#' `MutationalPatterns`.
 #' @param sig.select A character vector of specific signatures to include in
 #' the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like
 #' mutational processes).

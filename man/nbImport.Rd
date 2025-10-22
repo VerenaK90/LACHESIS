@@ -38,10 +38,11 @@ signature probabilities.}
 
 \item{ID}{sample name.}
 
-\item{sig.file}{Either the output of \code{fit_to_signatures} from package
-\code{MutationalPatterns}, or the file path to the output file from
-\code{SigProfilerAssignment}, typically named
-"Decomposed_MutationType_Probabilities.txt".}
+
+\item{sig.file}{The path to the output file from \code{SigProfilerAssignment},
+typically named "Decomposed_MutationType_Probabilities.txt". If \code{NULL} and
+\code{sig.assign = TRUE}, signatures will be assigned using functions from
+\code{MutationalPatterns}.}
 
 \item{sig.select}{A character vector of specific signatures to include in
 the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like
