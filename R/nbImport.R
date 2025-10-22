@@ -71,6 +71,10 @@
 #' @importFrom Biostrings getSeq
 #' @importFrom stats setNames
 #' @importFrom grDevices colorRampPalette
+#' @importFrom GenomeInfoDb genome
+#' @importFrom MutationalPatterns get_known_signatures mut_matrix fit_to_signatures
+#' @importFrom IRanges IRanges
+#' @importFrom GenomicRanges GRanges
 #' @export
 
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
@@ -408,7 +412,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 #' )
 #' plotNB(nb = nb, snvClonality = snvClonality)
 #'
-#' # Example using variants assosciated with specific SBS mutational
+#' # Example using variants associated with specific SBS mutational
 #' # signatures from vcf file
 #' snvs <- system.file("extdata", "NBE15",
 #'     "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
