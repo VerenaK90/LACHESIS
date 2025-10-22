@@ -84,7 +84,7 @@
 nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                      sig.assign = FALSE, assign.method = "sample", ID = NULL,
                      sig.file = NULL, sig.select = NULL, min.p = NULL,
-                     ref.build = "hg19", cosmic.version = "COSMIC_v.3.2", ...) {
+                     ref.build = "hg19", cosmic.version = "COSMIC_v3.2", ...) {
     end <- start <- sequence_context <- chrom <- i.end <- i.start <- TCN <-
         NULL
 
@@ -159,8 +159,6 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     }
 
     if (is.null(sig.file)) {
-      args <- list(...)
-      cosmic.version <- args$cosmic.version
       if (is.null(cosmic.version)) {
         cosmic.version <- "COSMIC_v3.2"
       }else{

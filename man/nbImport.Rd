@@ -16,7 +16,7 @@ nbImport(
   sig.select = NULL,
   min.p = NULL,
   ref.build = "hg19",
-  cosmic.version = "COSMIC_v.3.2",
+  cosmic.version = "COSMIC_v3.2",
   ...
 )
 }
