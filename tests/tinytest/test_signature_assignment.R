@@ -249,7 +249,7 @@ test_sig_assign_ref_build_validation <- function() {
                             "NBE15_Decomposed_MutationType_Probabilities.txt",
                             package = "LACHESIS")
 
-    # Valid ref.build values (may fail with coordinate mismatches)
+    # Valid ref.build values (may fail with coordinate mismatches or missing BSgenome packages)
     for (ref in c("hg19", "hg38")) {
         tryCatch({
             result <- nbImport(cnv = data$cnv, snv = data$snv,
@@ -259,9 +259,9 @@ test_sig_assign_ref_build_validation <- function() {
             expect_true(is.data.table(result),
                         info = paste("Should work with ref.build =", ref))
         }, error = function(e) {
-            # Coordinate mismatch between data and ref.build is expected for some builds
-            if (grepl("allow.nonnarrowing|refwidth", e$message)) {
-                expect_true(TRUE, info = paste("ref.build validation skipped for", ref, "(coordinate mismatch)"))
+            # Expected errors: coordinate mismatch, missing BSgenome packages
+            if (grepl("allow.nonnarrowing|refwidth|Please install BSgenome", e$message)) {
+                expect_true(TRUE, info = paste("ref.build validation skipped for", ref, "(missing resource or coordinate mismatch)"))
             } else {
                 expect_true(FALSE, info = paste("Unexpected error for ref.build =", ref, ":", e$message))
             }
