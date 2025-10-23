@@ -183,19 +183,19 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                            if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg18",
                                                 quietly = TRUE))
                              stop("Please install BSgenome.Hsapiens.UCSC.hg18.")
-                           BSgenome.Hsapiens.UCSC.hg18::BSgenome.Hsapiens.UCSC.hg18
+                           getNamespace("BSgenome.Hsapiens.UCSC.hg18")$BSgenome.Hsapiens.UCSC.hg18
                          },
                          "hg19" = {
                            if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg19",
                                                 quietly = TRUE))
                              stop("Please install BSgenome.Hsapiens.UCSC.hg19.")
-                           BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
+                           getNamespace("BSgenome.Hsapiens.UCSC.hg19")$BSgenome.Hsapiens.UCSC.hg19
                          },
                          "hg38" = {
                            if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg38",
                                                 quietly = TRUE))
                              stop("Please install BSgenome.Hsapiens.UCSC.hg38.")
-                           BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+                           getNamespace("BSgenome.Hsapiens.UCSC.hg38")$BSgenome.Hsapiens.UCSC.hg38
                          },
         )
 
@@ -337,13 +337,13 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                      if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg19",
                                           quietly = TRUE))
                        stop("Please install BSgenome.Hsapiens.UCSC.hg19.")
-                     BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
+                     getNamespace("BSgenome.Hsapiens.UCSC.hg19")$BSgenome.Hsapiens.UCSC.hg19
                    },
                    "hg38" = {
                      if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg38",
                                           quietly = TRUE))
                        stop("Please install BSgenome.Hsapiens.UCSC.hg38.")
-                     BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+                     getNamespace("BSgenome.Hsapiens.UCSC.hg38")$BSgenome.Hsapiens.UCSC.hg38
                    },
   )
   # get the trinucleotide context
