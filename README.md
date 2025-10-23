@@ -11,7 +11,7 @@
 
 ## Documentation
 
-A [vignette](vignettes/vignette_LACHESIS.Rmd) explaining how to use &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma;, input and output formats alongside with example data can be installed by setting `build_vignettes=TRUE`.
+A [vignette](vignettes/vignette_LACHESIS.Rmd) explaining how to use &Lambda;&Alpha;&Xi;&Epsilon;&Sigma;&Iota;&Sigma;, input and output formats alongside with example data can be installed by setting `build_vignettes = TRUE` and `dependencies = TRUE`.
 
 ## Demo 
 
@@ -53,7 +53,7 @@ devtools::install_github("VerenaK90/LACHESIS")
 To install the vignette, run
 
 ```r
-devtools::install_github("VerenaK90/LACHESIS", build_vignettes=TRUE)
+devtools::install_github("VerenaK90/LACHESIS", build_vignettes = TRUE, dependencies = TRUE)
 ````
 
 The vignette can then be viewed by typing `vignette("vignette_LACHESIS", "LACHESIS")`. The package including its vignette can be installed within a few minutes.
