@@ -14,7 +14,6 @@ output:
     toc_depth: 3
     number_sections: false
     fig_width: 5
-bibliography: library.bib
 vignette: >
     %\VignetteIndexEntry{LACHESIS - Real-time inference of evolutionary dynamics during tumor initiation based on whole genome sequencing data}
     %\VignetteEngine{knitr::rmarkdown}
