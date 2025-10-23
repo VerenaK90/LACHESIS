@@ -21,11 +21,11 @@ Copyright: Verena Körber, Anand Mayakonda, Maximilia Eggle (2025)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends:
-  R (>= 4.5)
+  R (>= 4.3)
 Imports:
   data.table, vcfR, tidyr, stats, utils, graphics, grDevices, ggplot2, gridExtra, survival, survminer, RColorBrewer, Biostrings
 Suggests:
-  BSgenome.Hsapiens.UCSC.hg18, BSgenome.Hsapiens.UCSC.hg38, BSgenome.Hsapiens.UCSC.hg19, BiocStyle, Cairo, rmarkdown, knitr, R.utils, tinytest, GenomeInfoDb, GenomicRanges, IRanges, MutationalPatterns, magic
+  BSgenome.Hsapiens.UCSC.hg18, BSgenome.Hsapiens.UCSC.hg38, BSgenome.Hsapiens.UCSC.hg19, BiocStyle, Cairo, rmarkdown, knitr, R.utils, tinytest, GenomeInfoDb, GenomicRanges, IRanges, MutationalPatterns, magick
 biocViews: Software, StatisticalMethod, TimeCourse, Sequencing, WholeGenome, Survival, SomaticMutation
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
