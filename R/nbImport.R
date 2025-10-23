@@ -319,20 +319,15 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     alt = sv$alt
   )
   GenomeInfoDb::genome(sv.granges) <- ref.build
-  bs.genome <- switch(ref.build,
-                   "hg19" = {
-                     if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg19",
-                                          quietly = TRUE))
-                       stop("Please install BSgenome.Hsapiens.UCSC.hg19.")
-                     getNamespace("BSgenome.Hsapiens.UCSC.hg19")$BSgenome.Hsapiens.UCSC.hg19
-                   },
-                   "hg38" = {
-                     if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg38",
-                                          quietly = TRUE))
-                       stop("Please install BSgenome.Hsapiens.UCSC.hg38.")
-                     getNamespace("BSgenome.Hsapiens.UCSC.hg38")$BSgenome.Hsapiens.UCSC.hg38
-                   },
-  )
+
+  genome_pkg <- paste0("BSgenome.Hsapiens.UCSC.", ref.build)
+
+  if(!requireNamespace(genome_pkg, quietly = TRUE)) {
+     stop("Please install ", genome_pkg, ".")
+    }
+
+  bs.genome <- getNamespace(genome_pkg)[[genome_pkg]]
+
   # get the trinucleotide context
   mut.mat <- MutationalPatterns::mut_matrix(sv.granges, bs.genome)
   # perform the fitting
