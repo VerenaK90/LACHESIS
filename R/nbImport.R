@@ -178,26 +178,13 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     sbs.cols <- grep("^SBS", names(sig.data), value = TRUE)
 
     if (!"sequence_context" %in% colnames(sv)) {
-        genome <- switch(ref.build,
-                         "hg18" = {
-                           if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg18",
-                                                quietly = TRUE))
-                             stop("Please install BSgenome.Hsapiens.UCSC.hg18.")
-                           getNamespace("BSgenome.Hsapiens.UCSC.hg18")$BSgenome.Hsapiens.UCSC.hg18
-                         },
-                         "hg19" = {
-                           if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg19",
-                                                quietly = TRUE))
-                             stop("Please install BSgenome.Hsapiens.UCSC.hg19.")
-                           getNamespace("BSgenome.Hsapiens.UCSC.hg19")$BSgenome.Hsapiens.UCSC.hg19
-                         },
-                         "hg38" = {
-                           if(!requireNamespace("BSgenome.Hsapiens.UCSC.hg38",
-                                                quietly = TRUE))
-                             stop("Please install BSgenome.Hsapiens.UCSC.hg38.")
-                           getNamespace("BSgenome.Hsapiens.UCSC.hg38")$BSgenome.Hsapiens.UCSC.hg38
-                         },
-        )
+      genome_pkg <- paste0("BSgenome.Hsapiens.UCSC.", ref.build)
+
+      if(!requireNamespace(genome_pkg, quietly = TRUE)) {
+        stop("Please install ", genome_pkg, ".")
+      }
+
+      genome <- getNamespace(genome_pkg)[[genome_pkg]]
 
         # Mapping purine bases to reverse strand ("-")
         sv[, strand := ifelse(ref %in% c("A", "G"), "-", "+")]
