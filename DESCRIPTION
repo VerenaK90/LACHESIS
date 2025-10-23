@@ -25,7 +25,7 @@ Depends:
 Imports:
   data.table, vcfR, tidyr, stats, utils, graphics, grDevices, ggplot2, gridExtra, survival, survminer, RColorBrewer, Biostrings
 Suggests:
-  BSgenome.Hsapiens.UCSC.hg18, BSgenome.Hsapiens.UCSC.hg38, BSgenome.Hsapiens.UCSC.hg19, BiocStyle, Cairo, rmarkdown, knitr, R.utils, tinytest, GenomeInfoDb, GenomicRanges, IRanges, MutationalPatterns
+  BSgenome.Hsapiens.UCSC.hg18, BSgenome.Hsapiens.UCSC.hg38, BSgenome.Hsapiens.UCSC.hg19, BiocStyle, Cairo, rmarkdown, knitr, R.utils, tinytest, GenomeInfoDb, GenomicRanges, IRanges, MutationalPatterns, magic
 biocViews: Software, StatisticalMethod, TimeCourse, Sequencing, WholeGenome, Survival, SomaticMutation
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
