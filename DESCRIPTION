@@ -1,6 +1,6 @@
 Package: LACHESIS
 Title: Functions used to analyze early tumor evolution from whole genome sequencing data
-Version: 0.99.0
+Version: 0.99.1
 Authors@R: c(
   person(given = "Verena",
          family = "Körber",
@@ -21,7 +21,7 @@ Copyright: Verena Körber, Anand Mayakonda, Maximilia Eggle (2025)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends:
-  R (>= 4.3)
+  R (>= 4.5)
 Imports:
   data.table, vcfR, tidyr, stats, utils, graphics, grDevices, ggplot2, gridExtra, survival, survminer, RColorBrewer, Biostrings
 Suggests:

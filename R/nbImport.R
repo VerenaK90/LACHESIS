@@ -306,12 +306,12 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     )) {
         stop("Please install MutationalPatterns.")
     }
-    # convert genome naming to MutationalPatterns; this is not supported for hg18.
+    # convert genome naming to MutationalPatterns; not supported for hg18.
     tryCatch(
         match.arg(ref.build, c("hg19", "hg38"), several.ok = FALSE),
         error = function(e) {
-            stop("Invalid value for `ref.build`. Mutational signature assignment can
-                   only be performed for hg19 and hg38", call. = FALSE)
+            stop("Invalid value for `ref.build`. Mutational signature assignment
+                   can only be performed for hg19 and hg38", call. = FALSE)
         }
     )
     genome <- ifelse(ref.build == "hg19", "GRCh37", "GRCh38")
