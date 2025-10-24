@@ -65,8 +65,8 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
     }
 
     ref.build <- match.arg(
-      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
-      several.ok = FALSE
+        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        several.ok = FALSE
     )
 
     snvClonality <- merge(nbObj, mrcaObj[, .(
@@ -161,7 +161,7 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
 }
 
 .expectedClVAFAB <- function(A, B, purity) {
-    unique(c(1,B,A) * purity / (purity * (A + B) + 2 * (1 - purity)))
+    unique(c(1, B, A) * purity / (purity * (A + B) + 2 * (1 - purity)))
 }
 
 #' Plotting assigned clonality status for every SNV by chromosome

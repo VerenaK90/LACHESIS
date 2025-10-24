@@ -9,11 +9,13 @@ library(data.table)
 load_test_data <- function(sample = "NBE15") {
     if (sample == "NBE15") {
         cnv_file <- system.file("extdata", "NBE15",
-                                "NBE15_comb_pro_extra2.51_1.txt",
-                                package = "LACHESIS")
+            "NBE15_comb_pro_extra2.51_1.txt",
+            package = "LACHESIS"
+        )
         vcf_file <- system.file("extdata", "NBE15",
-                                "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
-                                package = "LACHESIS")
+            "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+            package = "LACHESIS"
+        )
     }
     cnv <- readCNV(cn.info = cnv_file)
     snv <- readVCF(vcf = vcf_file, vcf.source = "dkfz")
@@ -27,19 +29,23 @@ load_test_data <- function(sample = "NBE15") {
 # Test 1: readVCF - Invalid vcf.source
 test_readVCF_invalid_vcf_source <- function() {
     strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz",
-                               package = "LACHESIS")
+        package = "LACHESIS"
+    )
 
     expect_error(readVCF(vcf = strelka_vcf, vcf.source = "invalid_tool"),
-                 info = "Invalid vcf.source should raise error")
+        info = "Invalid vcf.source should raise error"
+    )
 
-    expect_error(readVCF(vcf = strelka_vcf, vcf.source = "STRELKA"),  # Wrong case
-                 info = "Case-sensitive vcf.source should raise error if wrong")
+    expect_error(readVCF(vcf = strelka_vcf, vcf.source = "STRELKA"), # Wrong case
+        info = "Case-sensitive vcf.source should raise error if wrong"
+    )
 }
 
 # Test 2: readVCF - Valid vcf.source values
 test_readVCF_valid_vcf_sources <- function() {
     strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz",
-                               package = "LACHESIS")
+        package = "LACHESIS"
+    )
 
     valid_sources <- c("strelka", "mutect", "dkfz", "sentieon")
 
@@ -48,12 +54,14 @@ test_readVCF_valid_vcf_sources <- function() {
             result <- readVCF(vcf = strelka_vcf, vcf.source = source)
         } else if (source == "mutect") {
             mutect_vcf <- system.file("extdata", "mutect.somatic.vcf.gz",
-                                      package = "LACHESIS")
+                package = "LACHESIS"
+            )
             result <- readVCF(vcf = mutect_vcf, vcf.source = source, filter.value = ".")
         } else if (source == "dkfz") {
             dkfz_vcf <- system.file("extdata", "NBE15",
-                                    "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
-                                    package = "LACHESIS")
+                "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",
+                package = "LACHESIS"
+            )
             result <- readVCF(vcf = dkfz_vcf, vcf.source = source)
         } else if (source == "sentieon") {
             # Sentieon vcf might not be available, so skip
@@ -63,7 +71,8 @@ test_readVCF_valid_vcf_sources <- function() {
 
         if (!is.null(result)) {
             expect_true(is.data.table(result),
-                        info = paste("readVCF should work with vcf.source =", source))
+                info = paste("readVCF should work with vcf.source =", source)
+            )
         }
     }
 }
@@ -79,10 +88,14 @@ test_nbImport_invalid_ref_build_values <- function() {
     invalid_builds <- c("hg17", "hg20", "hg99", "GRCh37", "mm10", "")
 
     for (build in invalid_builds) {
-        expect_error(nbImport(cnv = data$cnv, snv = data$snv,
-                              purity = 1.0, ploidy = 2.51,
-                              ref.build = build),
-                     info = paste("Invalid ref.build =", build, "should raise error"))
+        expect_error(
+            nbImport(
+                cnv = data$cnv, snv = data$snv,
+                purity = 1.0, ploidy = 2.51,
+                ref.build = build
+            ),
+            info = paste("Invalid ref.build =", build, "should raise error")
+        )
     }
 }
 
@@ -94,21 +107,27 @@ test_nbImport_valid_ref_build_values <- function() {
 
     for (build in valid_builds) {
         # Some ref.builds may cause coordinate range errors if SNV data is from a different build
-        tryCatch({
-            result <- nbImport(cnv = data$cnv, snv = data$snv,
-                               purity = 1.0, ploidy = 2.51,
-                               ref.build = build)
+        tryCatch(
+            {
+                result <- nbImport(
+                    cnv = data$cnv, snv = data$snv,
+                    purity = 1.0, ploidy = 2.51,
+                    ref.build = build
+                )
 
-            expect_true(is.data.table(result),
-                        info = paste("nbImport should work with ref.build =", build))
-        }, error = function(e) {
-            # Expected errors: coordinate mismatch or missing BSgenome packages
-            if (grepl("allow.nonnarrowing|refwidth|Please install BSgenome", e$message)) {
-                expect_true(TRUE, info = paste("Test skipped for ref.build =", build, " (expected)"))
-            } else {
-                expect_true(FALSE, info = paste("Unexpected error for ref.build =", build, ":", e$message))
+                expect_true(is.data.table(result),
+                    info = paste("nbImport should work with ref.build =", build)
+                )
+            },
+            error = function(e) {
+                # Expected errors: coordinate mismatch or missing BSgenome packages
+                if (grepl("allow.nonnarrowing|refwidth|Please install BSgenome", e$message)) {
+                    expect_true(TRUE, info = paste("Test skipped for ref.build =", build, " (expected)"))
+                } else {
+                    expect_true(FALSE, info = paste("Unexpected error for ref.build =", build, ":", e$message))
+                }
             }
-        })
+        )
     }
 }
 
@@ -116,18 +135,23 @@ test_nbImport_valid_ref_build_values <- function() {
 test_nbImport_invalid_assign_method <- function() {
     data <- load_test_data("NBE15")
     sig_file <- system.file("extdata",
-                            "NBE15_Decomposed_MutationType_Probabilities.txt",
-                            package = "LACHESIS")
+        "NBE15_Decomposed_MutationType_Probabilities.txt",
+        package = "LACHESIS"
+    )
 
     invalid_methods <- c("maximum", "sampling", "average", "random", "")
 
     for (method in invalid_methods) {
-        expect_error(nbImport(cnv = data$cnv, snv = data$snv,
-                              purity = 1.0, ploidy = 2.51,
-                              sig.assign = TRUE, ID = "NBE15",
-                              sig.file = sig_file,
-                              assign.method = method),
-                     info = paste("Invalid assign.method =", method, "should raise error"))
+        expect_error(
+            nbImport(
+                cnv = data$cnv, snv = data$snv,
+                purity = 1.0, ploidy = 2.51,
+                sig.assign = TRUE, ID = "NBE15",
+                sig.file = sig_file,
+                assign.method = method
+            ),
+            info = paste("Invalid assign.method =", method, "should raise error")
+        )
     }
 }
 
@@ -135,20 +159,24 @@ test_nbImport_invalid_assign_method <- function() {
 test_nbImport_valid_assign_method <- function() {
     data <- load_test_data("NBE15")
     sig_file <- system.file("extdata",
-                            "NBE15_Decomposed_MutationType_Probabilities.txt",
-                            package = "LACHESIS")
+        "NBE15_Decomposed_MutationType_Probabilities.txt",
+        package = "LACHESIS"
+    )
 
     valid_methods <- c("max", "sample")
 
     for (method in valid_methods) {
-        result <- nbImport(cnv = data$cnv, snv = data$snv,
-                           purity = 1.0, ploidy = 2.51,
-                           sig.assign = TRUE, ID = "NBE15",
-                           sig.file = sig_file,
-                           assign.method = method)
+        result <- nbImport(
+            cnv = data$cnv, snv = data$snv,
+            purity = 1.0, ploidy = 2.51,
+            sig.assign = TRUE, ID = "NBE15",
+            sig.file = sig_file,
+            assign.method = method
+        )
 
         expect_true(is.data.table(result),
-                    info = paste("nbImport should work with assign.method =", method))
+            info = paste("nbImport should work with assign.method =", method)
+        )
     }
 }
 
@@ -159,8 +187,10 @@ test_nbImport_valid_assign_method <- function() {
 # Test 7: plotNB - Invalid ref.build
 test_plotNB_invalid_ref_build <- function() {
     data <- load_test_data("NBE15")
-    nb <- nbImport(cnv = data$cnv, snv = data$snv,
-                   purity = 1.0, ploidy = 2.51)
+    nb <- nbImport(
+        cnv = data$cnv, snv = data$snv,
+        purity = 1.0, ploidy = 2.51
+    )
 
     # Create minimal snvClonality object (required for plotNB)
     # Using a dummy object for testing parameter validation
@@ -168,16 +198,22 @@ test_plotNB_invalid_ref_build <- function() {
         chrom = 1, snv_start = 1000, Clonality = "C", t_vaf = 0.3
     )
 
-    expect_error(plotNB(nb = nb, snvClonality = snvClonality,
-                        ref.build = "hg99"),
-                 info = "Invalid ref.build should raise error in plotNB")
+    expect_error(
+        plotNB(
+            nb = nb, snvClonality = snvClonality,
+            ref.build = "hg99"
+        ),
+        info = "Invalid ref.build should raise error in plotNB"
+    )
 }
 
 # Test 8: plotNB - Valid ref.build values
 test_plotNB_valid_ref_build <- function() {
     data <- load_test_data("NBE15")
-    nb <- nbImport(cnv = data$cnv, snv = data$snv,
-                   purity = 1.0, ploidy = 2.51)
+    nb <- nbImport(
+        cnv = data$cnv, snv = data$snv,
+        purity = 1.0, ploidy = 2.51
+    )
 
     # Create dummy snvClonality
     snvClonality <- data.table::data.table(
@@ -188,17 +224,23 @@ test_plotNB_valid_ref_build <- function() {
 
     for (build in valid_builds) {
         # This may fail for other reasons (missing data), but parameter validation should pass
-        tryCatch({
-            plotNB(nb = nb, snvClonality = snvClonality,
-                   ref.build = build)
-        }, error = function(e) {
-            # Expected - just testing parameter validation, not full functionality
-            return(TRUE)
-        })
+        tryCatch(
+            {
+                plotNB(
+                    nb = nb, snvClonality = snvClonality,
+                    ref.build = build
+                )
+            },
+            error = function(e) {
+                # Expected - just testing parameter validation, not full functionality
+                return(TRUE)
+            }
+        )
 
         # If it doesn't error on ref.build, that's good
         expect_true(TRUE,
-                    info = paste("plotNB should validate ref.build =", build))
+            info = paste("plotNB should validate ref.build =", build)
+        )
     }
 }
 
@@ -211,30 +253,42 @@ test_error_message_includes_valid_choices <- function() {
     data <- load_test_data("NBE15")
 
     # Test that error message mentions valid choices for ref.build
-    tryCatch({
-        nbImport(cnv = data$cnv, snv = data$snv,
-                 purity = 1.0, ploidy = 2.51,
-                 ref.build = "invalid")
-    }, error = function(e) {
-        msg <- as.character(e)
-        expect_true(grepl("hg19|hg18|hg38", msg),
-                    info = "Error message should mention valid choices")
-    })
+    tryCatch(
+        {
+            nbImport(
+                cnv = data$cnv, snv = data$snv,
+                purity = 1.0, ploidy = 2.51,
+                ref.build = "invalid"
+            )
+        },
+        error = function(e) {
+            msg <- as.character(e)
+            expect_true(grepl("hg19|hg18|hg38", msg),
+                info = "Error message should mention valid choices"
+            )
+        }
+    )
 }
 
 # Test 10: Error message includes invalid value
 test_error_message_includes_invalid_value <- function() {
     data <- load_test_data("NBE15")
 
-    tryCatch({
-        nbImport(cnv = data$cnv, snv = data$snv,
-                 purity = 1.0, ploidy = 2.51,
-                 assign.method = "bad_method")
-    }, error = function(e) {
-        msg <- as.character(e)
-        expect_true(grepl("bad_method|assign.method|invalid", msg, ignore.case = TRUE),
-                    info = "Error message should reference the invalid value")
-    })
+    tryCatch(
+        {
+            nbImport(
+                cnv = data$cnv, snv = data$snv,
+                purity = 1.0, ploidy = 2.51,
+                assign.method = "bad_method"
+            )
+        },
+        error = function(e) {
+            msg <- as.character(e)
+            expect_true(grepl("bad_method|assign.method|invalid", msg, ignore.case = TRUE),
+                info = "Error message should reference the invalid value"
+            )
+        }
+    )
 }
 
 # ============================================================================
@@ -245,44 +299,56 @@ test_error_message_includes_invalid_value <- function() {
 test_parameter_combination_ref_and_method <- function() {
     data <- load_test_data("NBE15")
     sig_file <- system.file("extdata",
-                            "NBE15_Decomposed_MutationType_Probabilities.txt",
-                            package = "LACHESIS")
+        "NBE15_Decomposed_MutationType_Probabilities.txt",
+        package = "LACHESIS"
+    )
 
     # Valid combination (may fail with coordinate mismatches for certain ref.builds)
-    tryCatch({
-        result <- nbImport(cnv = data$cnv, snv = data$snv,
-                           purity = 1.0, ploidy = 2.51,
-                           sig.assign = TRUE, ID = "NBE15",
-                           sig.file = sig_file,
-                           ref.build = "hg38",
-                           assign.method = "max")
+    tryCatch(
+        {
+            result <- nbImport(
+                cnv = data$cnv, snv = data$snv,
+                purity = 1.0, ploidy = 2.51,
+                sig.assign = TRUE, ID = "NBE15",
+                sig.file = sig_file,
+                ref.build = "hg38",
+                assign.method = "max"
+            )
 
-        expect_true(is.data.table(result),
-                    info = "Should work with valid combinations of parameters")
-    }, error = function(e) {
-        # Expected errors: coordinate mismatches or missing BSgenome packages
-        if (grepl("allow.nonnarrowing|refwidth|Please install BSgenome", e$message)) {
-            expect_true(TRUE, info = "Parameter combination test (skipped due to resource/coordinate issue)")
-        } else {
-            expect_true(FALSE, info = paste("Unexpected error:", e$message))
+            expect_true(is.data.table(result),
+                info = "Should work with valid combinations of parameters"
+            )
+        },
+        error = function(e) {
+            # Expected errors: coordinate mismatches or missing BSgenome packages
+            if (grepl("allow.nonnarrowing|refwidth|Please install BSgenome", e$message)) {
+                expect_true(TRUE, info = "Parameter combination test (skipped due to resource/coordinate issue)")
+            } else {
+                expect_true(FALSE, info = paste("Unexpected error:", e$message))
+            }
         }
-    })
+    )
 }
 
 # Test 12: sig.assign TRUE requires proper method
 test_sig_assign_true_requires_method <- function() {
     data <- load_test_data("NBE15")
     sig_file <- system.file("extdata",
-                            "NBE15_Decomposed_MutationType_Probabilities.txt",
-                            package = "LACHESIS")
+        "NBE15_Decomposed_MutationType_Probabilities.txt",
+        package = "LACHESIS"
+    )
 
     # Should fail with invalid method
-    expect_error(nbImport(cnv = data$cnv, snv = data$snv,
-                          purity = 1.0, ploidy = 2.51,
-                          sig.assign = TRUE, ID = "NBE15",
-                          sig.file = sig_file,
-                          assign.method = "invalid"),
-                 info = "sig.assign = TRUE with invalid method should error")
+    expect_error(
+        nbImport(
+            cnv = data$cnv, snv = data$snv,
+            purity = 1.0, ploidy = 2.51,
+            sig.assign = TRUE, ID = "NBE15",
+            sig.file = sig_file,
+            assign.method = "invalid"
+        ),
+        info = "sig.assign = TRUE with invalid method should error"
+    )
 }
 
 # ============================================================================
@@ -294,36 +360,48 @@ test_no_partial_matching_ref_build <- function() {
     data <- load_test_data("NBE15")
 
     # "hg1" is a partial match for "hg19", should not work
-    expect_error(nbImport(cnv = data$cnv, snv = data$snv,
-                          purity = 1.0, ploidy = 2.51,
-                          ref.build = "hg1"),
-                 info = "Partial matching should not be allowed for ref.build")
+    expect_error(
+        nbImport(
+            cnv = data$cnv, snv = data$snv,
+            purity = 1.0, ploidy = 2.51,
+            ref.build = "hg1"
+        ),
+        info = "Partial matching should not be allowed for ref.build"
+    )
 }
 
 # Test 14: Partial matching handling for assign.method
 test_no_partial_matching_assign_method <- function() {
     data <- load_test_data("NBE15")
     sig_file <- system.file("extdata",
-                            "NBE15_Decomposed_MutationType_Probabilities.txt",
-                            package = "LACHESIS")
+        "NBE15_Decomposed_MutationType_Probabilities.txt",
+        package = "LACHESIS"
+    )
 
     # "m" is a partial match for "max"
     # Function may either: (a) allow partial matching, or (b) raise an error
     # We test that the function handles it in one of these ways
-    tryCatch({
-        result <- nbImport(cnv = data$cnv, snv = data$snv,
-                           purity = 1.0, ploidy = 2.51,
-                           sig.assign = TRUE, ID = "NBE15",
-                           sig.file = sig_file,
-                           assign.method = "m")
-        # If it doesn't error, that's OK - function accepts partial matching
-        expect_true(is.data.table(result),
-                    info = "Function allows partial matching for assign.method")
-    }, error = function(e) {
-        # If it does error, that's also OK - function enforces exact matching
-        expect_true(grepl("assign.method|invalid|match", e$message, ignore.case = TRUE),
-                    info = "Function raises error for partial assign.method match")
-    })
+    tryCatch(
+        {
+            result <- nbImport(
+                cnv = data$cnv, snv = data$snv,
+                purity = 1.0, ploidy = 2.51,
+                sig.assign = TRUE, ID = "NBE15",
+                sig.file = sig_file,
+                assign.method = "m"
+            )
+            # If it doesn't error, that's OK - function accepts partial matching
+            expect_true(is.data.table(result),
+                info = "Function allows partial matching for assign.method"
+            )
+        },
+        error = function(e) {
+            # If it does error, that's also OK - function enforces exact matching
+            expect_true(grepl("assign.method|invalid|match", e$message, ignore.case = TRUE),
+                info = "Function raises error for partial assign.method match"
+            )
+        }
+    )
 }
 
 # ============================================================================
@@ -335,15 +413,23 @@ test_case_sensitivity <- function() {
     data <- load_test_data("NBE15")
 
     # match.arg is case-sensitive
-    expect_error(nbImport(cnv = data$cnv, snv = data$snv,
-                          purity = 1.0, ploidy = 2.51,
-                          ref.build = "HG19"),  # Wrong case
-                 info = "Parameters should be case-sensitive")
+    expect_error(
+        nbImport(
+            cnv = data$cnv, snv = data$snv,
+            purity = 1.0, ploidy = 2.51,
+            ref.build = "HG19"
+        ), # Wrong case
+        info = "Parameters should be case-sensitive"
+    )
 
-    expect_error(nbImport(cnv = data$cnv, snv = data$snv,
-                          purity = 1.0, ploidy = 2.51,
-                          ref.build = "Hg19"),  # Wrong case
-                 info = "Parameters should be case-sensitive")
+    expect_error(
+        nbImport(
+            cnv = data$cnv, snv = data$snv,
+            purity = 1.0, ploidy = 2.51,
+            ref.build = "Hg19"
+        ), # Wrong case
+        info = "Parameters should be case-sensitive"
+    )
 }
 
 # Run all tests in this file

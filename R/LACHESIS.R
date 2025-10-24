@@ -206,8 +206,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
     }
 
     ref.build <- match.arg(
-      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
-      several.ok = FALSE
+        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        several.ok = FALSE
     )
 
     incl.chr <- setdiff(seq_len(22), excl.chr)
@@ -343,9 +343,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 stop("Please provide vcf source.")
             }
             vcf.source <- match.arg(
-              arg = x$vcf.source, choices = c("strelka", "mutect",
-                                              "sentieon", "dkfz"),
-              several.ok = FALSE
+                arg = x$vcf.source, choices = c(
+                    "strelka", "mutect",
+                    "sentieon", "dkfz"
+                ),
+                several.ok = FALSE
             )
             if (is.null(x$vcf.tumor.ids)) {
                 x$vcf.tumor.ids <- x$ID
@@ -634,10 +636,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 next
             }
             vcf.source[i] <- match.arg(
-                arg = vcf.source[i], choices = c("strelka", "mutect",
-                                                 "sentieon", "dkfz"),
+                arg = vcf.source[i], choices = c(
+                    "strelka", "mutect",
+                    "sentieon", "dkfz"
+                ),
                 several.ok = FALSE
-              )
+            )
 
             cnv <- readCNV(
                 cn.info = cnv.files[[i]], chr.col = cnv.chr.col[i],
@@ -1426,8 +1430,10 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
-#' plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS",
-#'     mrca.cutpoint = 0.05)
+#' plotSurvival(lachesis,
+#'     surv.time = "EFS.time", surv.event = "EFS",
+#'     mrca.cutpoint = 0.05
+#' )
 #'
 #' @export
 #' @import ggplot2

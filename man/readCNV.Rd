@@ -77,8 +77,9 @@ ascat_cn <- system.file("extdata",
 )
 cn_data <- readCNV(ascat_cn)
 purple_cn <- system.file("extdata",
-  "PURPLE/NB-S-599-T.purple.cnv.somatic.tsv",
-  package = "LACHESIS")
+    "PURPLE/NB-S-599-T.purple.cnv.somatic.tsv",
+    package = "LACHESIS"
+)
 cn_data <- LACHESIS::readCNV(purple_cn)
 }
 \author{

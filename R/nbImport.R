@@ -92,13 +92,13 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     }
 
     ref.build <- match.arg(
-      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
-      several.ok = FALSE
+        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        several.ok = FALSE
     )
 
     assign.method <- match.arg(
-      arg = assign.method, choices = c("max", "sample"),
-      several.ok = FALSE
+        arg = assign.method, choices = c("max", "sample"),
+        several.ok = FALSE
     )
 
     colnames(cnv)[c(1, 2, 3)] <- c("chrom", "start", "end")
@@ -155,22 +155,27 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     }
 
     if (is.null(sig.file)) {
-      if (is.null(cosmic.version)) {
-        cosmic.version <- "COSMIC_v3.2"
-      }else{
-        cosmic.version <- match.arg(cosmic.version,
-                                    choices = c("COSMIC", "COSMIC_v3.1",
-                                                "COSMIC_v3.2"),
-                                    several.ok = FALSE)
-      }
+        if (is.null(cosmic.version)) {
+            cosmic.version <- "COSMIC_v3.2"
+        } else {
+            cosmic.version <- match.arg(cosmic.version,
+                choices = c(
+                    "COSMIC", "COSMIC_v3.1",
+                    "COSMIC_v3.2"
+                ),
+                several.ok = FALSE
+            )
+        }
 
-      warning(sprintf("'SigAssignment' input data not provided. Signatures will
+        warning(sprintf(
+            "'SigAssignment' input data not provided. Signatures will
       be assigned using `MutationalPatterns` and signature version %s",
-                      cosmic.version))
+            cosmic.version
+        ))
 
-      sig.data <- .compute_sig_probs(sv, ref.build, cosmic.version, ID)
-    }else{
-      sig.data <- data.table::fread(sig.file)
+        sig.data <- .compute_sig_probs(sv, ref.build, cosmic.version, ID)
+    } else {
+        sig.data <- data.table::fread(sig.file)
     }
 
     data.table::setnames(sig.data, c("Sample Names"), c("Sample"))
@@ -178,13 +183,13 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     sbs.cols <- grep("^SBS", names(sig.data), value = TRUE)
 
     if (!"sequence_context" %in% colnames(sv)) {
-      genome_pkg <- paste0("BSgenome.Hsapiens.UCSC.", ref.build)
+        genome_pkg <- paste0("BSgenome.Hsapiens.UCSC.", ref.build)
 
-      if(!requireNamespace(genome_pkg, quietly = TRUE)) {
-        stop("Please install ", genome_pkg, ".")
-      }
+        if (!requireNamespace(genome_pkg, quietly = TRUE)) {
+            stop("Please install ", genome_pkg, ".")
+        }
 
-      genome <- getNamespace(genome_pkg)[[genome_pkg]]
+        genome <- getNamespace(genome_pkg)[[genome_pkg]]
 
         # Mapping purine bases to reverse strand ("-")
         sv[, strand := ifelse(ref %in% c("A", "G"), "-", "+")]
@@ -295,52 +300,58 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     }
 }
 
-.compute_sig_probs <- function(sv, ref.build, cosmic.version, ID){
-  if(!requireNamespace("MutationalPatterns",
-                       quietly = TRUE))
-    stop("Please install MutationalPatterns.")
-  # convert genome naming to MutationalPatterns; this is not supported for hg18.
-  tryCatch(
-    match.arg(ref.build,  c("hg19", "hg38"), several.ok = FALSE),
-    error = function(e) {
-      stop("Invalid value for `ref.build`. Mutational signature assignment can
+.compute_sig_probs <- function(sv, ref.build, cosmic.version, ID) {
+    if (!requireNamespace("MutationalPatterns",
+        quietly = TRUE
+    )) {
+        stop("Please install MutationalPatterns.")
+    }
+    # convert genome naming to MutationalPatterns; this is not supported for hg18.
+    tryCatch(
+        match.arg(ref.build, c("hg19", "hg38"), several.ok = FALSE),
+        error = function(e) {
+            stop("Invalid value for `ref.build`. Mutational signature assignment can
                    only be performed for hg19 and hg38", call. = FALSE)
-    })
-  genome <- ifelse(ref.build == "hg19", "GRCh37", "GRCh38")
-  # get the reference sigs
-  signatures <- MutationalPatterns::get_known_signatures(
-    source = cosmic.version, genome = genome)
-  # convert sv to granges object for input to mut_matrix
-  sv.granges <- GenomicRanges::GRanges(
-    seqnames = paste("chr", sv$chrom, sep = ""),
-    ranges = IRanges::IRanges(start = sv$i.start, end = sv$i.end),
-    strand = "*",
-    ref = sv$ref,
-    alt = sv$alt
-  )
-  GenomeInfoDb::genome(sv.granges) <- ref.build
+        }
+    )
+    genome <- ifelse(ref.build == "hg19", "GRCh37", "GRCh38")
+    # get the reference sigs
+    signatures <- MutationalPatterns::get_known_signatures(
+        source = cosmic.version, genome = genome
+    )
+    # convert sv to granges object for input to mut_matrix
+    sv.granges <- GenomicRanges::GRanges(
+        seqnames = paste("chr", sv$chrom, sep = ""),
+        ranges = IRanges::IRanges(start = sv$i.start, end = sv$i.end),
+        strand = "*",
+        ref = sv$ref,
+        alt = sv$alt
+    )
+    GenomeInfoDb::genome(sv.granges) <- ref.build
 
-  genome_pkg <- paste0("BSgenome.Hsapiens.UCSC.", ref.build)
+    genome_pkg <- paste0("BSgenome.Hsapiens.UCSC.", ref.build)
 
-  if(!requireNamespace(genome_pkg, quietly = TRUE)) {
-     stop("Please install ", genome_pkg, ".")
+    if (!requireNamespace(genome_pkg, quietly = TRUE)) {
+        stop("Please install ", genome_pkg, ".")
     }
 
-  bs.genome <- getNamespace(genome_pkg)[[genome_pkg]]
+    bs.genome <- getNamespace(genome_pkg)[[genome_pkg]]
 
-  # get the trinucleotide context
-  mut.mat <- MutationalPatterns::mut_matrix(sv.granges, bs.genome)
-  # perform the fitting
-  fit <- MutationalPatterns::fit_to_signatures(mut.mat, signatures)
-  # now compute the probability for each SBS to generate the substitution
-  contr.per.sig <- t(t(signatures) *
-    fit$contribution[,1] / sum(fit$contribution[,1]))
-  rel.contr.per.sig <- contr.per.sig/rowSums(contr.per.sig)
+    # get the trinucleotide context
+    mut.mat <- MutationalPatterns::mut_matrix(sv.granges, bs.genome)
+    # perform the fitting
+    fit <- MutationalPatterns::fit_to_signatures(mut.mat, signatures)
+    # now compute the probability for each SBS to generate the substitution
+    contr.per.sig <- t(t(signatures) *
+        fit$contribution[, 1] / sum(fit$contribution[, 1]))
+    rel.contr.per.sig <- contr.per.sig / rowSums(contr.per.sig)
 
-  sig.data <- data.table::data.table(`Sample Names` = ID,
-                                     MutationType = rownames(mut.mat),
-                                     rel.contr.per.sig)
-  return(sig.data)
+    sig.data <- data.table::data.table(
+        `Sample Names` = ID,
+        MutationType = rownames(mut.mat),
+        rel.contr.per.sig
+    )
+    return(sig.data)
 }
 
 #' Plot VAF distribution per copy number
@@ -452,8 +463,8 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
     }
 
     ref.build <- match.arg(
-      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
-      several.ok = FALSE
+        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        several.ok = FALSE
     )
     sig.colors <- attr(nb, "sig.colors")
     purity <- attr(nb, "purity")
@@ -793,7 +804,6 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
 .expectedClVAF <- function(CN, purity) {
     seq_len(CN) * purity / (purity * CN + 2 * (1 - purity))
 }
-
 
 
 # Plot shared legend, taken from

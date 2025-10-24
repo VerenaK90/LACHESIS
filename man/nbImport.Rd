@@ -38,7 +38,6 @@ signature probabilities.}
 
 \item{ID}{sample name.}
 
-
 \item{sig.file}{The path to the output file from \code{SigProfilerAssignment},
 typically named "Decomposed_MutationType_Probabilities.txt". If \code{NULL} and
 \code{sig.assign = TRUE}, signatures will be assigned using functions from

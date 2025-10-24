@@ -75,8 +75,8 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
     }
 
     ref.build <- match.arg(
-      arg = ref.build, choices = c("hg19", "hg18", "hg38"),
-      several.ok = FALSE
+        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        several.ok = FALSE
     )
 
     # Add centromere position to mrcaObj
