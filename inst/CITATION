@@ -1,4 +1,4 @@
-citHeader("To cite package ‘LACHESIS’ in publications:")
+citHeader("To cite package 'LACHESIS' in publications:")
 
 citEntry(
   entry  = "Article",
