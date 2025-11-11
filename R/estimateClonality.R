@@ -64,6 +64,11 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
         stop("Please specify tumor purity.")
     }
 
+    ref.build <- match.arg(
+        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        several.ok = FALSE
+    )
+
     snvClonality <- merge(nbObj, mrcaObj[, .(
         chrom, TCN, A, B, p_sc, p_lc, p_ec,
         p_c, A_time, B_time
@@ -80,7 +85,7 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
         if (is.na(CN) || is.na(VAF) || CN == 0 || depth == 0) {
             "n.d."
         } else {
-            expectedVAFs <- .expectedClVAF(CN, purity)
+            expectedVAFs <- .expectedClVAFAB(A, B, purity)
 
             expected_SC <- expectedVAFs[1] * 0.5
             expected_C <- expectedVAFs[1]
@@ -155,8 +160,8 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
     return(snvClonality)
 }
 
-.expectedClVAF <- function(CN, purity) {
-    seq_len(CN) * purity / (purity * CN + 2 * (1 - purity))
+.expectedClVAFAB <- function(A, B, purity) {
+    unique(c(1, B, A) * purity / (purity * (A + B) + 2 * (1 - purity)))
 }
 
 #' Plotting assigned clonality status for every SNV by chromosome

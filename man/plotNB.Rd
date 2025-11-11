@@ -92,7 +92,7 @@ snvClonality <- estimateClonality(
 )
 plotNB(nb = nb, snvClonality = snvClonality)
 
-# Example using variants assosciated with specific SBS mutational
+# Example using variants associated with specific SBS mutational
 # signatures from vcf file
 snvs <- system.file("extdata", "NBE15",
     "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf",

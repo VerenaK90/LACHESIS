@@ -15,7 +15,9 @@ nbImport(
   sig.file = NULL,
   sig.select = NULL,
   min.p = NULL,
-  ref.build = "hg19"
+  ref.build = "hg19",
+  cosmic.version = "COSMIC_v3.2",
+  ...
 )
 }
 \arguments{
@@ -30,14 +32,16 @@ nbImport(
 \item{sig.assign}{Logical. If TRUE, each variant will be assigned to a
 mutational signature.}
 
-\item{assign.method}{Method to assign signatures: "max" to assign the
-signature with the highest probability, "sample" to randomly assign based on
+\item{assign.method}{Method to assign signatures: \code{max} to assign the
+signature with the highest probability, \code{sample} to randomly assign based on
 signature probabilities.}
 
 \item{ID}{sample name.}
 
-\item{sig.file}{File path to the SigAssignment output file, typically named
-"Decomposed_MutationType_Probabilities.txt".}
+\item{sig.file}{The path to the output file from \code{SigProfilerAssignment},
+typically named "Decomposed_MutationType_Probabilities.txt". If \code{NULL} and
+\code{sig.assign = TRUE}, signatures will be assigned using functions from
+\code{MutationalPatterns}.}
 
 \item{sig.select}{A character vector of specific signatures to include in
 the analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like
@@ -49,6 +53,12 @@ specific signature.}
 
 \item{ref.build}{Reference genome. Default \code{hg19}.
 Can be \code{hg18}, \code{hg19} or \code{hg38}.}
+
+\item{cosmic.version}{COSMIC mutational signature reference.
+Can be "COSMIC", "COSMIC_v3.1", "COSMIC_v3.2"}
+
+\item{...}{further arguments and parameters passed to other
+LACHESIS functions.}
 }
 \value{
 a data.table
@@ -91,6 +101,11 @@ nb <- nbImport(
     cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
     sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath,
     sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18")
+)
+nb.2 <- nbImport(
+    cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51,
+    sig.assign = TRUE, ID = "NBE15",
+    sig.select = c("SBS1", "SBS5", "SBS40", "SBS18")
 )
 }
 \seealso{

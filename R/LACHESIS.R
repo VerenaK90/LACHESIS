@@ -19,7 +19,7 @@
 #' @param snv.files vector of snv files in same order as ids; should be in vcf
 #' format, will be ignored if `input.files` is specified.
 #' @param vcf.source Tool used for generating VCF file. Can be `strelka` or
-#' `mutect` or `dkfz`.
+#' `mutect` or `dkfz` or `sentieon`.
 #' @param purity vector tumor cell content in same order as ids; will be ignored
 #'  if `input.files` is specified.
 #' @param ploidy average copy number in the tumor sample in same order as ids;
@@ -72,8 +72,10 @@
 #' @param assign.method Method to assign signatures: "max" to assign the
 #' signature with the highest probability, "sample" to randomly assign based on
 #' signature probabilities.
-#' @param sig.file File path to the SigAssignment output file, typically named
-#' "Decomposed_MutationType_Probabilities.txt".
+#' @param sig.file The path to the output file from `SigProfilerAssignment`,
+#' typically named "Decomposed_MutationType_Probabilities.txt". If `NULL` and
+#' `sig.assign = TRUE`, signatures will be assigned using functions from
+#' `MutationalPatterns`.
 #' @param sig.select A character vector of specific signatures to include in the
 #'  analysis (e.g., c("SBS1", "SBS5", "SBS40") to focus on clock-like mutational
 #'   processes).
@@ -97,12 +99,12 @@
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file
@@ -202,6 +204,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             }
         }
     }
+
+    ref.build <- match.arg(
+        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        several.ok = FALSE
+    )
 
     incl.chr <- setdiff(seq_len(22), excl.chr)
     if (!ignore.XY) {
@@ -310,7 +317,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         if (any(is.na(sample.specs[, snv.file]))) {
             tmp1 <- toString(sample.specs[, ID[which(is.na(snv.file))]])
             warning(sprintf(
-                "No SNV file provided for sample(s) %s; sample(s) will be excluded",
+                "No SNV file provided for sample(s) %s; will be excluded",
                 tmp1
             ))
             rm(tmp1)
@@ -335,6 +342,13 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (is.null(x$vcf.source)) {
                 stop("Please provide vcf source.")
             }
+            vcf.source <- match.arg(
+                arg = x$vcf.source, choices = c(
+                    "strelka", "mutect",
+                    "sentieon", "dkfz"
+                ),
+                several.ok = FALSE
+            )
             if (is.null(x$vcf.tumor.ids)) {
                 x$vcf.tumor.ids <- x$ID
             } else if (any(is.na(x$vcf.tumor.ids))) {
@@ -371,15 +385,16 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             snv <- readVCF(
                 vcf = x$snv.file, vcf.source = x$vcf.source,
                 t.sample = x$vcf.tumor.id, min.depth = min.depth,
-                min.vaf = min.vaf, info.af = vcf.info.af, ignore.XY = ignore.XY,
-                info.dp = vcf.info.dp, filter.value = filter.value, ...
+                min.vaf = min.vaf, info.af = vcf.info.af,
+                ignore.XY = ignore.XY, info.dp = vcf.info.dp,
+                filter.value = filter.value, ...
             )
 
             nb <- nbImport(
                 cnv = cnv, snv = snv, purity = x$purity, ploidy = x$ploidy,
                 sig.assign = sig.assign, assign.method = assign.method,
                 ID = x$ID, sig.file = sig.file, sig.select = sig.select,
-                min.p = min.p, ref.build = ref.build
+                min.p = min.p, ref.build = ref.build, ...
             )
 
             if (nrow(nb) == 0) {
@@ -614,12 +629,19 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (is.na(snv.files)[i]) {
                 tmp1 <- ids[1]
                 warning(sprintf(
-                    "No SNV file provided for sample %s; sample will be excluded",
+                    "No SNV file provided for sample %s; will be excluded",
                     tmp1
                 ))
                 rm(tmp1)
                 next
             }
+            vcf.source[i] <- match.arg(
+                arg = vcf.source[i], choices = c(
+                    "strelka", "mutect",
+                    "sentieon", "dkfz"
+                ),
+                several.ok = FALSE
+            )
 
             cnv <- readCNV(
                 cn.info = cnv.files[[i]], chr.col = cnv.chr.col[i],
@@ -641,7 +663,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                 cnv = cnv, snv = snv, purity = purity[i], ploidy = ploidy[i],
                 sig.assign = sig.assign, assign.method = assign.method,
                 ID = ids[i], sig.file = sig.file, sig.select = sig.select,
-                min.p = min.p, ref.build = ref.build
+                min.p = min.p, ref.build = ref.build, ...
             )
 
             if (nrow(nb) == 0) {
@@ -907,12 +929,12 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file
@@ -943,7 +965,8 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     }
     if (nrow(lachesis) == 1) {
         warning(
-            "Cannot produce summary statistics for a single case. Returning null."
+            "Cannot produce summary statistics for a single case.
+            Returning null."
         )
         return()
     }
@@ -1226,12 +1249,12 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file
@@ -1387,12 +1410,12 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file
@@ -1407,7 +1430,10 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
-#' plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS")
+#' plotSurvival(lachesis,
+#'     surv.time = "EFS.time", surv.event = "EFS",
+#'     mrca.cutpoint = 0.05
+#' )
 #'
 #' @export
 #' @import ggplot2
@@ -1638,12 +1664,12 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 #' nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
-#' nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+#' nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
 #'     full.names = TRUE
 #' )
 #'
-#' cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-#' snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+#' cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+#' snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 #'
 #' input.files$cnv.file <- cnv.file
 #' input.files$snv.file <- snv.file

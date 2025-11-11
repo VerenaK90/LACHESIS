@@ -68,7 +68,7 @@ tab-delimited format, will be ignored if \code{input.files} is specified.}
 format, will be ignored if \code{input.files} is specified.}
 
 \item{vcf.source}{Tool used for generating VCF file. Can be \code{strelka} or
-\code{mutect} or \code{dkfz}.}
+\code{mutect} or \code{dkfz} or \code{sentieon}.}
 
 \item{purity}{vector tumor cell content in same order as ids; will be ignored
 if \code{input.files} is specified.}
@@ -148,8 +148,10 @@ filtering, defaults to PASS.}
 \item{sig.assign}{Logical. If TRUE, each variant will be assigned to the most
 likely mutational signature.}
 
-\item{sig.file}{File path to the SigAssignment output file, typically named
-"Decomposed_MutationType_Probabilities.txt".}
+\item{sig.file}{The path to the output file from \code{SigProfilerAssignment},
+typically named "Decomposed_MutationType_Probabilities.txt". If \code{NULL} and
+\code{sig.assign = TRUE}, signatures will be assigned using functions from
+\code{MutationalPatterns}.}
 
 \item{assign.method}{Method to assign signatures: "max" to assign the
 signature with the highest probability, "sample" to randomly assign based on
@@ -192,12 +194,12 @@ nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"),
 nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"),
     full.names = TRUE
 )
-nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"),
+nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"),
     full.names = TRUE
 )
 
-cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 
 input.files$cnv.file <- cnv.file
 input.files$snv.file <- snv.file

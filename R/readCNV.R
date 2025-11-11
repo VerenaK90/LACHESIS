@@ -42,6 +42,11 @@
 #'     package = "LACHESIS"
 #' )
 #' cn_data <- readCNV(ascat_cn)
+#' purple_cn <- system.file("extdata",
+#'     "PURPLE/NB-S-599-T.purple.cnv.somatic.tsv",
+#'     package = "LACHESIS"
+#' )
+#' cn_data <- LACHESIS::readCNV(purple_cn)
 #' @return A standardized data frame with copy number information per segment.
 #' readCNV()
 #' @import data.table

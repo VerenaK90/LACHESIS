@@ -6,7 +6,7 @@ abstract: >
   LACHESIS package version: `r packageVersion("LACHESIS")`
 
 output:
-  rmarkdown::html_document:
+  BiocStyle::html_document:
     highlight: pygments
     toc: true
     toc_float:
@@ -14,7 +14,6 @@ output:
     toc_depth: 3
     number_sections: false
     fig_width: 5
-bibliography: library.bib
 vignette: >
     %\VignetteIndexEntry{LACHESIS - Real-time inference of evolutionary dynamics during tumor initiation based on whole genome sequencing data}
     %\VignetteEngine{knitr::rmarkdown}
@@ -33,7 +32,7 @@ knitr::opts_chunk$set(
 
 # Installation
 
-To install this package, start R (version "4.5") and enter:
+To install this package, start R and enter:
 
 ```{r install, eval=FALSE}
 if (!require("BiocManager", quietly = TRUE)) {
@@ -97,7 +96,7 @@ Additionally, if the function was applied to a cohort, the following files will 
 
 There are two ways to perform analyses using LACHESIS: either by utilizing the sub-functions individually or by calling the wrapper function. All of the functions presented in the main workflow are also invoked by the wrapper function. In addition, the wrapper function summarizes results across samples, allowing cohort analysis to be performed.
 
-```{r structure, echo=FALSE, fig.show='hold', out.width="100%"}
+```{r structure, echo=FALSE, fig.show='hold', fig.wide = TRUE}
 knitr::include_graphics(system.file("extdata", "LACHESIS_package_structure.png", package = "LACHESIS"))
 ```
 
@@ -117,24 +116,6 @@ If total copy number information is available but the number of A and B alleles 
 
 ```{r readCNV_function, eval = FALSE}
 readCNV(cn.info = NULL, chr.col = NULL, start.col = NULL, end.col = NULL, A.col = NULL, B.col = NULL, tcn.col = NULL, merge.tolerance = 10^5, ignore.XY = TRUE, max.cn = 4, tumor.id = NULL)
-```
-
-```{r readCNV_input, echo=FALSE}
-library(knitr)
-
-readcnv_input <- data.frame(
-    Column1 = c("*cn.info*", "*x.col*", "*merge.tolerance*", "*ignore.XY*", "*max.cn*", "*tumor.id*"),
-    Column2 = c(
-        "file path to the copy number information.",
-        "column index or name of chromosome number (*chr.col*), first (*start.col*) and last (*end.col*) position of the segment, of A (*A.col*) and B (*B.col*) alleles, total copy number (*tcn.col*)",
-        "the maximum distance below which adjacent segments with equal copy number are merged",
-        "ignoring allosomes when set to TRUE, retaining all chromosomes when set to FALSE",
-        "the maximum copy number to be included in the analysis",
-        "the tumor ID"
-    )
-)
-
-knitr::kable(readcnv_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -175,6 +156,15 @@ cn_data <- LACHESIS::readCNV(ascat_cn)
 head(cn_data, n = 1)
 ```
 
+
+#### Example using output from PURPLE as copy number information
+
+```{r readCNV_example3, message=FALSE, warning=FALSE}
+purple_cn <- system.file("extdata", "PURPLE/NB-S-599-T.purple.cnv.somatic.tsv", package = "LACHESIS")
+cn_data <- LACHESIS::readCNV(purple_cn)
+head(cn_data, n = 1)
+```
+
 ### Importing Variant Information (readVCF)  
 
 The `readVCF` function is used to import a VCF file and extract key genomic information such as read counts and VAFs. Supported tools to generate the VCF file are [Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/360037593851-Mutect2), [Strelka2](https://github.com/Illumina/strelka?tab=readme-ov-file), [Sentieon](https://support.sentieon.com/manual/) and the [DKFZ SNV Calling Workflow](https://github.com/DKFZ-ODCF/SNVCallingWorkflow).
@@ -183,27 +173,6 @@ The `readVCF` function is used to import a VCF file and extract key genomic info
 
 ```{r readVCF_function, eval=FALSE}
 readVCF(vcf = NULL, ignore.XY = TRUE, vcf.source = "strelka", min.vaf = 0.01, min.depth = 30, t.sample = NULL, info.af = "AF", info.dp = "DP", filter.value = "PASS")
-```
-
-```{r readVCF_input, echo=FALSE}
-library(knitr)
-
-readvcf_input <- data.frame(
-    Column1 = c("*vcf*", "*ignore.XY*", "*vcf.source*", "*min.vaf*", "*min.depth*", "*t.sample*", "*info.af*", "*info.dp*", "filter.value"),
-    Column2 = c(
-        "file path to the variant information.",
-        "allosomes will be ignored when set to TRUE, all chromosomes will be retained when set to FALSE",
-        "tool used for generating vcf file: strelka, mutect, dkfz or sentieon",
-        "vaf threshold for removing variants",
-        "minimum required depth for a variant to be considered",
-        "vcf sample name for tumor",
-        "if *vcf.source = sentieon*: the string encoding the allele frequency field in the FORMAT column",
-        "if *vcf.source = sentieon*: the string encoding the read depth field in the FORMAT column",
-        "only use variants with specified FILTER column value, defaults to PASS"
-    )
-)
-
-knitr::kable(readvcf_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -255,7 +224,7 @@ head(d_data, n = 1)
 ```
 
 
-### Plotting Variant Allele Frequencies (PlotVAFdistr) 
+### Plotting Variant Allele Frequencies (plotVAFdistr) 
 
 The `plotVAFdistr` function generates a VAF histogram of somatic SNVs. If `showdensity` is set to `TRUE`, an additional density plot is displayed.
 
@@ -265,37 +234,18 @@ The `plotVAFdistr` function generates a VAF histogram of somatic SNVs. If `showd
 plotVAFdistr(vaf = NULL, vaf.interval = 0.05, t_sample = NULL, vaf.show.counts = FALSE, vaf.show.density = TRUE, vaf.col = "#34495e", vaf.border = "#bdc3c7", srtcounts = 45, output.file = NULL)
 ```
 
-```{r plotVAF_input, echo=FALSE}
-library(knitr)
-
-plotvaf_input <- data.frame(
-    Column1 = c("*vaf*", "*vaf.interval*", "*t_sample*", "*vaf.show.counts*", "*vaf.show.density*", "*vaf.col*", "*vaf.border*", "*srtcounts*", "*output.file*"),
-    Column2 = c(
-        "output from [readVCF](#output-1)",
-        "interval size [(hist() - breaks)](https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/hist)",
-        "tumor sample name",
-        "count per break on the histogram will be displayed when set to TRUE",
-        "additional density plot will be shown when set to TRUE",
-        "color to be used to fill the bars",
-        "border color",
-        "text angle if *showcounts = TRUE*",
-        "output filename"
-    )
-)
-
-knitr::kable(plotvaf_input, col.names = c("Input", "Definition"), escape = FALSE)
-```
-
 #### Example
 
-```{r plotVAF_example1, message=FALSE, warning=FALSE, fig.cap="Figure 1: VAF distribution of SSNVs"}
+```{r plot1, message=FALSE, warning=FALSE, fig.cap="VAF distribution of SSNVs"}
 strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = strelka_vcf, vcf.source = "strelka")
 head(s_data, n = 1)
 LACHESIS::plotVAFdistr(s_data)
 ```
 
-### Assigning copy number states to single nucleotide variants (NbImport)
+This VAF histogram provides a first overview of the tumor’s mutational landscape. The observed clonal (~0.3) and subclonal (~0.1) peaks align with expectations based on the tumor purity (0.83) and ploidy (2.59). 
+
+### Assigning copy number states to single nucleotide variants (nbImport)
 
 The function `nbImport` integrates CNV and SNV information into a single datatable. Each variant is assigned to its corresponding copy number segment and status. 
 
@@ -305,32 +255,11 @@ The function `nbImport` integrates CNV and SNV information into a single datatab
 nbImport(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL)
 ```
 
-```{r nbImport_input, echo=FALSE}
-library(knitr)
-
-nb_import_input <- data.frame(
-    Column1 = c("*cnv*", "*snv*", "*purity*", "*ploidy*", "*sig.assign*", "*assign.method*", "*ID*", "*sig.file*", "*sig.select*", "*min.p*", "*ref.build*"),
-    Column2 = c(
-        "output of [readCNV](#output)",
-        "output of [readVCF(#output-1)",
-        "the tumor cell content",
-        "the average copy number in the tumor sample",
-        "if TRUE, each variant will be assigned to the most likely mutational signature",
-        "method to assign signatures: `max` to assign the signature with the highest probability, `sample` to randomly assign based on signature probabilities",
-        "sample name",
-        "file path to the SigAssignment output file, typically named `Decomposed_MutationType_Probabilities.txt`",
-        "character vector of specific signatures to include in the analysis (e.g., c(´SBS1´, ´SBS5´, ´SBS40´) to focus on clock-like mutational processes)",
-        "minimum probability threshold from the SigAssignment output that a variant must meet to be considered as matching a specific signature",
-        "reference genome: hg18, hg19 or hg38"
-    )
-)
-
-knitr::kable(nb_import_input, col.names = c("Input", "Definition"), escape = FALSE)
-```
-
 ##### Assignment of mutational signatures
 
-[SigProfilerAssignment](https://github.com/AlexandrovLab/SigProfilerAssignment) is a tool developed by Alexandrov lab at UC San Diego. It assigns previously known mutational signatures to sequenced samples. The tool generates a file called "Decomposed_MutationType_Probabilities.txt" that can be used as sig.file for LACHESIS. A global random seed (set.seed()) should be specified before running LACHESIS to create reproducable results.
+LACHESIS can incorporate mutational signatures generated by either [SigProfilerAssignment](https://github.com/AlexandrovLab/SigProfilerAssignment) or [MutationalPatterns](https://bioconductor.org/packages/release/bioc/html/MutationalPatterns.html). SigProfilerAssignment is a Python-based tool developed by the Alexandrov Lab, whereas MutationalPatterns is an R package available through Bioconductor. Both tools assign previously known mutational signatures to sequenced samples. If signature assignment has already been performed with SigProfilerAssignment, the outputfile, typically named "Decomposed_MutationType_Probabilities.txt", can be provided via sig.file parameter. If sig.file is not specified and sig.assign = TRUE, the probabilities for the SBS signatures will be automatically computed using MutationalPatterns.  
+
+A global random seed (set.seed()) should be specified before running LACHESIS to create reproducable results.
 
 #### Output
 
@@ -372,7 +301,7 @@ c_data <- LACHESIS::readCNV(aceseq_cn)
 nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 ```
 
-#### Example using variants assosciated with specific SBS mutational signatures from vcf file
+#### Example using variants associated with specific SBS mutational signatures from vcf file
 
 ```{r nbImport_example2, message=FALSE, warning=FALSE}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
@@ -380,8 +309,11 @@ s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
 c_data <- LACHESIS::readCNV(aceseq_cn)
 sig.filepath <- system.file("extdata", "NBE15_Decomposed_MutationType_Probabilities.txt", package = "LACHESIS")
-head(sig.filepath)
+head(sig.filepath, n = 1)
 nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.file = sig.filepath, sig.select = c("SBS1", "SBS5", "SBS40a", "SBS18"))
+head(nb, n = 1)
+nb.2 <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51, sig.assign = TRUE, ID = "NBE15", sig.select = c("SBS1", "SBS5", "SBS40", "SBS18"))
+head(nb.2, n = 1)
 ```
 
 ### Plotting Imported Data (plotNB)  
@@ -395,34 +327,9 @@ The bottom plots show VAF histograms of SNVs, stratified by copy number and mino
 plotNB(nb = NULL, snvClonality = NULL, ref.build = "hg19", min.cn = 2, max.cn = 4, nb.col.abline = "gray70", nb.col.cn.2 = "#7f8c8d", nb.col.cn = "#16a085", nb.col.hist = "#34495e", nb.border = NA, nb.breaks = 100, samp.name = NULL, output.file = NULL, sig.show = FALSE)
 ```
 
-```{r plotNB_input, echo=FALSE}
-library(knitr)
-
-plotnb_input <- data.frame(
-    Column1 = c("*nb*", "*ref.build*", "*min.cn*", "*max.cn*", "*nb.col.abline*", "*nb.col.cn.2*", "*nb.col.cn*", "*nb.col.hist*", "*nb.border*", "*nb.breaks*", "*samp.name*", "*output.file*", "*sig.show*"),
-    Column2 = c(
-        "output from [nbImport](#output-2) function: combined SNV and CNV information",
-        "reference genome: hg18, hg19 or hg38",
-        "the minimum copy number to be included in the analysis",
-        "the maximum copy number to be included in the analysis",
-        "the color code for the lines depicting clonality in the VAF histograms",
-        "the color code for tcn = 2 in the CNV plot",
-        "the color code for other copy numbers in the CNV plot",
-        "the color code for bars in the VAF histograms",
-        "the line color in the VAF histograms",
-        "the number of bins in the histograms",
-        "the tumor sample name",
-        "output filename",
-        "additional VAF histogram stratified by assigned mutational signatureswill be shown, if set to TRUE."
-    )
-)
-
-knitr::kable(plotnb_input, col.names = c("Input", "Definition"), escape = FALSE)
-```
-
 #### Example using all variants from vcf file
 
-```{r plotNB_example1, message=FALSE, warning=FALSE, fig.cap="Figure 2: *top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
+```{r plot2, message=FALSE, warning=FALSE, fig.cap="*top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -436,9 +343,11 @@ snvClonality <- LACHESIS::estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NB
 LACHESIS::plotNB(nb = nb, snvClonality = snvClonality)
 ```
 
+The copy number plot highlights multiple chromosomal aberrations across different copy number states, including a gain of chromosome 1q to four copies and a whole-chromosome gain of chromosome 5 to three copies. SNVs located on these segments are shown in the per-copy-number VAF histograms below. The dotted lines indicate the expected clonal VAFs for each copy number state. As we would expect, subclonal SNVs appear to the left of these lines, while clonal peaks align closely with the dotted lines.
+
 #### Example using variants assosciated with specific SBS mutational signatures from vcf file
 
-```{r plotNB_example2, message=FALSE, warning=FALSE, fig.cap="Figure 2: *top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
+```{r plot3, message=FALSE, warning=FALSE, fig.cap="*top plot* - copy number profile along the genome, *bottom plots* - VAF distribution of SSNVs stratified by copy number and minor/major alleles"}
 set.seed(123)
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
@@ -453,6 +362,8 @@ snvClonality <- LACHESIS::estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NB
 LACHESIS::plotNB(nb = nb, snvClonality = snvClonality, sig.show = TRUE)
 ```
 
+In addition to the VAF histograms stratified by clonality, here we show the same histograms stratified by mutational signature. In this case, SBS1, SBS5, SBS18, and SBS40a are observed—a typical constellation in untreated neuroblastoma. These signatures appear to be distributed relatively evenly and do not show any clear association with SNVs occurring before or after copy number gains or clonal expansion.
+
 ## Processing Clonal Mutations 
 
 ### Counting Clonal Mutations (ClonalMutationalCounter)
@@ -463,22 +374,6 @@ This function counts the number of clonal mutations residing on a single or mult
 
 ```{r clonalmutcount_function, eval = FALSE}
 clonalMutationCounter(nbObj = NULL, min.cn = 1, max.cn = 4, chromosomes = c(1:22))
-```
-
-```{r clonalmutcount_input, echo=FALSE}
-library(knitr)
-
-process_clonal_input <- data.frame(
-    Column1 = c("*nbObj*", "*min.cn*", "*max.cn*", "*chromosomes*"),
-    Column2 = c(
-        "output from [nbImport](#output-2) function: combined SNV and CNV information",
-        "the minimum copy number to be included in the analysis",
-        "the maximum copy number to be included in the analysis",
-        "the chromosomes to be evaluated"
-    )
-)
-
-knitr::kable(process_clonal_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -525,19 +420,6 @@ This function translates the clonal mutation counts obtained with `clonalMutatio
 
 ```{r normalizeCounts_function, eval=FALSE}
 normalizeCounts(countObj)
-```
-
-```{r normalizeCounts_input, echo=FALSE}
-library(knitr)
-
-normalize_counts_input <- data.frame(
-    Column1 = c("*countObj*"),
-    Column2 = c(
-        "output from [clonalMutationCounter](#output-3) function: clonal SNV counts stratified by copy number"
-    )
-)
-
-knitr::kable(normalize_counts_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -596,23 +478,6 @@ This function estimates mutation densities at MRCA and, if present, ECA from the
 
 ```{r MRCA_function, eval = FALSE}
 MRCA(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NULL)
-```
-
-```{r MRCA_input, echo=FALSE}
-library(knitr)
-
-mrca_input <- data.frame(
-    Column1 = c("*normObj*", "*min.seg.size*", "*fp.mean*", "*fp.sd*", "*excl.chr*"),
-    Column2 = c(
-        "output from [normalizeCounts](#output-4) function: normalized clonal SNV counts stratified",
-        "the minimal segment length to be included in the quantification",
-        "the average false positive rate of clonal mutations (e.g. due to incomplete tissue sampling)",
-        "the standard deviation of the false positive rate of clonal mutations (e.g. due to incomplete tissue sampling)",
-        "a vector of chromosomes that should be excluded from the quantification (e.g. due to reporter constructs in animal models)"
-    )
-)
-
-knitr::kable(mrca_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Output
@@ -695,33 +560,9 @@ This function visualizes the results of the MRCA analysis. The top plot presents
 plotMutationDensities(mrcaObj = NULL, samp.name = NULL, min.seg.size = 10^7, mut.col.zero = "#4FB12B", mut.col.multi = "#176A02", mut.border = NULL, mut.show.density = TRUE, mut.breaks = NULL, mut.xaxis = NULL, mut.show.realtime = FALSE, mut.snv.rate = 3.2, output.file = NULL)
 ```
 
-```{r plotMutDens_input, echo=FALSE}
-library(knitr)
-
-plotmrca_input <- data.frame(
-    Column1 = c("*mrcaObj*", "*samp.name*", "*min.seg.size*", "*mut.col.zero*", "*mut.col.multi*", "*mut.border*", "*mut.show.density*", "*mut.breaks*", "*mut.xaxis*", "*mut.show.realtime*", "*mut.snv.rate*", "*output.file*"),
-    Column2 = c(
-        "output from [mrca](#output-5) function",
-        "the tumor sample name",
-        "the minimal segment length to be included in the quantification",
-        "bar color for single-copy histogram",
-        "bar color for multi-copy histogram",
-        "the color of the border around the bars",
-        "if TRUE the density distribution of mutation densities on single copies will be shown in the histogram of mutation densities on multiple copies",
-        "interval size [(hist() - breaks)](https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/hist)",
-        "optional, user-specified cutoff value for x-axis in evolutionary timeline plot in SNVs/Mb",
-        "if TRUE the weeks post-conception or postnatal months will be shown on the evolutionary timeline",
-        "rate of accumulated SNVs per day in a diploid genome",
-        "output file"
-    )
-)
-
-knitr::kable(plotmrca_input, col.names = c("Input", "Definition"), escape = FALSE)
-```
-
 #### Example
 
-```{r plotMutDens_example1, message=FALSE, warning=FALSE, fig.cap="Figure 3: *top plots* - Distribution of non-amplified and amplified clonal mutation densities across segments, *bottom plot* - Evolutionary timeline showing mutation densities at chromosomal gains (mean and 95% CI) and at the tumor's ECA and MRCA (mean and 95% CI of)"}
+```{r plot4, message=FALSE, warning=FALSE, fig.cap="*top plots* - Distribution of non-amplified and amplified clonal mutation densities across segments, *bottom plot* - Evolutionary timeline showing mutation densities at chromosomal gains (mean and 95% CI) and at the tumor's ECA and MRCA (mean and 95% CI of)"}
 snvs <- system.file("extdata", "NBE15", "snvs_NBE15_somatic_snvs_conf_8_to_10.vcf", package = "LACHESIS")
 s_data <- LACHESIS::readVCF(vcf = snvs, vcf.source = "dkfz")
 aceseq_cn <- system.file("extdata", "NBE15", "NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS")
@@ -733,6 +574,8 @@ mrca <- LACHESIS::MRCA(norm_muts)
 LACHESIS::plotMutationDensities(mrca)
 ```
 
+The single-copy SNVs place the MRCA at approximately 0.22 SNVs per Mb. The ECA, defined by multi-copy SNVs, is positioned before the MRCA, close to 0 SNVs per Mb and most of the chromosomal gains are asscoiated with it. This pattern is typical in high-risk neuroblastoma, where aneuploidy occurs during the first trimester, followed by the emergence of the MRCA around birth or during the first year of life.
+
 ### Estimating Clonality per SNV (estimateClonality)
 
 This function determines the clonality status of each SNV, classifying them as clonal or subclonal. For clonal variants, the function further infers whether the mutation arose before or after a copy number alteration (pre-CNV or post-CNV) if possible.
@@ -741,24 +584,6 @@ This function determines the clonality status of each SNV, classifying them as c
 
 ```{r estimateClonality_function, eval = FALSE}
 estimateClonality(nbObj = NULL, mrcaObj = NULL, ID = NULL, purity = NULL)
-```
-
-```{r estimateClonality_input, echo=FALSE}
-library(knitr)
-
-estimateClonality_input <- data.frame(
-    Column1 = c("*nbObj*", "*mrcaObj*", "*ID*", "*purity*", "*driver.file*", "*ref.build*"),
-    Column2 = c(
-        "output from [nbImport](#output-2) function",
-        "output from [mrca](#output-5) function",
-        "the tumor sample name",
-        "the tumor cell content",
-        "file path to the information about known driver SNVs.",
-        "reference genome: hg18, hg19 or hg38"
-    )
-)
-
-knitr::kable(estimateClonality_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
@@ -785,22 +610,6 @@ This function visualizes the output from estimateClonality, providing an overvie
 plotClonality(snvClonality = snvClonality, nb = NULL, sig.assign = FALSE, output.file = NULL)
 ```
 
-```{r plotClonality_input, echo=FALSE}
-library(knitr)
-
-estimateClonality_input <- data.frame(
-    Column1 = c("*snvClonality*", "*nbObj*", "*sig.assign*", "*output.file*"),
-    Column2 = c(
-        "output from [estimateClonality](#output-6) function",
-        "output from [nbImport](#output-2) function",
-        "if TRUE, each variant will be assigned to the most likely mutational signature",
-        "output filename"
-    )
-)
-
-knitr::kable(estimateClonality_input, col.names = c("Input", "Definition"), escape = FALSE)
-```
-
 #### Example
 
 ```{r plotClonality_example1, message=FALSE, warning=FALSE}
@@ -816,6 +625,7 @@ snvClonality <- LACHESIS::estimateClonality(nbObj = nb, mrcaObj = mrca, ID = "NB
 LACHESIS::plotClonality(snvClonality = snvClonality, nb = nb, sig.assign = FALSE)
 ```
 
+This graph provides a first overview of whether SNVs occurred before or after copy number gains. A more detailed analysis of specific SNVs—such as known driver mutations—and their timing relative to the gains can be performed using the per-SNV table output. In this case, we observe a large number of SNVs occurring after the gain on chromosome 7, potentially triggered by this gain, whereas the small number of preceding mutations on chromosome 1 may provide insights into the initiation of the chromosome 1 gain.  
 
 # LACHESIS Wrapper Function
 
@@ -874,7 +684,7 @@ knitr::kable(lachesis_output, col.names = c("Column Name", "Definition"), align 
 strelka_vcf <- system.file("extdata", "strelka2.somatic.snvs.vcf.gz", package = "LACHESIS")
 aceseq_cn <- system.file("extdata", "ACESeq/NBE11_comb_pro_extra2.59_0.83.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(ids = "NBE11", cnv.files = aceseq_cn, snv.files = strelka_vcf, vcf.source = "strelka", purity = 0.83, ploidy = 2.59)
-head(lachesis, n = 1)
+head(lachesis, n = 3)
 ```
 
 #### Example with tab-delimited sample-specification file
@@ -890,10 +700,10 @@ input.files <- data.table::fread(input.files)
 # cnv and snv files for example tumors
 nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
 nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
-nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"), full.names = TRUE)
 
-cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 
 input.files$cnv.file <- cnv.file
 input.files$snv.file <- snv.file
@@ -911,7 +721,7 @@ data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 ```{r LACHESIS_example2_4, message=FALSE, warning=FALSE}
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
-head(lachesis, n = 1)
+head(lachesis, n = 3)
 ```
 
 #### Example with multiple sample and data frame input
@@ -923,7 +733,7 @@ nbe15_vcf <- system.file("extdata", "NBE15/snvs_NBE15_somatic_snvs_conf_8_to_10.
 nbe15_cn <- read.delim(system.file("extdata", "NBE15/NBE15_comb_pro_extra2.51_1.txt", package = "LACHESIS"), sep = "\t", header = TRUE)
 
 lachesis <- LACHESIS::LACHESIS(ids = c("NBE11", "NBE15"), cnv.files = list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf), vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51), cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3), cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37))
-head(lachesis, n = 1)
+head(lachesis, n = 3)
 ```
 
 
@@ -935,26 +745,6 @@ The function `plotLACHESIS` plots cumulative distributions of SSNV densities at 
 
 ```{r plotLACHESIS_function, eval = FALSE}
 plotLachesis(lachesis = NULL, lach.suppress.outliers = FALSE, lach.log.densities = FALSE, lach.col.multi = "#176A02", lach.border = NULL, binwidth = NULL, lach.col.zero = "#4FB12B", output.file = NULL)
-```
-
-```{r plotLACHESIS_input, echo=FALSE}
-library(knitr)
-
-plotlachesis_input <- data.frame(
-    Column1 = c("*lachesis*", "*lach.suppress.outliers*", "*lach.log.densities*", "*lach.col.multi*", "*lach.border*", "*binwidth*", "*lach.col.zero*", "*output.file*"),
-    Column2 = c(
-        "output from [LACHESIS](#output-7) function",
-        "whehter outliers (defined as the 2.5% tumors with lowest and highest densities) are to be plot",
-        "plotting logarithmic densities if set to TRUE",
-        "bar color for multi-copy SSNV densities",
-        "border color for the bars",
-        "the binwidth in the histogram",
-        "bar color for single-copy SSNV densities",
-        "output filename"
-    )
-)
-
-knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
 ```
 
 #### Example
@@ -970,10 +760,10 @@ input.files <- data.table::fread(input.files)
 # cnv and snv files for example tumors
 nbe11 <- list.files(system.file("extdata/NBE11/", package = "LACHESIS"), full.names = TRUE)
 nbe15 <- list.files(system.file("extdata/NBE15/", package = "LACHESIS"), full.names = TRUE)
-nbe63 <- list.files(system.file("extdata/NBE63/", package = "LACHESIS"), full.names = TRUE)
+nbe26 <- list.files(system.file("extdata/NBE26/", package = "LACHESIS"), full.names = TRUE)
 
-cnv.file <- c(nbe11[1], nbe15[1], nbe63[1])
-snv.file <- c(nbe11[2], nbe15[2], nbe63[2])
+cnv.file <- c(nbe11[1], nbe15[1], nbe26[1])
+snv.file <- c(nbe11[2], nbe15[2], nbe26[2])
 
 input.files$cnv.file <- cnv.file
 input.files$snv.file <- snv.file
@@ -983,10 +773,12 @@ lachesis_input <- tempfile(pattern = "lachesis", tmpdir = tempdir(), fileext = "
 data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 ```
 
-```{r plotLACHESIS_example1_2, message=FALSE, warning=FALSE, fig.cap="Figure 4: Cumulative distribution of SSNV densities in ECA (dark green) and MRCA (light green)"}
+```{r plot5, message=FALSE, warning=FALSE, fig.cap="Cumulative distribution of SSNV densities in ECA (dark green) and MRCA (light green)"}
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 LACHESIS::plotLachesis(lachesis)
 ```
+
+This graph provides a cohort-level overview, illustrating two late-MRCA (SNVs per Mb > 0.05) and one early-MRCA sample. In the late-MRCA cases, an early ECA was detected, indicating a longer evolution rather than a later onset.
 
 ### Plotting Clinical Correlations (plotClinicalCorrelations)
 
@@ -998,31 +790,16 @@ This function takes SNV densities as input and correlates them with clinical dat
 plotClinicalCorrelations(lachesis = NULL, clin.par = "Age", clin.suppress.outliers = FALSE, clin.log.densities = FALSE, output.file = NULL)
 ```
 
-```{r plotClinCor_input, echo=FALSE}
-library(knitr)
-
-plotclin_input <- data.frame(
-    Column1 = c("*lachesis*", "*clin.par*", "*clin.suppress.outliers*", "*clin.log.densities*", "*output.file*"),
-    Column2 = c(
-        "output from [LACHESIS](#output-7) function",
-        "the clinical parameter used for correlation, i.e. age",
-        "plotting outliers (defined as the 2.5% tumors with lowest and highest densities) if set to TRUE",
-        "plotting logarithmic densities if set to TRUE",
-        "output filename"
-    )
-)
-
-knitr::kable(plotclin_input, col.names = c("Input", "Definition"), escape = FALSE)
-```
-
 #### Example 
 
-```{r plotClinCor_example1, message=FALSE, warning=FALSE, fig.cap="Figure 5: Correlation between age at diagnosis and SNV densities at ECA and MRCA"}
+```{r plot6, message=FALSE, warning=FALSE, fig.cap="Correlation between age at diagnosis and SNV densities at ECA and MRCA"}
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
 LACHESIS::plotClinicalCorrelations(lachesis)
 ```
+
+The cohort size in this case is too small to draw reliable conclusions from these correlation plots. However, in larger neuroblastoma cohorts (Körber et al.), a correlation between patient age and MRCA timing has been observed.
 
 ### Plotting Survival (plotSurvival)
 
@@ -1034,34 +811,16 @@ The function `plotSurvival` plots correlation between SNV density timing at MRCA
 plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = "OS.time", surv.event = "OS", surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
 ```
 
-```{r plotSurvival_input, echo=FALSE}
-plotlachesis_input <- data.frame(
-    Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*surv.time*", "*surv.event*", "*surv.palette*", "*surv.time.breaks*", "*surv.time.scale*", "*surv.title*", "*surv.ylab*"),
-    Column2 = c(
-        "output from [LACHESIS](#output-7) function",
-        "MRCA density value to be used for survival stratification, will be computationally inferred to maximize survival differences if not specified by user",
-        "the directory to which the plot will be stored",
-        "column name containing survival time",
-        "column name containing event",
-        "numeric value controlling time axis breaks",
-        "numeric value by which survival time is to be divided (e.g., 365 for converting days into years, 30 for months)",
-        "color palette to be used",
-        "main title",
-        "y-axis label"
-    )
-)
-
-knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
-```
-
 #### Example
 
-```{r plotSurvival_example1, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"}
+```{r plot7, message=FALSE, warning=FALSE, fig.cap="Correlation between Survival and SNV densities at ECA and MRCA", echo = FALSE}
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
-LACHESIS::plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS")
+LACHESIS::plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS", mrca.cutpoint = 0.05)
 ```
+
+The timing of the MRCA serves as a robust predictor of event-free survival. Tumors with an early MRCA are linked to favorable overall survival outcomes, while late-MRCA tumors are more frequently associated with relapse.
 
 ### Classifying Tumor Evolution (classifyLACHESIS)
 
@@ -1073,26 +832,9 @@ The function `classifyLACHESIS` classifies a tumor's start of clonal outgrowth d
 classifyLACHESIS(lachesis, mrca.cutpoint = NULL, output.dir = NULL, entity = "neuroblastoma", infer.cutpoint = FALSE, surv.time = "OS.time", surv.event = "OS")
 ```
 
-```{r classifyLACHESIS_input, echo=FALSE}
-plotlachesis_input <- data.frame(
-    Column1 = c("*lachesis*", "*mrca.cutpoint*", "*output.dir*", "*entity*", "*infer.cutpoint*", "*surv.time*", "*surv.event*"),
-    Column2 = c(
-        "output from [LACHESIS](#output-6) function",
-        "MRCA density value to be used for survival stratification, will be computationally inferred to maximize survival differences if not specified by user",
-        "the directory to which the plot will be stored",
-        "the tumor entity if classifying according to a pre-defined threshold",
-        "the MRCA cutpoint will be inferred from the data if set to TRUE",
-        "column name containing survival time",
-        "column name containing event"
-    )
-)
-
-knitr::kable(plotlachesis_input, col.names = c("Input", "Definition"), escape = FALSE)
-```
-
 #### Example
 
-```{r classifyLACHESIS_example1, message=FALSE, warning=FALSE, fig.cap="Figure 6: Correlation between Survival and SNV densities at ECA and MRCA"}
+```{r classifyLACHESIS_example1, message=FALSE, warning=FALSE}
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
@@ -1117,13 +859,13 @@ The user should verify that the measured clonal peaks align with the expected va
 
 #### Positive Example
 
-```{r vaf-plots-positive, echo=FALSE, fig.show='hold', out.width="45%", fig.cap = "Figure 1: Clonal peaks (i.e. ->) correlate with expected VAFs (----)"}
+```{r vaf-plots-positive, echo=FALSE, fig.show='hold', out.width="70%", fig.cap = "Clonal peaks (i.e. ->) correlate with expected VAFs (----)"}
 knitr::include_graphics(system.file("extdata", "VAF_positive_example.png", package = "LACHESIS"))
 ```
 
 #### Negative Example
 
-```{r vaf-plots-negative, echo=FALSE, fig.show='hold', out.width="45%", fig.cap = "Figure 2: Clonal peaks cannot be clearly identified, a load of noise (i.e. ->) between the expected VAFs (----)"}
+```{r vaf-plots-negative, echo=FALSE, fig.show='hold', out.width="70%", fig.cap = "Clonal peaks cannot be clearly identified, a load of noise (i.e. ->) between the expected VAFs (----)"}
 knitr::include_graphics(system.file("extdata", "VAF_negative_example.png", package = "LACHESIS"))
 ```
 
@@ -1245,7 +987,7 @@ The column named according to parameter `surv.event` of [LACHESIS wrapper functi
 
 # How To Get Help 
 
-In case of any questions, feel free to open an issue on [**Github**](https://github.com/VerenaK90/LACHESIS_shiny/issues).
+In case of any questions, feel free to open an issue on [**Github**](https://github.com/VerenaK90/LACHESIS/issues).
 
 <!-- # Acknowledgments -->
 
