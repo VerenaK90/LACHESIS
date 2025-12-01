@@ -508,11 +508,11 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
         scale_fill_identity() +
         geom_hline(
             yintercept = seq_len(tcn_max), linetype = "dashed",
-            color = nb.col.abline, size = 0.3
+            color = nb.col.abline, linewidth = 0.3
         ) +
         geom_vline(
             xintercept = contig_lens, linetype = "dashed",
-            color = nb.col.abline, size = 0.3
+            color = nb.col.abline, linewidth = 0.3
         ) +
         scale_x_continuous(
             breaks = label_subset$mid,
