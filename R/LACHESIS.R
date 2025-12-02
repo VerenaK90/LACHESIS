@@ -1473,7 +1473,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
         stop("Please provide a valid column name for `surv.event`.")
     }
 
-   if (any(is.na(lachesis[[surv.time]]))) {
+    if (any(is.na(lachesis[[surv.time]]))) {
         tmp1 <- sum(is.na(lachesis[[surv.time]]))
         warning(sprintf(
             "Removing %s samples with missing survival time.", tmp1
@@ -1531,20 +1531,15 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     # Survival analysis
     survival.fit <- survival::survfit(
         Surv(
-        time  = lachesis.categorized[[surv.time]],
-        event = lachesis[[surv.event]]
+            time  = lachesis.categorized[[surv.time]],
+            event = lachesis[[surv.event]]
         ) ~ MRCA_timing,
         data = lachesis.categorized
     )
     survival.diff <- survival::survdiff(
         Surv(
-            time =
-                unlist(lachesis.categorized[
-                    , ..surv.time
-                ]),
-            event = unlist(lachesis[
-                , ..surv.event
-            ])
+            time  = lachesis.categorized[[surv.time]],
+            event = lachesis[[surv.event]]
         ) ~ MRCA_timing,
         data = lachesis.categorized
     )
@@ -1584,7 +1579,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
         break.time.by =
             surv.time.breaks
     )
-  
+
     # Printing cutpoint txt
     if (!is.null(output.dir)) {
         if (!is.null(mrca.cutpoint.obj)) {
@@ -1690,7 +1685,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
                              surv.time = "OS.time", surv.event = "OS") {
-    MRCA_time_mean <- ..surv.time <- ..surv.event <- NULL
+    MRCA_time_mean <- NULL
 
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")
@@ -1698,12 +1693,12 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
     entities <- c("neuroblastoma")
     entity <- match.arg(arg = entity, choices = entities, several.ok = FALSE)
 
-    if (infer.cutpoint == TRUE & sum(!(is.na(lachesis[, ..surv.time]))) < 2) {
+    if (infer.cutpoint == TRUE & sum(!(is.na(lachesis[[surv.time]]))) < 2) {
         stop("Please provide survival time if inferring cutpoint de novo.")
     }
 
-    if (infer.cutpoint == TRUE & (sum(!(is.na(lachesis[, ..surv.event]))) < 2 |
-        sum(lachesis[, ..surv.event] != 0, na.rm = TRUE) < 2)) {
+    if (infer.cutpoint == TRUE & (sum(!(is.na(lachesis[[surv.event]]))) < 2 |
+        sum(lachesis[[surv.event]] != 0, na.rm = TRUE) < 2)) {
         stop(
             "Please provide survival information if inferring cutpoint de novo."
         )
