@@ -1460,7 +1460,8 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     if (any(is.na(lachesis[["MRCA_time_mean"]]))) {
         tmp1 <- sum(is.na(lachesis[["MRCA_time_mean"]]))
         warning(sprintf(
-            "Removing %s samples with missing MRCA density estimate.", tmp1
+            "Removing %s samples with missing MRCA density estimate.", 
+            tmp1
         ))
         lachesis <- lachesis[!is.na(MRCA_time_mean)]
     }
@@ -1513,7 +1514,10 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
         )
 
         mrca.cutpoint <- as.numeric(
-            mrca.cutpoint.obj$cutpoint["MRCA_time_mean", "cutpoint"]
+            mrca.cutpoint.obj$cutpoint[
+                "MRCA_time_mean", 
+                "cutpoint"
+            ]
         )
     }
 
@@ -1550,8 +1554,8 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 
     survival.fit.plot <- survminer::ggsurvplot_df(
         surv_summary(survival.fit, data = lachesis.categorized),
-        title = surv.title, conf.int = FALSE,
-        censor.shape = 124,
+        title = surv.title, conf.int = FALSE, color = "strata",
+        censor.shape = 124, 
         palette = surv.palette, xlab = "Time", ylab = surv.ylab,
         legend.labs = c("Early MRCA", "Late MRCA"),
         legend.title = " ",
