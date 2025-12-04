@@ -829,50 +829,50 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
     # Plot clonality distribution of SNVs
     clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
-    if (!is.null(output.dir)) {
-        output.file <- paste(output.dir, "SNV_timing_per_SNV_cohort.txt",
-            sep = "/"
-        )
-        fwrite(clonality_cohort, output.file, sep = "\t")
+        if (!is.null(output.dir)) {
+            output.file <- paste(output.dir, "SNV_timing_per_SNV_cohort.txt",
+                sep = "/"
+            )
+            fwrite(clonality_cohort, output.file, sep = "\t")
 
-        clonality_colors <- c(
-            "Precnv" = "#66c2a5", "Postcnv" = "#fc8d62",
-            "C" = "#8da0cb", "SC" = "#e78ac3"
-        )
-
-        driver_dt <- clonality_cohort[!is.na(known_driver_gene) &
-            trimws(known_driver_gene) != ""]
-        driver_dt[, Sample := factor(Sample)]
-
-        p1 <- ggplot(driver_dt, aes(
-            x = Sample, y = known_driver_gene,
-            fill = Clonality
-        )) +
-            geom_tile(color = "white") +
-            scale_fill_manual(
-                values = clonality_colors,
-                labels = c(
-                    "Precnv" = "Clonal\n- Pre-CNV",
-                    "Postcnv" = "Clonal\n- Post-CNV",
-                    "C" = "Clonal\n-NOS",
-                    "SC" = "Subclonal"
-                )
-            ) +
-            labs(
-                title = "Clonality of Driver Mutations",
-                x = "Patient",
-                y = "Gene"
-            ) +
-            theme_classic() +
-            theme(
-                axis.text.x = element_text(angle = 45, hjust = 1),
-                axis.text.y = element_text(size = 8)
+            clonality_colors <- c(
+                "Precnv" = "#66c2a5", "Postcnv" = "#fc8d62",
+                "C" = "#8da0cb", "SC" = "#e78ac3"
             )
 
-        pdf(paste(output.dir, "Driver_mutations_cohort.pdf", sep = "/"))
-        print(p1)
-        dev.off()
-    }
+            driver_dt <- clonality_cohort[!is.na(known_driver_gene) &
+                trimws(known_driver_gene) != ""]
+            driver_dt[, Sample := factor(Sample)]
+
+            p1 <- ggplot(driver_dt, aes(
+                x = Sample, y = known_driver_gene,
+                fill = Clonality
+            )) +
+                geom_tile(color = "white") +
+                scale_fill_manual(
+                    values = clonality_colors,
+                    labels = c(
+                        "Precnv" = "Clonal\n- Pre-CNV",
+                        "Postcnv" = "Clonal\n- Post-CNV",
+                        "C" = "Clonal\n-NOS",
+                        "SC" = "Subclonal"
+                    )
+                ) +
+                labs(
+                    title = "Clonality of Driver Mutations",
+                    x = "Patient",
+                    y = "Gene"
+                ) +
+                theme_classic() +
+                theme(
+                    axis.text.x = element_text(angle = 45, hjust = 1),
+                    axis.text.y = element_text(size = 8, face = "italic")
+                )
+
+            pdf(paste(output.dir, "Driver_mutations_cohort.pdf", sep = "/"))
+            print(p1)
+            dev.off()
+        }
 
     # Plot the distribution of Mutation densities at ECA and MRCA
 
