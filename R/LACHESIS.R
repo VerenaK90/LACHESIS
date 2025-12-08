@@ -829,50 +829,50 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
     # Plot clonality distribution of SNVs
     clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
-    if (!is.null(output.dir)) {
-        output.file <- paste(output.dir, "SNV_timing_per_SNV_cohort.txt",
-            sep = "/"
-        )
-        fwrite(clonality_cohort, output.file, sep = "\t")
+        if (!is.null(output.dir)) {
+            output.file <- paste(output.dir, "SNV_timing_per_SNV_cohort.txt",
+                sep = "/"
+            )
+            fwrite(clonality_cohort, output.file, sep = "\t")
 
-        clonality_colors <- c(
-            "Precnv" = "#66c2a5", "Postcnv" = "#fc8d62",
-            "C" = "#8da0cb", "SC" = "#e78ac3"
-        )
-
-        driver_dt <- clonality_cohort[!is.na(known_driver_gene) &
-            trimws(known_driver_gene) != ""]
-        driver_dt[, Sample := factor(Sample)]
-
-        p1 <- ggplot(driver_dt, aes(
-            x = Sample, y = known_driver_gene,
-            fill = Clonality
-        )) +
-            geom_tile(color = "white") +
-            scale_fill_manual(
-                values = clonality_colors,
-                labels = c(
-                    "Precnv" = "Clonal\n- Pre-CNV",
-                    "Postcnv" = "Clonal\n- Post-CNV",
-                    "C" = "Clonal\n-NOS",
-                    "SC" = "Subclonal"
-                )
-            ) +
-            labs(
-                title = "Clonality of Driver Mutations",
-                x = "Patient",
-                y = "Gene"
-            ) +
-            theme_classic() +
-            theme(
-                axis.text.x = element_text(angle = 45, hjust = 1),
-                axis.text.y = element_text(size = 8)
+            clonality_colors <- c(
+                "Precnv" = "#66c2a5", "Postcnv" = "#fc8d62",
+                "C" = "#8da0cb", "SC" = "#e78ac3"
             )
 
-        pdf(paste(output.dir, "Driver_mutations_cohort.pdf", sep = "/"))
-        print(p1)
-        dev.off()
-    }
+            driver_dt <- clonality_cohort[!is.na(known_driver_gene) &
+                trimws(known_driver_gene) != ""]
+            driver_dt[, Sample := factor(Sample)]
+
+            p1 <- ggplot(driver_dt, aes(
+                x = Sample, y = known_driver_gene,
+                fill = Clonality
+            )) +
+                geom_tile(color = "white") +
+                scale_fill_manual(
+                    values = clonality_colors,
+                    labels = c(
+                        "Precnv" = "Clonal\n- Pre-CNV",
+                        "Postcnv" = "Clonal\n- Post-CNV",
+                        "C" = "Clonal\n-NOS",
+                        "SC" = "Subclonal"
+                    )
+                ) +
+                labs(
+                    title = "Clonality of Driver Mutations",
+                    x = "Patient",
+                    y = "Gene"
+                ) +
+                theme_classic() +
+                theme(
+                    axis.text.x = element_text(angle = 45, hjust = 1),
+                    axis.text.y = element_text(size = 8, face = "italic")
+                )
+
+            pdf(paste(output.dir, "Driver_mutations_cohort.pdf", sep = "/"))
+            print(p1)
+            dev.off()
+        }
 
     # Plot the distribution of Mutation densities at ECA and MRCA
 
@@ -1451,19 +1451,19 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
                          surv.time.breaks = NULL, surv.time.scale = 1,
                          surv.title = "Survival probability",
                          surv.ylab = "Survival") {
-    MRCA_time_mean <- ECA_time_mean <- ..surv.time <- ..surv.event <- NULL
+    MRCA_time_mean <- ECA_time_mean <- NULL
 
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")
     }
 
-    if (any(is.na(lachesis$MRCA_time_mean))) {
-        tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
+    if (any(is.na(lachesis[["MRCA_time_mean"]]))) {
+        tmp1 <- sum(is.na(lachesis[["MRCA_time_mean"]]))
         warning(sprintf(
-            "Removing %s samples with missing MRCA density estimate.", tmp1
+            "Removing %s samples with missing MRCA density estimate.", 
+            tmp1
         ))
-        rm(tmp1)
-        lachesis <- lachesis[!is.na(MRCA_time_mean), ]
+        lachesis <- lachesis[!is.na(MRCA_time_mean)]
     }
 
     if (!surv.time %in% colnames(lachesis)) {
@@ -1474,22 +1474,20 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
         stop("Please provide a valid column name for `surv.event`.")
     }
 
-    if (any(is.na(lachesis[, ..surv.time]))) {
-        tmp1 <- sum(is.na(lachesis[, surv.time]))
+    if (any(is.na(lachesis[[surv.time]]))) {
+        tmp1 <- sum(is.na(lachesis[[surv.time]]))
         warning(sprintf(
-            "Removing %s samples with missing survival time.",
-            tmp1
+            "Removing %s samples with missing survival time.", tmp1
         ))
-        rm(tmp1)
-        lachesis <- lachesis[!is.na(get(surv.time)), .SD]
+        lachesis <- lachesis[!is.na(get(surv.time))]
     }
 
-    if (any(is.na(lachesis[, ..surv.event]))) {
-        tmp1 <- sum(is.na(lachesis[, surv.event]))
+    if (any(is.na(lachesis[[surv.event]]))) {
+        tmp1 <- sum(is.na(lachesis[[surv.event]]))
         warning(sprintf(
             "Removing %s samples with missing survival event.", tmp1
         ))
-        lachesis <- lachesis[!is.na(get(surv.event)), .SD]
+        lachesis <- lachesis[!is.na(get(surv.event))]
     }
 
     if (nrow(lachesis) == 0) {
@@ -1499,10 +1497,12 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
         return(NULL)
     }
 
-    if (all(lachesis[, ..surv.event] == 0)) {
+    if (all(lachesis[[surv.event]] == 0)) {
         warning("No survival events in cohort Returning zero.")
         return(NULL)
     }
+
+    mrca.cutpoint.obj <- NULL
 
     # Calculating MRCA cutpoint
     if (is.null(mrca.cutpoint)) {
@@ -1513,10 +1513,12 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
             variables = c("MRCA_time_mean")
         )
 
-        mrca.cutpoint <- as.numeric(mrca.cutpoint.obj$cutpoint[
-            "MRCA_time_mean",
-            "cutpoint"
-        ])
+        mrca.cutpoint <- as.numeric(
+            mrca.cutpoint.obj$cutpoint[
+                "MRCA_time_mean", 
+                "cutpoint"
+            ]
+        )
     }
 
     # Categorizing according to MRCA
@@ -1533,25 +1535,15 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     # Survival analysis
     survival.fit <- survival::survfit(
         Surv(
-            time =
-                unlist(lachesis.categorized[
-                    , ..surv.time
-                ]),
-            event = unlist(lachesis[
-                , ..surv.event
-            ])
+            time  = lachesis.categorized[[surv.time]],
+            event = lachesis[[surv.event]]
         ) ~ MRCA_timing,
         data = lachesis.categorized
     )
     survival.diff <- survival::survdiff(
         Surv(
-            time =
-                unlist(lachesis.categorized[
-                    , ..surv.time
-                ]),
-            event = unlist(lachesis[
-                , ..surv.event
-            ])
+            time  = lachesis.categorized[[surv.time]],
+            event = lachesis[[surv.event]]
         ) ~ MRCA_timing,
         data = lachesis.categorized
     )
@@ -1563,9 +1555,10 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     survival.fit.plot <- survminer::ggsurvplot_df(
         surv_summary(survival.fit, data = lachesis.categorized),
         title = surv.title, conf.int = FALSE, color = "strata",
-        censor.shape = 124,
+        censor.shape = 124, 
         palette = surv.palette, xlab = "Time", ylab = surv.ylab,
         legend.labs = c("Early MRCA", "Late MRCA"),
+        legend.title = " ",
         break.time.by = surv.time.breaks
     ) +
         annotate("text",
@@ -1581,37 +1574,41 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 
     survival.fit.risk.table <- survminer::ggrisktable(survival.fit,
         data = lachesis.categorized,
+        colour = "strata",
         legend.labs = c(
             "Early MRCA",
             "Late MRCA"
         ),
+        legend.title = NULL,
         break.time.by =
             surv.time.breaks
     )
 
     # Printing cutpoint txt
     if (!is.null(output.dir)) {
-        mrca.cutpoint.dt <- data.table::data.table(
-            cutpoint = mrca.cutpoint,
-            statistic = as.numeric(mrca.cutpoint.obj$cutpoint[
-                "MRCA_time_mean",
-                "statistic"
-            ]),
-            p_value = p_value
-        )
+        if (!is.null(mrca.cutpoint.obj)) {
+            mrca.cutpoint.dt <- data.table::data.table(
+                cutpoint = mrca.cutpoint,
+                statistic = as.numeric(mrca.cutpoint.obj$cutpoint[
+                    "MRCA_time_mean",
+                    "statistic"
+                ]),
+                p_value = p_value
+            )
 
-        mrca.cutpoint.rounded <- formatC(mrca.cutpoint,
-            format = "f",
-            digits = 2
-        )
-        data.table::fwrite(mrca.cutpoint.dt,
-            file = file.path(output.dir, paste0(
-                "cutpoint_estimate_",
-                surv.event, "_",
-                mrca.cutpoint.rounded,
-                ".txt"
-            )), sep = "\t"
-        )
+            mrca.cutpoint.rounded <- formatC(mrca.cutpoint,
+                format = "f",
+                digits = 2
+            )
+            data.table::fwrite(mrca.cutpoint.dt,
+                file = file.path(output.dir, paste0(
+                    "cutpoint_estimate_",
+                    surv.event, "_",
+                    mrca.cutpoint.rounded,
+                    ".txt"
+                )), sep = "\t"
+            )
+        }
     }
 
     # Printing pdf
@@ -1692,7 +1689,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
                              surv.time = "OS.time", surv.event = "OS") {
-    MRCA_time_mean <- ..surv.time <- ..surv.event <- NULL
+    MRCA_time_mean <- NULL
 
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")
@@ -1700,12 +1697,12 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
     entities <- c("neuroblastoma")
     entity <- match.arg(arg = entity, choices = entities, several.ok = FALSE)
 
-    if (infer.cutpoint == TRUE & sum(!(is.na(lachesis[, ..surv.time]))) < 2) {
+    if (infer.cutpoint == TRUE & sum(!(is.na(lachesis[[surv.time]]))) < 2) {
         stop("Please provide survival time if inferring cutpoint de novo.")
     }
 
-    if (infer.cutpoint == TRUE & (sum(!(is.na(lachesis[, ..surv.event]))) < 2 |
-        sum(lachesis[, ..surv.event] != 0, na.rm = TRUE) < 2)) {
+    if (infer.cutpoint == TRUE & (sum(!(is.na(lachesis[[surv.event]]))) < 2 |
+        sum(lachesis[[surv.event]] != 0, na.rm = TRUE) < 2)) {
         stop(
             "Please provide survival information if inferring cutpoint de novo."
         )
