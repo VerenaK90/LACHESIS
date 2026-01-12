@@ -1193,6 +1193,16 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
             nrow(lachesis[!is.na(ECA_time_mean), ]),
         col = lach.col.multi, border = NA
     )
+    
+    legend("topright",
+       legend = c("ECA", "MRCA"),
+       fill = c(lach.col.multi, lach.col.zero),
+       border = NA,
+       bty = "o",
+       cex = 0.7,
+       inset = c(0.05, 0.1)
+    )  
+    
     plot.ecdf(lachesis$ECA_time_mean,
         col = "black", add = TRUE,
         verticals = TRUE
