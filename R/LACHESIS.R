@@ -1006,10 +1006,10 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         }
     }
 
-    lo_mat <- matrix(data = c(1, 2, 3, 4), nrow = 2, ncol = 2, byrow = TRUE)
+    lo_mat <- matrix(data = c(1, 3, 2, 3), nrow = 2, ncol = 2, byrow = TRUE)
     graphics::layout(
-        mat = lo_mat, widths = c(1, 2, 1, 2),
-        heights = c(1, 1, 1, 1)
+        mat = lo_mat, widths = c(1, 2),
+        heights = c(1, 1)
     )
 
     par(mar = c(3, 4, 3, 1))
@@ -1043,57 +1043,6 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     title(main = paste("SNV densities at MRCA"), cex.main = 1)
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
     mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
-
-    # Cumulative densities at MRCA
-    par(mar = c(3, 4, 3, 1), xpd = FALSE)
-
-    x.min <- 0
-    x.max <- max(c(lachesis$MRCA_time_upper)) * 1.3
-    y.min <- 0
-    y.max <- 1
-    plot(NA, NA,
-        xlim = c(x.min, x.max), ylim = c(y.min, y.max), xlab = NA,
-        ylab = NA, main = NA, axes = FALSE, frame.plot = FALSE
-    )
-    Axis(side = 1, cex = 0.7)
-    Axis(side = 2, cex = 0.7)
-    mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
-    mtext(text = "Fraction of tumors", side = 2, line = 2, cex = 0.7)
-
-    to.plot <- data.frame(
-        x.lower = rep(sort(c(lachesis$MRCA_time_mean)),
-            each = 2
-        )[-1],
-        x.upper = rep(sort(c(lachesis$MRCA_time_mean)),
-            each = 2
-        )[-2 * (nrow(lachesis))]
-    )
-    to.plot$y.lower <- vapply(
-        rep(sort(c(lachesis$MRCA_time_mean)), each = 2),
-        function(x) {
-            sum(lachesis$MRCA_time_upper <= x)
-        },
-        numeric(1)
-    )[-2 * (nrow(lachesis))]
-    to.plot$y.upper <- vapply(
-        rep(sort(c(lachesis$MRCA_time_mean)), each = 2),
-        function(x) {
-            sum(lachesis$MRCA_time_lower <= x)
-        },
-        numeric(1)
-    )[-1]
-
-    polygon(c(to.plot$x.lower, rev(to.plot$x.upper)),
-        c(to.plot$y.lower, rev(to.plot$y.upper)) / nrow(lachesis),
-        col = lach.col.zero, border = NA
-    )
-
-    plot.ecdf(lachesis$MRCA_time_mean,
-        col = "black", add = TRUE,
-        verticals = TRUE
-    )
-
-    title(main = paste("SNV densities at MRCA"), cex.main = 1)
 
     # Histogram of SNV density at ECA
 
@@ -1160,11 +1109,12 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
     mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
 
-    # Cumulative mutation densities at ECA:
+    # Cumulative mutation densities at ECA and MRCA
     par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
     x.min <- 0
-    x.max <- max(lachesis$ECA_time_upper, na.rm = TRUE) * 1.3
+    x.max <- max(lachesis$MRCA_time_upper,
+        lachesis$ECA_time_upper, na.rm = TRUE) * 1.3
     y.min <- 0
     y.max <- 1
     plot(NA, NA,
@@ -1176,7 +1126,40 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
     mtext(text = "Fraction of tumors", side = 2, line = 2, cex = 0.7)
 
-    to.plot <- data.frame(
+    to.plot.MRCA <- data.frame(
+        x.lower = rep(sort(c(lachesis$MRCA_time_mean)),
+            each = 2
+        )[-1],
+        x.upper = rep(sort(c(lachesis$MRCA_time_mean)),
+            each = 2
+        )[-2 * (nrow(lachesis))]
+    )
+    to.plot.MRCA$y.lower <- vapply(
+        rep(sort(c(lachesis$MRCA_time_mean)), each = 2),
+        function(x) {
+            sum(lachesis$MRCA_time_upper <= x)
+        },
+        numeric(1)
+    )[-2 * (nrow(lachesis))]
+    to.plot.MRCA$y.upper <- vapply(
+        rep(sort(c(lachesis$MRCA_time_mean)), each = 2),
+        function(x) {
+            sum(lachesis$MRCA_time_lower <= x)
+        },
+        numeric(1)
+    )[-1]
+
+    polygon(c(to.plot.MRCA$x.lower, rev(to.plot.MRCA$x.upper)),
+        c(to.plot.MRCA$y.lower, rev(to.plot.MRCA$y.upper)) / nrow(lachesis),
+        col = lach.col.zero, border = NA
+    )
+
+    plot.ecdf(lachesis$MRCA_time_mean,
+        col = "black", add = TRUE,
+        verticals = TRUE
+    )
+
+    to.plot.ECA <- data.frame(
         x.lower = rep(sort(c(lachesis$ECA_time_mean)),
             each = 2
         )[-1],
@@ -1184,7 +1167,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
             each = 2
         )[-2 * (nrow(lachesis[!is.na(ECA_time_mean), ]))]
     )
-    to.plot$y.lower <- vapply(
+    to.plot.ECA$y.lower <- vapply(
         rep(sort(c(lachesis$ECA_time_mean)), each = 2),
         function(x) {
             sum(lachesis$ECA_time_upper <= x,
@@ -1196,7 +1179,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
             !is.na(ECA_time_mean),
         ]))
     ]
-    to.plot$y.upper <- vapply(
+    to.plot.ECA$y.upper <- vapply(
         rep(sort(c(lachesis$ECA_time_mean)), each = 2),
         function(x) {
             sum(lachesis$ECA_time_lower <= x,
@@ -1205,17 +1188,27 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         }, numeric(1)
     )[-1]
 
-    polygon(c(to.plot$x.lower, rev(to.plot$x.upper)),
-        c(to.plot$y.lower, rev(to.plot$y.upper)) /
+    polygon(c(to.plot.ECA$x.lower, rev(to.plot.ECA$x.upper)),
+        c(to.plot.ECA$y.lower, rev(to.plot.ECA$y.upper)) /
             nrow(lachesis[!is.na(ECA_time_mean), ]),
         col = lach.col.multi, border = NA
     )
+    
+    legend("topright",
+       legend = c("ECA", "MRCA"),
+       fill = c(lach.col.multi, lach.col.zero),
+       border = NA,
+       bty = "o",
+       cex = 0.7,
+       inset = c(0.05, 0.1)
+    )  
+    
     plot.ecdf(lachesis$ECA_time_mean,
         col = "black", add = TRUE,
         verticals = TRUE
     )
 
-    title(main = paste("SNV densities at ECA"), cex.main = 1)
+    title(main = paste("Cumulative SNV densities at ECA and MRCA"), cex.main = 1)
 
     if (!is.null(output.file)) {
         dev.off()
