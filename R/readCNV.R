@@ -136,7 +136,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     cn.info[[A.col]] <- as.numeric(as.character(cn.info[[A.col]]))
     cn.info[[B.col]] <- as.numeric(as.character(cn.info[[B.col]]))
     # set B to zero if TCN==0
-    if(any(cn.info[TCN == 1])){
+    if(nrow(cn.info[TCN == 1,]) > 0){
       cn.info[TCN == 1,][[B.col]] <- 0
     }
 
