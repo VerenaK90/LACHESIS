@@ -136,7 +136,9 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     cn.info[[A.col]] <- as.numeric(as.character(cn.info[[A.col]]))
     cn.info[[B.col]] <- as.numeric(as.character(cn.info[[B.col]]))
     # set B to zero if TCN==0
-    cn.info[TCN == 1,][[B.col]] <- 0
+    if(any(cn.info[TCN == 1])){
+      cn.info[TCN == 1,][[B.col]] <- 0
+    }
 
     # for callers without subconal/clonal assignment,
     # remove subclonals based on maximal deviation of 0.2 for the
