@@ -19,3 +19,11 @@ CHANGES IN VERSION 0.99.2
 NEW FEATURES
 
     o Update citation file.
+
+CHANGES IN VERSION 0.99.5
+-------------------------
+
+NEW FEATURES
+
+    o Cumulative SNV densities at ECA and MRCA are now shown together
+    o Warnings in nbImport and plotSurvival were addressed by updating notation in ggplot
