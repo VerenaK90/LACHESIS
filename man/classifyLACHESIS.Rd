@@ -9,11 +9,17 @@ density at its MRCA}
 classifyLACHESIS(
   lachesis,
   mrca.cutpoint = NULL,
-  output.dir = NULL,
   infer.cutpoint = FALSE,
   entity = "neuroblastoma",
+  lach.col.multi = "#176A02",
+  lach.col.zero = "#4FB12B",
   surv.time = "OS.time",
-  surv.event = "OS"
+  surv.event = "OS",
+  class.show.age = FALSE,
+  mut.show.realtime = FALSE,
+  mut.snv.rate = 3.2,
+  surv.time.scale = 1,
+  output.dir = NULL
 )
 }
 \arguments{
@@ -23,17 +29,32 @@ classifyLACHESIS(
 observation, will be used as inferred from a test data set if not specified
 by user.}
 
-\item{output.dir}{link to directory in which output is to be stored.}
-
 \item{infer.cutpoint}{logical; should the MRCA cutpoint be inferred from the
 data?}
 
 \item{entity}{optional; the tumor entity if classifying according to a
 pre-defined threshold. Currently, only "neuroblastoma" is supported.}
 
+\item{lach.col.multi}{optional, bar color for multi-copy SSNV densities.}
+
+\item{lach.col.zero}{optional, bar color for single-copy SSNV densities.}
+
 \item{surv.time}{column name containing survival time; defaults to \code{OS.time}.}
 
 \item{surv.event}{column name containing event; defaults to \code{OS}.}
+
+\item{class.show.age}{logical; if \code{TRUE}, displays age at diagnosis.}
+
+\item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception
+on the evolutionary timeline.}
+
+\item{mut.snv.rate}{optional; rate of accumulated SNVs per day in a
+diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)}
+
+\item{surv.time.scale}{numeric value by which survival time is to be divided
+(e.g., 365 for converting days into years, 30 for months), defaults to \code{1}.}
+
+\item{output.dir}{link to directory in which output is to be stored.}
 }
 \value{
 data.table with binary assignment early/ late
