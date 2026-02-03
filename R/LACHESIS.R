@@ -1918,8 +1918,9 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL,
         if (class.show.age == TRUE) {
             age_months <- dt$Age / surv.time.scale
             age_weeks_pc <- 38 + age_months * 4.345
-            age_xaxis <- age_weeks_pc * 7 * mut.snv.rate / (3300 * 2)
-
+            # Converting SNVs per day to SNVs per Mb starting from
+            # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
+            age_xaxis <- (age_weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
 
             mrca_ecdf <- ecdf(dt$MRCA_time_mean)
             age_yaxis <- mrca_ecdf(dt$MRCA_time_mean)
