@@ -829,50 +829,50 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
     # Plot clonality distribution of SNVs
     clonality_cohort <- rbindlist(clonality_list, use.names = TRUE, fill = TRUE)
-        if (!is.null(output.dir)) {
-            output.file <- paste(output.dir, "SNV_timing_per_SNV_cohort.txt",
-                sep = "/"
-            )
-            fwrite(clonality_cohort, output.file, sep = "\t")
+    if (!is.null(output.dir)) {
+        output.file <- paste(output.dir, "SNV_timing_per_SNV_cohort.txt",
+            sep = "/"
+        )
+        fwrite(clonality_cohort, output.file, sep = "\t")
 
-            clonality_colors <- c(
-                "Precnv" = "#66c2a5", "Postcnv" = "#fc8d62",
-                "C" = "#8da0cb", "SC" = "#e78ac3"
-            )
+        clonality_colors <- c(
+            "Precnv" = "#66c2a5", "Postcnv" = "#fc8d62",
+            "C" = "#8da0cb", "SC" = "#e78ac3"
+        )
 
-            driver_dt <- clonality_cohort[!is.na(known_driver_gene) &
-                trimws(known_driver_gene) != ""]
-            driver_dt[, Sample := factor(Sample)]
+        driver_dt <- clonality_cohort[!is.na(known_driver_gene) &
+            trimws(known_driver_gene) != ""]
+        driver_dt[, Sample := factor(Sample)]
 
-            p1 <- ggplot(driver_dt, aes(
-                x = Sample, y = known_driver_gene,
-                fill = Clonality
-            )) +
-                geom_tile(color = "white") +
-                scale_fill_manual(
-                    values = clonality_colors,
-                    labels = c(
-                        "Precnv" = "Clonal\n- Pre-CNV",
-                        "Postcnv" = "Clonal\n- Post-CNV",
-                        "C" = "Clonal\n-NOS",
-                        "SC" = "Subclonal"
-                    )
-                ) +
-                labs(
-                    title = "Clonality of Driver Mutations",
-                    x = "Patient",
-                    y = "Gene"
-                ) +
-                theme_classic() +
-                theme(
-                    axis.text.x = element_text(angle = 45, hjust = 1),
-                    axis.text.y = element_text(size = 8, face = "italic")
+        p1 <- ggplot(driver_dt, aes(
+            x = Sample, y = known_driver_gene,
+            fill = Clonality
+        )) +
+            geom_tile(color = "white") +
+            scale_fill_manual(
+                values = clonality_colors,
+                labels = c(
+                    "Precnv" = "Clonal\n- Pre-CNV",
+                    "Postcnv" = "Clonal\n- Post-CNV",
+                    "C" = "Clonal\n-NOS",
+                    "SC" = "Subclonal"
                 )
+            ) +
+            labs(
+                title = "Clonality of Driver Mutations",
+                x = "Patient",
+                y = "Gene"
+            ) +
+            theme_classic() +
+            theme(
+                axis.text.x = element_text(angle = 45, hjust = 1),
+                axis.text.y = element_text(size = 8, face = "italic")
+            )
 
-            pdf(paste(output.dir, "Driver_mutations_cohort.pdf", sep = "/"))
-            print(p1)
-            dev.off()
-        }
+        pdf(paste(output.dir, "Driver_mutations_cohort.pdf", sep = "/"))
+        print(p1)
+        dev.off()
+    }
 
     # Plot the distribution of Mutation densities at ECA and MRCA
 
@@ -1193,16 +1193,16 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
             nrow(lachesis[!is.na(ECA_time_mean), ]),
         col = lach.col.multi, border = NA
     )
-    
+
     legend("topright",
-       legend = c("ECA", "MRCA"),
-       fill = c(lach.col.multi, lach.col.zero),
-       border = NA,
-       bty = "o",
-       cex = 0.7,
-       inset = c(0.05, 0.1)
-    )  
-    
+        legend = c("ECA", "MRCA"),
+        fill = c(lach.col.multi, lach.col.zero),
+        border = NA,
+        bty = "o",
+        cex = 0.7,
+        inset = c(0.05, 0.1)
+    )
+
     plot.ecdf(lachesis$ECA_time_mean,
         col = "black", add = TRUE,
         verticals = TRUE
@@ -1453,7 +1453,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     if (any(is.na(lachesis[["MRCA_time_mean"]]))) {
         tmp1 <- sum(is.na(lachesis[["MRCA_time_mean"]]))
         warning(sprintf(
-            "Removing %s samples with missing MRCA density estimate.", 
+            "Removing %s samples with missing MRCA density estimate.",
             tmp1
         ))
         lachesis <- lachesis[!is.na(MRCA_time_mean)]
@@ -1508,7 +1508,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 
         mrca.cutpoint <- as.numeric(
             mrca.cutpoint.obj$cutpoint[
-                "MRCA_time_mean", 
+                "MRCA_time_mean",
                 "cutpoint"
             ]
         )
@@ -1548,7 +1548,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
     survival.fit.plot <- survminer::ggsurvplot_df(
         surv_summary(survival.fit, data = lachesis.categorized),
         title = surv.title, conf.int = FALSE, color = "strata",
-        censor.shape = 124, 
+        censor.shape = 124,
         palette = surv.palette, xlab = "Time", ylab = surv.ylab,
         legend.labs = c("Early MRCA", "Late MRCA"),
         legend.title = " ",
@@ -1638,6 +1638,15 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 #' pre-defined threshold. Currently, only "neuroblastoma" is supported.
 #' @param surv.time column name containing survival time; defaults to `OS.time`.
 #' @param surv.event column name containing event; defaults to `OS`.
+#' @param class.show.age logical; if `TRUE`, displays age at diagnosis.
+#' @param lach.col.zero optional, bar color for single-copy SSNV densities.
+#' @param lach.col.multi optional, bar color for multi-copy SSNV densities.
+#' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
+#' on the evolutionary timeline.
+#' @param mut.snv.rate optional; rate of accumulated SNVs per day in a
+#' diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)
+#' @param surv.time.scale numeric value by which survival time is to be divided
+#' (e.g., 365 for converting days into years, 30 for months), defaults to `1`.
 #' @param output.dir link to directory in which output is to be stored.
 #' @return data.table with binary assignment early/ late
 #' @examples
@@ -1679,14 +1688,18 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
 #' @export
 #' @import survminer
 
-classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
+classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
-                             surv.time = "OS.time", surv.event = "OS") {
+                             lach.col.multi = "#176A02", lach.col.zero = "#4FB12B",
+                             surv.time = "OS.time", surv.event = "OS", class.show.age = FALSE,
+                             mut.show.realtime = FALSE, mut.snv.rate = 3.2, surv.time.scale = 1, 
+                             output.dir = NULL) {
     MRCA_time_mean <- NULL
 
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")
     }
+
     entities <- c("neuroblastoma")
     entity <- match.arg(arg = entity, choices = entities, several.ok = FALSE)
 
@@ -1733,13 +1746,230 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
     lachesis.categorized <- lachesis
     lachesis.categorized$MRCA_timing <-
         ifelse(lachesis.categorized$MRCA_time_mean <
-            mrca.cutpoint, "early", "late")
+            mrca.cutpoint, "Early MRCA", "Late MRCA")
     lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing,
-        levels = c("early", "late")
+        levels = c("Early MRCA", "Late MRCA")
     )
 
     attr(lachesis.categorized, "MRCA Cutpoint") <- mrca.cutpoint
     attr(lachesis.categorized, "Entity") <- entity
+
+    if (!is.null(output.dir)) {
+        pdf(file = file.path(output.dir, "MRCA_Classification.pdf"), width = 10, height = 5)
+    }
+
+    lachesis.categorized[, MRCA_timing := fifelse(
+        MRCA_time_mean < mrca.cutpoint,
+        "Early MRCA",
+        "Late MRCA"
+    )]
+
+    par(mfrow = c(1, 2), mar = c(3, 4, 6, 1), xpd = FALSE)
+
+    x.min <- 0
+    if (class.show.age) {
+        max_age_snvs <- max(
+            (lachesis.categorized$Age / surv.time.scale + 9.5) * 7 *
+                mut.snv.rate / (3300 * 2),
+            na.rm = TRUE
+        )
+        x.max <- max(
+            lachesis.categorized$MRCA_time_mean,
+            lachesis.categorized$ECA_time_mean,
+            max_age_snvs,
+            na.rm = TRUE
+        ) * 1.3
+    } else {
+        x.max <- max(
+            lachesis.categorized$MRCA_time_mean,
+            lachesis.categorized$ECA_time_mean,
+            na.rm = TRUE
+        ) * 1.3
+    }
+
+    plot_early_late_ecdf <- function(dt, title) {
+        plot(
+            NA, NA,
+            xlim = c(x.min, x.max),
+            ylim = c(0, 1),
+            xlab = NA,
+            ylab = NA,
+            axes = FALSE,
+            frame.plot = FALSE
+        )
+
+        Axis(side = 1, cex = 0.7)
+        Axis(side = 2, cex = 0.7)
+        mtext("SNVs per Mb", side = 1, line = 2, cex = 0.7)
+        mtext("Fraction of tumors", side = 2, line = 2, cex = 0.7)
+        mtext(title, side = 3, line = 3, cex = 0.9, font = 2)
+
+        if (class.show.age) mut.show.realtime <- TRUE
+        if (mut.show.realtime) {
+            weeks_pc <- c(12, 27, 38, 64, 90, 116, 142, 194, 246, 298, 350, 402)
+            # Converting SNVs per day to SNVs per Mb starting from
+            # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
+            snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
+            realtime_labels <- c("12wk", "27wk", "38wk", "6mo", "12mo", "18mo", "24mo", "36mo", "48mo", "60mo", "72mo", "84mo")
+
+            axis(
+                side = 3, at = c(x.min, snvs_per_mb, x.max),
+                labels = c("", realtime_labels, ""),
+                cex.axis = 0.7
+            )
+            segments(
+                x0 = x.min, y0 = par("usr")[4], x1 = x.max, y1 = par("usr")[4],
+                xpd = NA
+            )
+            mtext("Estimated time (weeks post conception and months postnatal)",
+                side = 3,
+                line = 2, cex = 0.7
+            )
+        }
+        ## MRCA
+        to.plot.MRCA <- data.frame(
+            x.lower = rep(sort(c(dt$MRCA_time_mean)),
+                each = 2
+            )[-1],
+            x.upper = rep(sort(c(dt$MRCA_time_mean)),
+                each = 2
+            )[-2 * (nrow(dt))]
+        )
+        to.plot.MRCA$y.lower <- vapply(
+            rep(sort(c(dt$MRCA_time_mean)), each = 2),
+            function(x) {
+                sum(dt$MRCA_time_upper <= x)
+            },
+            numeric(1)
+        )[-2 * (nrow(dt))]
+        to.plot.MRCA$y.upper <- vapply(
+            rep(sort(c(dt$MRCA_time_mean)), each = 2),
+            function(x) {
+                sum(dt$MRCA_time_lower <= x)
+            },
+            numeric(1)
+        )[-1]
+
+        polygon(c(to.plot.MRCA$x.lower, rev(to.plot.MRCA$x.upper)),
+            c(to.plot.MRCA$y.lower, rev(to.plot.MRCA$y.upper)) / nrow(dt),
+            col = adjustcolor(lach.col.zero, alpha.f = 0.3), border = NA
+        )
+        plot.ecdf(
+            dt$MRCA_time_mean,
+            add = TRUE,
+            verticals = TRUE,
+            col = "#4FB12B",
+            lwd = 2,
+            pch = 19,
+            cex = 0.8
+        )
+
+        ## ECA
+        if ("ECA_time_mean" %in% colnames(dt)) {
+            eca_dt <- dt[!is.na(ECA_time_mean)]
+            if (nrow(eca_dt) > 1) {
+                to.plot.ECA <- data.frame(
+                    x.lower = rep(sort(c(eca_dt$ECA_time_mean)),
+                        each = 2
+                    )[-1],
+                    x.upper = rep(sort(c(eca_dt$ECA_time_mean)),
+                        each = 2
+                    )[-2 * (nrow(eca_dt[!is.na(ECA_time_mean), ]))]
+                )
+                to.plot.ECA$y.lower <- vapply(
+                    rep(sort(c(eca_dt$ECA_time_mean)), each = 2),
+                    function(x) {
+                        sum(eca_dt$ECA_time_upper <= x,
+                            na.rm = TRUE
+                        )
+                    }, numeric(1)
+                )[
+                    -2 * (nrow(eca_dt[
+                        !is.na(ECA_time_mean),
+                    ]))
+                ]
+                to.plot.ECA$y.upper <- vapply(
+                    rep(sort(c(eca_dt$ECA_time_mean)), each = 2),
+                    function(x) {
+                        sum(eca_dt$ECA_time_lower <= x,
+                            na.rm = TRUE
+                        )
+                    }, numeric(1)
+                )[-1]
+
+                polygon(c(to.plot.ECA$x.lower, rev(to.plot.ECA$x.upper)),
+                    c(to.plot.ECA$y.lower, rev(to.plot.ECA$y.upper)) /
+                        nrow(eca_dt[!is.na(ECA_time_mean), ]),
+                    col = adjustcolor(lach.col.multi, alpha.f = 0.3), border = NA
+                )
+                plot.ecdf(
+                    eca_dt$ECA_time_mean,
+                    add = TRUE,
+                    verticals = TRUE,
+                    col = "#176A02",
+                    lwd = 2,
+                    pch = 19,
+                    cex = 0.8
+                )
+            }
+        }
+
+        ## Age at diagnosis
+        if (class.show.age == TRUE) {
+            age_months <- dt$Age / surv.time.scale
+            age_weeks_pc <- 38 + age_months * 4.345
+            age_xaxis <- age_weeks_pc * 7 * mut.snv.rate / (3300 * 2)
+
+
+            mrca_ecdf <- ecdf(dt$MRCA_time_mean)
+            age_yaxis <- mrca_ecdf(dt$MRCA_time_mean)
+            mrca_snvs <- dt$MRCA_time_mean
+
+            par(new = TRUE)
+            plot(NA, xlim = c(x.min, x.max), ylim = c(0, 1), axes = FALSE, xlab = NA, ylab = NA)
+
+            points(age_xaxis, age_yaxis, pch = 19, col = "black", cex = 0.8)
+
+            for (i in seq_len(nrow(dt))) {
+                segments(
+                    x0 = mrca_snvs[i], y0 = age_yaxis[i],
+                    x1 = age_xaxis[i], y1 = age_yaxis[i],
+                    col = "black", lwd = 0.5, lty = 2
+                )
+            }
+
+            legend(
+                "bottomright",
+                legend = if (class.show.age) c("MRCA", "ECA", "Age at diagnosis") else c("MRCA", "ECA"),
+                col = if (class.show.age) c("#4FB12B", "#176A02", "black") else c("#4FB12B", "#176A02"),
+                lwd = 2, bty = "o", cex = 0.7, inset = c(0.05, 0.01)
+            )
+        } else {
+            legend(
+                "bottomright",
+                legend = c("MRCA", "ECA"),
+                col = c("#4FB12B", "#176A02"),
+                lwd = 2,
+                bty = "o",
+                cex = 0.7,
+                inset = c(0.05, 0.1)
+            )
+        }
+    }
+
+    plot_early_late_ecdf(
+        lachesis.categorized[MRCA_timing == "Early MRCA"],
+        "Early MRCA"
+    )
+
+    plot_early_late_ecdf(
+        lachesis.categorized[MRCA_timing == "Late MRCA"],
+        "Late MRCA"
+    )
+
+    if (!is.null(output.dir)) {
+        dev.off()
+    }
 
     if (!is.null(output.dir)) {
         data.table::fwrite(lachesis.categorized,
