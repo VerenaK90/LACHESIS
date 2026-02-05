@@ -137,7 +137,7 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     cn.info[[B.col]] <- as.numeric(as.character(cn.info[[B.col]]))
     # set B to zero if TCN==0
     if(nrow(cn.info[TCN == 1,]) > 0){
-      cn.info[TCN == 1,][[B.col]] <- 0
+      cn.info[TCN == 1, (B.col) := 0]
     }
 
     # for callers without subconal/clonal assignment,
