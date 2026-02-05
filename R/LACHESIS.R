@@ -1151,11 +1151,12 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
     polygon(c(to.plot.MRCA$x.lower, rev(to.plot.MRCA$x.upper)),
         c(to.plot.MRCA$y.lower, rev(to.plot.MRCA$y.upper)) / nrow(lachesis),
-        col = lach.col.zero, border = NA
+        col = adjustcolor(lach.col.zero, alpha.f = 0.3),
+        border = NA
     )
 
     plot.ecdf(lachesis$MRCA_time_mean,
-        col = "black", add = TRUE,
+        col = lach.col.zero, add = TRUE,
         verticals = TRUE
     )
 
@@ -1191,20 +1192,21 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     polygon(c(to.plot.ECA$x.lower, rev(to.plot.ECA$x.upper)),
         c(to.plot.ECA$y.lower, rev(to.plot.ECA$y.upper)) /
             nrow(lachesis[!is.na(ECA_time_mean), ]),
-        col = lach.col.multi, border = NA
+        col = adjustcolor(lach.col.multi, alpha.f = 0.3),
+        border = NA
     )
     
     legend("topright",
-       legend = c("ECA", "MRCA"),
-       fill = c(lach.col.multi, lach.col.zero),
-       border = NA,
-       bty = "o",
-       cex = 0.7,
-       inset = c(0.05, 0.1)
-    )  
+        legend = c("ECA", "MRCA"),
+        fill = c(lach.col.multi, lach.col.zero),
+        border = NA,
+        bty = "o",
+        cex = 0.7,
+        inset = c(0.05, 0.1)
+    )
     
     plot.ecdf(lachesis$ECA_time_mean,
-        col = "black", add = TRUE,
+        col = lach.col.multi, add = TRUE,
         verticals = TRUE
     )
 
@@ -1563,7 +1565,7 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
                 digits = 4
             )
             )), size = 5
-        )
+    )
 
     survival.fit.risk.table <- survminer::ggrisktable(survival.fit,
         data = lachesis.categorized,
