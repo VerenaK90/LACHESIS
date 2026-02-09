@@ -15,9 +15,6 @@ classifyLACHESIS(
   lach.col.zero = "#4FB12B",
   surv.time = "OS.time",
   surv.event = "OS",
-  class.show.age = FALSE,
-  mut.show.realtime = FALSE,
-  mut.snv.rate = 3.2,
   surv.time.scale = 1,
   output.dir = NULL
 )
@@ -42,14 +39,6 @@ pre-defined threshold. Currently, only "neuroblastoma" is supported.}
 \item{surv.time}{column name containing survival time; defaults to \code{OS.time}.}
 
 \item{surv.event}{column name containing event; defaults to \code{OS}.}
-
-\item{class.show.age}{logical; if \code{TRUE}, displays age at diagnosis.}
-
-\item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception
-on the evolutionary timeline.}
-
-\item{mut.snv.rate}{optional; rate of accumulated SNVs per day in a
-diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)}
 
 \item{surv.time.scale}{numeric value by which survival time is to be divided
 (e.g., 365 for converting days into years, 30 for months), defaults to \code{1}.}
