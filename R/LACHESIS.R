@@ -1387,6 +1387,8 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
                 na.rm = TRUE
             )
             x.min <- 0
+            cex_id <- if(nrow(to.plot2) > 45) 0.35 else 0.6
+            cex_points <- if(nrow(to.plot2) > 45) 0.7 else 1
 
             par(mar = c(3.5, 4, 4, 2), xpd = FALSE)
 
@@ -1397,7 +1399,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
                 yaxt = "n",
                 xlab = NA,
                 ylab = "",
-                cex.axis = 0.7
+                cex.axis = 0.5
             )
             mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
             axis(
@@ -1405,7 +1407,7 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
                 at = y.pos,
                 labels = to.plot2[["Sample_ID"]],
                 las = 2,
-                cex.axis = 0.7
+                cex.axis = cex_id
             )
             title(main = "Real-Time Estimation at ECA/ MRCA vs Age at Diagnosis", cex.main = 1, line = 3)
 
@@ -1416,7 +1418,8 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
                     to.plot2[["MRCA_time_mean"]][to.plot2_mrca],
                     y.pos[to.plot2_mrca],
                     pch = 16,
-                    col = lach.col.zero
+                    col = lach.col.zero, 
+                    cex = cex_points
                 )
             }
 
@@ -1427,7 +1430,8 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
                     to.plot2[["ECA_time_mean"]][to.plot2_eca],
                     y.pos[to.plot2_eca],
                     pch = 16,
-                    col = lach.col.multi
+                    col = lach.col.multi, 
+                    cex = cex_points
                 )
 
                 segments(
@@ -1446,7 +1450,8 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
                 age_xaxis[to.plot2_age],
                 y.pos[to.plot2_age],
                 pch = 16,
-                col = "black"
+                col = "black", 
+                cex = cex_points
             )
             if ("MRCA_time_mean" %in% colnames(to.plot2)) {
                 segments(
@@ -1456,6 +1461,30 @@ plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
                     y1 = y.pos[to.plot2_age],
                     col = "gray50",
                     lty = 2
+                )
+            }
+
+            # Quality check whether age at diagnosis is before the timing of MRCA
+            age_before_mrca <- to.plot2_age &
+                !is.na(to.plot2[["MRCA_time_mean"]]) &
+                (age_xaxis < to.plot2[["MRCA_time_mean"]])
+            
+            if (any(age_before_mrca, na.rm = TRUE)) {
+                text(
+                    x = age_xaxis[age_before_mrca],
+                    y = y.pos[age_before_mrca],
+                    labels = "*",
+                    col = "red",
+                    pos = 4,
+                    cex = 1.1
+                )
+                mtext(
+                    "       * Diagnosis before timing of MRCA: doublecheck QC and confidence intervals",
+                    side = 0,
+                    line = 2,
+                    col = "red",
+                    cex = 0.6,
+                    adj = 0
                 )
             }
 
