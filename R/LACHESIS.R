@@ -1238,8 +1238,12 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #' pre-defined threshold. Currently, only "neuroblastoma" is supported.
 #' @param surv.time column name containing survival time; defaults to `OS.time`.
 #' @param surv.event column name containing event; defaults to `OS`.
+#' @param lach.col.zero optional, bar color for single-copy SSNV densities.
+#' @param lach.col.multi optional, bar color for multi-copy SSNV densities.
+#' @param surv.time.scale numeric value by which survival time is to be divided
+#' (e.g., 365 for converting days into years, 30 for months), defaults to `1`.
 #' @param output.dir link to directory in which output is to be stored.
-#' @return data.table with binary assignment early/ late
+#' @return data.table with binary assignment early/ late 
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt",
@@ -1279,14 +1283,17 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #' @export
 #' @import survminer
 
-classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
+classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
-                             surv.time = "OS.time", surv.event = "OS") {
+                             lach.col.multi = "#176A02", lach.col.zero = "#4FB12B",
+                             surv.time = "OS.time", surv.event = "OS", surv.time.scale = 1, 
+                             output.dir = NULL) {
     MRCA_time_mean <- NULL
 
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")
     }
+
     entities <- c("neuroblastoma")
     entity <- match.arg(arg = entity, choices = entities, several.ok = FALSE)
 
@@ -1333,13 +1340,152 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL, output.dir = NULL,
     lachesis.categorized <- lachesis
     lachesis.categorized$MRCA_timing <-
         ifelse(lachesis.categorized$MRCA_time_mean <
-            mrca.cutpoint, "early", "late")
+            mrca.cutpoint, "Early MRCA", "Late MRCA")
     lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing,
-        levels = c("early", "late")
+        levels = c("Early MRCA", "Late MRCA")
     )
 
     attr(lachesis.categorized, "MRCA Cutpoint") <- mrca.cutpoint
     attr(lachesis.categorized, "Entity") <- entity
+
+    if (!is.null(output.dir)) {
+        pdf(file = file.path(output.dir, "MRCA_Classification.pdf"), width = 10, height = 5)
+    }
+
+    lachesis.categorized[, MRCA_timing := fifelse(
+        MRCA_time_mean < mrca.cutpoint,
+        "Early MRCA",
+        "Late MRCA"
+    )]
+
+    par(mfrow = c(1, 2), mar = c(3, 4, 4, 1), xpd = FALSE)
+
+    x.min <- 0
+    x.max <- max(
+        lachesis.categorized$MRCA_time_mean,
+        lachesis.categorized$ECA_time_mean,
+        na.rm = TRUE
+    ) * 1.3
+
+    plot_early_late_ecdf <- function(dt, title) {
+        plot(
+            NA, NA,
+            xlim = c(x.min, x.max),
+            ylim = c(0, 1),
+            xlab = NA,
+            ylab = NA,
+            axes = FALSE,
+            frame.plot = FALSE
+        )
+
+        Axis(side = 1, cex = 0.7)
+        Axis(side = 2, cex = 0.7)
+        mtext("SNVs per Mb", side = 1, line = 2, cex = 0.7)
+        mtext("Fraction of tumors", side = 2, line = 2, cex = 0.7)
+        mtext(title, side = 3, line = 2, cex = 0.9, font = 2)
+        mtext(paste("cutpoint =", mrca.cutpoint, "SNVs per Mb"), side = 3, line = 1, cex = 0.7, font = 1)
+
+        ## MRCA
+        to.plot.MRCA <- data.frame(
+            x.lower = rep(sort(c(dt$MRCA_time_mean)),
+                each = 2
+            )[-1],
+            x.upper = rep(sort(c(dt$MRCA_time_mean)),
+                each = 2
+            )[-2 * (nrow(dt))]
+        )
+        to.plot.MRCA$y.lower <- vapply(
+            rep(sort(c(dt$MRCA_time_mean)), each = 2),
+            function(x) {
+                sum(dt$MRCA_time_upper <= x)
+            },
+            numeric(1)
+        )[-2 * (nrow(dt))]
+        to.plot.MRCA$y.upper <- vapply(
+            rep(sort(c(dt$MRCA_time_mean)), each = 2),
+            function(x) {
+                sum(dt$MRCA_time_lower <= x)
+            },
+            numeric(1)
+        )[-1]
+
+        polygon(c(to.plot.MRCA$x.lower, rev(to.plot.MRCA$x.upper)),
+            c(to.plot.MRCA$y.lower, rev(to.plot.MRCA$y.upper)) / nrow(dt),
+            col = adjustcolor(lach.col.zero, alpha.f = 0.3), border = NA
+        )
+        plot.ecdf(
+            dt$MRCA_time_mean,
+            add = TRUE,
+            verticals = TRUE,
+            col = "#4FB12B",
+            lwd = 2,
+            pch = 19,
+            cex = 0.8
+        )
+
+        ## ECA
+        if ("ECA_time_mean" %in% colnames(dt)) {
+            eca_dt <- dt[!is.na(ECA_time_mean)]
+            if (nrow(eca_dt) > 1) {
+                to.plot.ECA <- data.frame(
+                    x.lower = rep(sort(c(eca_dt$ECA_time_mean)),
+                        each = 2
+                    )[-1],
+                    x.upper = rep(sort(c(eca_dt$ECA_time_mean)),
+                        each = 2
+                    )[-2 * (nrow(eca_dt[!is.na(ECA_time_mean), ]))]
+                )
+                to.plot.ECA$y.lower <- vapply(
+                    rep(sort(c(eca_dt$ECA_time_mean)), each = 2),
+                    function(x) {
+                        sum(eca_dt$ECA_time_upper <= x,
+                            na.rm = TRUE
+                        )
+                    }, numeric(1)
+                )[
+                    -2 * (nrow(eca_dt[
+                        !is.na(ECA_time_mean),
+                    ]))
+                ]
+                to.plot.ECA$y.upper <- vapply(
+                    rep(sort(c(eca_dt$ECA_time_mean)), each = 2),
+                    function(x) {
+                        sum(eca_dt$ECA_time_lower <= x,
+                            na.rm = TRUE
+                        )
+                    }, numeric(1)
+                )[-1]
+
+                polygon(c(to.plot.ECA$x.lower, rev(to.plot.ECA$x.upper)),
+                    c(to.plot.ECA$y.lower, rev(to.plot.ECA$y.upper)) /
+                        nrow(eca_dt[!is.na(ECA_time_mean), ]),
+                    col = adjustcolor(lach.col.multi, alpha.f = 0.3), border = NA
+                )
+                plot.ecdf(
+                    eca_dt$ECA_time_mean,
+                    add = TRUE,
+                    verticals = TRUE,
+                    col = "#176A02",
+                    lwd = 2,
+                    pch = 19,
+                    cex = 0.8
+                )
+            }
+        }
+    }
+    plot_early_late_ecdf(
+        lachesis.categorized[MRCA_timing == "Early MRCA"],
+        "Early MRCA"
+    )
+
+    plot_early_late_ecdf(
+        lachesis.categorized[MRCA_timing == "Late MRCA"],
+        "Late MRCA"
+    )
+
+    if (!is.null(output.dir)) {
+        dev.off()
+    }
 
     if (!is.null(output.dir)) {
         data.table::fwrite(lachesis.categorized,
