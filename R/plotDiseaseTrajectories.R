@@ -145,7 +145,7 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
     if ("ECA_time_mean" %in% colnames(to.plot)) {
       to.plot_eca <- !is.na(to.plot[["ECA_time_mean"]])
       points(
-        to.plot2[["ECA_time_mean"]][to.plot_eca],
+        to.plot[["ECA_time_mean"]][to.plot_eca],
         y.pos[to.plot_eca],
         pch = 16,
         col = lach.col.eca,
