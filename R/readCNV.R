@@ -135,6 +135,10 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     # moreover, round copy numbers to 1 digit (for e.g. input from PURPLE)
     cn.info[[A.col]] <- as.numeric(as.character(cn.info[[A.col]]))
     cn.info[[B.col]] <- as.numeric(as.character(cn.info[[B.col]]))
+    # set B to zero if TCN == 1
+    if(nrow(cn.info[TCN == 1,]) > 0){
+      cn.info[TCN == 1, (B.col) := 0]
+    }
 
     # for callers without subconal/clonal assignment,
     # remove subclonals based on maximal deviation of 0.2 for the

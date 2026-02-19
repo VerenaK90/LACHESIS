@@ -1,6 +1,6 @@
 Package: LACHESIS
 Title: Functions used to analyze early tumor evolution from whole genome sequencing data
-Version: 0.99.4
+Version: 0.99.5
 Authors@R: c(
   person(given = "Verena",
          family = "Körber",
