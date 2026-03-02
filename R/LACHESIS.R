@@ -952,8 +952,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' plotLachesis(lachesis)
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title
-#' @importFrom grDevices adjustcolor
 #' arrows legend points polygon
+#' @importFrom grDevices adjustcolor
+
 
 plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
                          lach.log.densities = FALSE, lach.col.multi = "#176A02",
