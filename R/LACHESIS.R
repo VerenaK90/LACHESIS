@@ -1092,11 +1092,12 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         }
 
         hist(to.plot[, ECA_time_mean],
-            xlim = c(0, 1.05 * max(to.plot[, ECA_time_mean],
+            xlim = c(0, max(0.01, 1.05 * max(to.plot[, ECA_time_mean],
                 na.rm = TRUE
-            )),
+            ))),
             breaks = seq(
-                0, max(to.plot[, ECA_time_mean], na.rm = TRUE) * 1.05,
+                0, max(0.01, max(to.plot[, ECA_time_mean], na.rm = TRUE)) *
+                  1.05,
                 binwidth
             ),
             col = lach.col.multi, border = lach.border, main = NA,
@@ -1243,7 +1244,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 #' @param surv.time.scale numeric value by which survival time is to be divided
 #' (e.g., 365 for converting days into years, 30 for months), defaults to `1`.
 #' @param output.dir link to directory in which output is to be stored.
-#' @return data.table with binary assignment early/ late 
+#' @return data.table with binary assignment early/ late
 #' @examples
 #' # An example file with sample annotations and meta data
 #' input.files <- system.file("extdata", "Sample_template.txt",
@@ -1286,7 +1287,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
                              lach.col.multi = "#176A02", lach.col.zero = "#4FB12B",
-                             surv.time = "OS.time", surv.event = "OS", surv.time.scale = 1, 
+                             surv.time = "OS.time", surv.event = "OS", surv.time.scale = 1,
                              output.dir = NULL) {
     MRCA_time_mean <- NULL
 
