@@ -10,8 +10,6 @@ plotClinicalCorrelations(
   clin.par = "Age",
   clin.suppress.outliers = FALSE,
   clin.log.densities = FALSE,
-  corr.time.scale = 1,
-  mut.snv.rate = 3.2,
   lach.col.multi = "#176A02",
   lach.col.zero = "#4FB12B",
   output.file = NULL
@@ -26,13 +24,6 @@ plotClinicalCorrelations(
 lowest and highest densities) be plotted? Default \code{FALSE}.}
 
 \item{clin.log.densities}{plot logarithmic densities. Default \code{FALSE}.}
-
-\item{corr.time.scale}{numeric value by which survival time is to be divided
-to convert into months (e.g., 30 for converting days into months), defaults
-to \code{1}.}
-
-\item{mut.snv.rate}{optional; rate of accumulated SNVs per day in a
-diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)}
 
 \item{lach.col.multi}{optional, color for multi-copy SSNV densities.}
 

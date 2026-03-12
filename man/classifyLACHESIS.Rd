@@ -2,8 +2,8 @@
 % Please edit documentation in R/LACHESIS.R
 \name{classifyLACHESIS}
 \alias{classifyLACHESIS}
-\title{Classify a tumor's start of clonal outgrowth during tumorigenesis as "early"
-or "late" (favorable/ unfavorable prognosis) depending on the mutation
+\title{Classify a tumor's start of clonal outgrowth during tumorigenesis as "Early MRCA"
+or "Late MRCA" (favorable/ unfavorable prognosis) depending on the mutation
 density at its MRCA}
 \usage{
 classifyLACHESIS(

@@ -1225,8 +1225,8 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
 
 
-#' Classify a tumor's start of clonal outgrowth during tumorigenesis as "early"
-#'  or "late" (favorable/ unfavorable prognosis) depending on the mutation
+#' Classify a tumor's start of clonal outgrowth during tumorigenesis as "Early MRCA"
+#'  or "Late MRCA" (favorable/ unfavorable prognosis) depending on the mutation
 #'  density at its MRCA
 #' @description
 #' Takes SNV density timing as computed by `LACHESIS` as input and classifies
@@ -1341,12 +1341,15 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL,
 
     # Categorizing according to MRCA
     lachesis.categorized <- lachesis
-    lachesis.categorized$MRCA_timing <-
-        ifelse(lachesis.categorized$MRCA_time_mean <
-            mrca.cutpoint, "Early MRCA", "Late MRCA")
-    lachesis.categorized$MRCA_timing <- factor(lachesis.categorized$MRCA_timing,
-        levels = c("Early MRCA", "Late MRCA")
-    )
+    lachesis.categorized[, MRCA_timing := data.table::fifelse(
+        MRCA_time_mean < mrca.cutpoint,
+        "Early MRCA",
+        "Late MRCA"
+    )]
+    lachesis.categorized[, MRCA_timing :=
+        factor(MRCA_timing,
+        levels = c("Early MRCA", "Late MRCA"))
+    ]
 
     attr(lachesis.categorized, "MRCA Cutpoint") <- mrca.cutpoint
     attr(lachesis.categorized, "Entity") <- entity
@@ -1354,12 +1357,6 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL,
     if (!is.null(output.dir)) {
         pdf(file = file.path(output.dir, "MRCA_Classification.pdf"), width = 10, height = 5)
     }
-
-    lachesis.categorized[, MRCA_timing := fifelse(
-        MRCA_time_mean < mrca.cutpoint,
-        "Early MRCA",
-        "Late MRCA"
-    )]
 
     par(mfrow = c(1, 2), mar = c(3, 4, 4, 1), xpd = FALSE)
 

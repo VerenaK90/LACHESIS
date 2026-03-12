@@ -8,11 +8,6 @@
 #' @param clin.suppress.outliers shall outliers (defined as the 2.5% tumors with
 #'  lowest and highest densities) be plotted? Default `FALSE`.
 #' @param clin.log.densities plot logarithmic densities. Default `FALSE`.
-#' @param mut.snv.rate optional; rate of accumulated SNVs per day in a
-#' diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)
-#' @param corr.time.scale numeric value by which survival time is to be divided
-#' to convert into months (e.g., 30 for converting days into months), defaults
-#' to `1`.
 #' @param lach.col.zero optional, color for single-copy SSNV densities.
 #' @param lach.col.multi optional, color for multi-copy SSNV densities.
 #' @param output.file optional; file path to output.
@@ -60,7 +55,6 @@
 plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",
                                      clin.suppress.outliers = FALSE,
                                      clin.log.densities = FALSE,
-                                     corr.time.scale = 1, mut.snv.rate = 3.2,
                                      lach.col.multi = "#176A02",
                                      lach.col.zero = "#4FB12B",
                                      output.file = NULL) {

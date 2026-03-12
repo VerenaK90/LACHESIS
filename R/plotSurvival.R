@@ -153,11 +153,11 @@ plotSurvival <- function(lachesis = NULL, mrca.cutpoint = NULL,
   lachesis.categorized[[surv.time]] <-
     as.numeric(lachesis.categorized[[surv.time]]) / surv.time.scale
   lachesis.categorized$MRCA_timing <-
-    ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "early",
-           "late"
+    ifelse(lachesis.categorized$MRCA_time_mean < mrca.cutpoint, "Early MRCA",
+           "Late MRCA"
     )
   lachesis.categorized$MRCA_timing <-
-    factor(lachesis.categorized$MRCA_timing, levels = c("early", "late"))
+    factor(lachesis.categorized$MRCA_timing, levels = c("Early MRCA", "Late MRCA"))
 
   # Survival analysis
   survival.fit <- survival::survfit(
