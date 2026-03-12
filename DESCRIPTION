@@ -21,7 +21,7 @@ Copyright: Verena Körber, Anand Mayakonda, Maximilia Eggle (2025)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends:
-  R (>= 4.5)
+  R (>= 4.3)
 Imports:
   data.table, vcfR, tidyr, stats, utils, graphics, grDevices, ggplot2, gridExtra, survival, survminer, RColorBrewer, Biostrings
 Suggests:
