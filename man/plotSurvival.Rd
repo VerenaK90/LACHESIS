@@ -13,8 +13,9 @@ plotSurvival(
   surv.palette = c("dodgerblue", "dodgerblue4"),
   surv.time.breaks = NULL,
   surv.time.scale = 1,
-  surv.title = "Survival probability",
-  surv.ylab = "Survival"
+  surv.title = "Survival Probability",
+  surv.ylab = "Survival",
+  surv.xlab = "Time"
 )
 }
 \arguments{
@@ -44,6 +45,8 @@ to \code{NULL}.}
 \item{surv.title}{main title.}
 
 \item{surv.ylab}{y-axis label, defaults to \code{Survival}.}
+
+\item{surv.xlab}{x-axis label, defaults to \code{Time}.}
 }
 \value{
 survival graphs
