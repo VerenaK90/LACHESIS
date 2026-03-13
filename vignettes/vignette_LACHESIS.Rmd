@@ -58,7 +58,7 @@ If you use LACHESIS in published research, please cite:
 
 # Input Data
 
-LACHESIS takes sample names, somatic single nucleotide variants and allele-specific copy number information as input. Though not strictly required, you may, ideally, also provide an estimate for the tumor cell purity and ploidy. Sample name, paths to respective variant files,  and optionally further specifications can either be specified by vectors or in a tab-delimited **sample-specification file**. The package can be run on a single sample or on a cohort. A detailed **log file** will be generated, capturing the date, time, and provided input parameters.
+LACHESIS takes sample names, somatic single nucleotide variants and allele-specific copy number information as input. In addtion, please also provide an estimate for the tumor cell purity and ploidy. Sample name, paths to respective variant files,  and optionally further specifications can either be specified by vectors or in a tab-delimited **sample-specification file**. The package can be run on a single sample or on a cohort. A detailed **log file** will be generated, capturing the date, time, and provided input parameters.
 
 #### Copy Number Variation (CNV) File
 
@@ -66,7 +66,7 @@ The CNV file is a tab-delimited file that contains segmented copy number informa
 
 #### Single Nucleotide Variant (SNV) File
 
-The SNV file should be in VCF format (Variant Call Format), a standardized text file format with a **header section** (lines starting with # and ##) and a **data section** where each row represents a variant. We recommend using only the variants that have passed the filtering process.
+The SNV file should be in VCF format (Variant Call Format), a standardized text file format with a **header section** (lines starting with # and ##) and a **data section** where each row represents a variant. We recommend including only variants that have passed the filtering (i.e., FILTER = PASS). In addition, variants should be filtered based on relevant quality metrics such as mapping quality and strand bias, if these criteria are not already incorporated into the pipeline’s filtering ([i.e. applying this perl script for variant filtering](https://github.com/ckandoth/variant-filter)).
 
 # Package Output
 
@@ -80,7 +80,7 @@ LACHESIS utilizes whole genome sequencing data to determine the mutational timin
 
 #### Graphs (.pdf)
 
-* **SNV_densities.pdf:** histograms of normalized, mean single-copy and multi-copy mutation densities and timeline of early tumor evolution
+* **Evolutionary_timeline.pdf:** histograms of normalized, mean single-copy and multi-copy mutation densities and timeline of early tumor evolution
 * **VAF_histogram_strat.pdf:** measured copy numbers along the genome and variant allele frequency (VAF) histograms of SNVs stratified by copy number and minor/major allele count
 * **VAF_histogram:** variant allele frequency histogram and density distribution of all SNVs
 * **SNV_timing_per_SNV_ID.pdf:** clonality status of SNVs associated with specific chromosomal gains
@@ -90,7 +90,9 @@ Additionally, if the function was applied to a cohort, the following files will 
 * **SNV_densities_cohort.pdf:** histograms and cumulative distributions (with 95% confidence intervals) of mean mutation densities per segment at MRCA and ECA
 * **Driver_mutations_cohort.pdf:** known driver SNVs and their evolutionary timing clonal (pre-CNV, post-CNV, unknown) or subclonal
 * **lachesis_clin.par.pdf:** correlation between SNV densities computed by LACHESIS and clinical parameters (age, survival,...)
+* **trajectories_plot.pdf:** correlation between real-time estimates of ECA/ MRCA and Age at diagnosis
 * **survival_plots.pdf:** Kaplan-Meier plots stratified by MRCA density if providing survival information
+* **classifier_plot.pdf:** cumulative distributions (with 95% confidence intervals) of mean mutation densities per segment at MRCA and ECA stratified by MRCA cutpoint
 
 ## Structure
 
@@ -167,7 +169,7 @@ head(cn_data, n = 1)
 
 ### Importing Variant Information (readVCF)  
 
-The `readVCF` function is used to import a VCF file and extract key genomic information such as read counts and VAFs. Supported tools to generate the VCF file are [Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/360037593851-Mutect2), [Strelka2](https://github.com/Illumina/strelka?tab=readme-ov-file), [Sentieon](https://support.sentieon.com/manual/) and the [DKFZ SNV Calling Workflow](https://github.com/DKFZ-ODCF/SNVCallingWorkflow).
+The `readVCF` function is used to import a VCF file and extract key genomic information such as read counts and VAFs. Supported tools to generate the VCF file are [Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/360037593851-Mutect2), [Strelka2](https://github.com/Illumina/strelka?tab=readme-ov-file), [Sentieon](https://support.sentieon.com/manual/), [DKFZ SNV Calling Workflow](https://github.com/DKFZ-ODCF/SNVCallingWorkflow) and the [Sage output provided by Oncoanalyser](https://nf-co.re/oncoanalyser/dev/).
 
 #### Input 
 
@@ -571,7 +573,7 @@ nb <- LACHESIS::nbImport(cnv = c_data, snv = s_data, purity = 1, ploidy = 2.51)
 cl_muts <- LACHESIS::clonalMutationCounter(nb)
 norm_muts <- LACHESIS::normalizeCounts(cl_muts)
 mrca <- LACHESIS::MRCA(norm_muts)
-LACHESIS::plotMutationDensities(mrca)
+LACHESIS::plotMutationDensities(mrca, mut.border = FALSE)
 ```
 
 The single-copy SNVs place the MRCA at approximately 0.22 SNVs per Mb. The ECA, defined by multi-copy SNVs, is positioned before the MRCA, close to 0 SNVs per Mb and most of the chromosomal gains are asscoiated with it. This pattern is typical in high-risk neuroblastoma, where aneuploidy occurs during the first trimester, followed by the emergence of the MRCA around birth or during the first year of life.
@@ -775,14 +777,14 @@ data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 ```{r plot5, message=FALSE, warning=FALSE, fig.cap="Cumulative distribution of SSNV densities in ECA (dark green) and MRCA (light green)"}
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
-LACHESIS::plotLachesis(lachesis)
+LACHESIS::plotLachesis(lachesis, lach.border = FALSE)
 ```
 
 This graph provides a cohort-level overview, illustrating two late-MRCA (SNVs per Mb > 0.05) and one early-MRCA sample. In the late-MRCA cases, an early ECA was detected, indicating a longer evolution rather than a later onset.
 
 ### Plotting Clinical Correlations (plotClinicalCorrelations)
 
-This function takes SNV densities as input and correlates them with clinical data specified by the user, such as age at diagnosis, survival data etc.
+This function takes SNV densities as input and correlates them with clinical data specified by the user, such as age at diagnosis, survival data etc. 
 
 #### Input 
 
@@ -801,6 +803,27 @@ LACHESIS::plotClinicalCorrelations(lachesis)
 
 The cohort size in this case is too small to draw reliable conclusions from these correlation plots. However, in larger neuroblastoma cohorts (Körber et al.), a correlation between patient age and MRCA timing has been observed.
 
+### Plotting Disease Trajectories (plotDiseaseTrajectories)
+
+This function converts SNV densities measured at the ECA and MRCA into estimated time (weeks post conception or months postnatal), enabling comparison between inferred mutation timing and the age at diagnosis.
+
+#### Input 
+
+```{r plotDisTraj_function, eval = FALSE}
+plotDiseaseTrajectories(lachesis = NULL, mut.snv.rate = 3.2, lach.col.eca = "#176A02", lach.col.mrca = "#4FB12B", corr.time.scale = 1, output.file = NULL)
+```
+
+#### Example 
+
+```{r plot7, message=FALSE, warning=FALSE, fig.cap="Timeline of tumor evolution showing real-time of ECA, MRCA and age at diagnosis"}
+input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
+lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
+
+LACHESIS::plotDiseaseTrajectories(lachesis, corr.time.scale = 30, mut.snv.rate = 3.2)
+```
+
+The timeline depicts a diagnostic gap between MRCA and age at diagnosis, highlighting the potential for early detection strategies in neuroblastoma. 
+
 ### Plotting Survival (plotSurvival)
 
 The function `plotSurvival` plots correlation between SNV density timing at MRCA with Survival
@@ -808,23 +831,23 @@ The function `plotSurvival` plots correlation between SNV density timing at MRCA
 #### Input
 
 ```{r plotSurvival_function, eval = FALSE}
-plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = "OS.time", surv.event = "OS", surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival probability", surv.ylab = "Survival")
+plotSurvival(lachesis = NULL, mrca.cutpoint = NULL, output.dir = NULL, surv.time = "OS.time", surv.event = "OS", surv.palette = c("dodgerblue", "dodgerblue4"), surv.time.breaks = NULL, surv.time.scale = 1, surv.title = "Survival Probability", surv.ylab = "Survival", surv.xlab = "Time")
 ```
 
 #### Example
 
-```{r plot7, message=FALSE, warning=FALSE, fig.cap="Correlation between Survival and SNV densities at ECA and MRCA", echo = FALSE}
+```{r plot8, message=FALSE, warning=FALSE, fig.cap="Correlation between Survival and SNV densities at ECA and MRCA", echo = FALSE}
 input.files <- system.file("extdata", "Sample_template.txt", package = "LACHESIS")
 lachesis <- LACHESIS::LACHESIS(input.files = lachesis_input)
 
-LACHESIS::plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS", mrca.cutpoint = 0.05)
+LACHESIS::plotSurvival(lachesis, surv.time = "EFS.time", surv.event = "EFS", mrca.cutpoint = 0.05, surv.time.scale = 365, surv.xlab = "Time (years)", surv.ylab = "Event-Free Survival")
 ```
 
-The timing of the MRCA serves as a robust predictor of event-free survival. Tumors with an early MRCA are linked to favorable overall survival outcomes, while late-MRCA tumors are more frequently associated with relapse.
+The timing of the MRCA serves as a robust predictor of event-free survival. Tumors with an early MRCA are linked to favorable survival outcomes, while late-MRCA tumors are more frequently associated with relapse.
 
 ### Classifying Tumor Evolution (classifyLACHESIS)
 
-The function `classifyLACHESIS` classifies a tumor's start of clonal outgrowth during tumorigenesis as "early" or "late" (favorable/ unfavorable prognosis) depending on the mutation density at its MRCA.
+The function `classifyLACHESIS` classifies a tumor's start of clonal outgrowth during tumorigenesis as "Early MRCA" or "Late MRCA" (favorable/ unfavorable prognosis) depending on the mutation density at its MRCA.
 
 #### Input
 
