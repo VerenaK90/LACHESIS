@@ -19,7 +19,7 @@
 #' @param snv.files vector of snv files in same order as ids; should be in vcf
 #' format, will be ignored if `input.files` is specified.
 #' @param vcf.source Tool used for generating VCF file. Can be `strelka` or
-#' `mutect` or `dkfz` or `sentieon`.
+#' `mutect` or `dkfz` or `sentieon` or `sage`.
 #' @param purity vector tumor cell content in same order as ids; will be ignored
 #'  if `input.files` is specified.
 #' @param ploidy average copy number in the tumor sample in same order as ids;
@@ -345,7 +345,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             vcf.source <- match.arg(
                 arg = x$vcf.source, choices = c(
                     "strelka", "mutect",
-                    "sentieon", "dkfz"
+                    "sentieon", "dkfz", "sage"
                 ),
                 several.ok = FALSE
             )
@@ -638,7 +638,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             vcf.source[i] <- match.arg(
                 arg = vcf.source[i], choices = c(
                     "strelka", "mutect",
-                    "sentieon", "dkfz"
+                    "sentieon", "dkfz", "sage"
                 ),
                 several.ok = FALSE
             )
@@ -1099,7 +1099,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
             ))),
             breaks = seq(
                 0, max(0.01, max(to.plot[, ECA_time_mean], na.rm = TRUE)) *
-                  1.05,
+                    1.05,
                 binwidth
             ),
             col = lach.col.multi, border = lach.border, main = NA,
@@ -1215,14 +1215,15 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         verticals = TRUE
     )
 
-    title(main = paste("Cumulative SNV densities at ECA and MRCA"),
-          cex.main = 1)
+    title(
+        main = paste("Cumulative SNV densities at ECA and MRCA"),
+        cex.main = 1
+    )
 
     if (!is.null(output.file)) {
         dev.off()
     }
 }
-
 
 
 #' Classify a tumor's start of clonal outgrowth during tumorigenesis as "Early MRCA"
@@ -1348,8 +1349,8 @@ classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL,
     )]
     lachesis.categorized[, MRCA_timing :=
         factor(MRCA_timing,
-        levels = c("Early MRCA", "Late MRCA"))
-    ]
+            levels = c("Early MRCA", "Late MRCA")
+        )]
 
     attr(lachesis.categorized, "MRCA Cutpoint") <- mrca.cutpoint
     attr(lachesis.categorized, "Entity") <- entity
