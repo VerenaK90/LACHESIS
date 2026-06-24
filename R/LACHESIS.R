@@ -1291,9 +1291,10 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
 classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
-                             lach.col.multi = "#176A02", lach.col.zero = "#4FB12B",
-                             surv.time = "OS.time", surv.event = "OS", surv.time.scale = 1,
-                             output.dir = NULL) {
+                             lach.col.multi = "#176A02",
+                             lach.col.zero = "#4FB12B",
+                             surv.time = "OS.time", surv.event = "OS",
+                             surv.time.scale = 1, output.dir = NULL) {
     MRCA_time_mean <- NULL
 
     if (is.null(lachesis)) {
