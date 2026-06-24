@@ -48,6 +48,8 @@
 #' estimateMutationRate(lachesis)
 #'
 #' @export
+#' @import ggplot2
+#' @import data.table
 
 estimateMutationRate <- function(lachesis = NULL) {
   res <- ci <- r2 <- slope <- mu <- mu_ci <- . <- NULL
@@ -58,9 +60,10 @@ estimateMutationRate <- function(lachesis = NULL) {
     )
   }
 
-  if (is.null(lachesis[,Age])) {
+  if (is.null(lachesis[,Age]) | nrow(lachesis[!is.na(Age),]) == 0 ) {
     stop("Please specify age information.")
   }
+  lachesis <- lachesis[!is.na(Age),]
 
   # fit linear model
   res <- lachesis[,lm(Age ~ MRCA_time_mean)]
@@ -69,6 +72,12 @@ estimateMutationRate <- function(lachesis = NULL) {
   # calculate goodness of fit
   r2 <- summary(res)
   r2 <- r2$r.squared
+
+  # plot the fit
+  p <- ggplot(lachesis, aes(x = MRCA_time_mean, y = Age)) +
+    geom_point() +  geom_smooth(method='lm') + theme_classic() +
+    scale_x_continuous("Number of SNVs per Mb at MRCA") +
+    scale_y_continuous("Age at diagnosis")
 
   slope <- coef(res)["MRCA_time_mean"]
 
@@ -93,5 +102,5 @@ estimateMutationRate <- function(lachesis = NULL) {
   )
 
 
-  return(list(parameters = res, r.squared = r2))
+  return(list(parameters = res, r.squared = r2, plot = p))
 }

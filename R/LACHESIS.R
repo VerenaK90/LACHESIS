@@ -909,6 +909,15 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' @param lach.suppress.outliers whether outliers (defined as the 2.5% tumors
 #' with lowest and highest densities) are to be plot. Default `TRUE`.
 #' @param lach.log.densities plot logarithmic densities. Default `FALSE`.
+#' @param mut.snv.rate optional; rate of accumulated SNVs per day in a
+#' diploid genome (e.g. 3.2 SNVs/day in neuroblastoma). Will be ignored if
+#' `estimate.mut.rate` is set to `TRUE` or if `mut.show.realtime == FALSE`.
+#' @param estimate.mut.rate if set to `TRUE`, the mutation rate will be
+#' estimated by fitting a linear regression model to the relationship between
+#' age at diagnosis and mutaiton density at MRCA. Default `FALSE`. Will be
+#' ignored if `mut.show.realtime == FALSE`.
+#' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
+#' on the evolutionary timeline.
 #' @param lach.col.zero optional, bar color for single-copy SSNV densities.
 #' @param lach.col.multi optional, bar color for multi-copy SSNV densities.
 #' @param lach.border, optional, border color for the bars.
@@ -959,6 +968,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
 
 plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
+                         mut.snv.rate = 3.2, estimate.mut.rate = FALSE,
+                         mut.show.realtime = FALSE,
                          lach.log.densities = FALSE, lach.col.multi = "#176A02",
                          lach.border = NULL, binwidth = NULL,
                          lach.col.zero = "#4FB12B", output.file = NULL, ...) {
@@ -987,6 +998,18 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
             "No sample with MRCA density estimate provided. Returning zero."
         )
         return(NULL)
+    }
+    if(estimate.mut.rate == TRUE & mut.show.realtime == TRUE &
+       (is.null(lachesis[,Age]) | nrow(lachesis[!is.na(Age),]) == 0) ){
+      warning("Please provide age information if estimating mutation rates de
+              novo. Continuing without real time.")
+      mut.show.realtime <- FALSE
+    }else if( estimate.mut.rate == TRUE & mut.show.realtime == TRUE){
+      tmp <- estimateMutationRate(lachesis[!is.na(Age),])
+      # convert mutation rate per Mb to mutation rate per haploid genome
+      mut.snv.rate <- tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
+        3.3 * 10^3 * 2
+      rm(tmp)
     }
     if (!is.null(output.file)) {
         pdf(output.file, width = 8, height = 6)
@@ -1114,7 +1137,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
     mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
 
-    # Cumulative mutation densities at ECA and MRCA
+    # II. Cumulative mutation densities at ECA and MRCA
     par(mar = c(3, 4, 3, 1), xpd = FALSE)
 
     x.min <- 0
@@ -1132,6 +1155,28 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     Axis(side = 2, cex = 0.7)
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
     mtext(text = "Fraction of tumors", side = 2, line = 2, cex = 0.7)
+
+    if (mut.show.realtime) {
+
+      weeks_pc <- c(12, 27, 38, 64, 90, 116)
+      # Converting SNVs per day to SNVs per Mb starting from
+      # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
+      snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
+      realtime_labels <- c("12wk", "27wk", "38wk", "6mo", "12mo", "18mo")
+      axis(
+        side = 3, at = c(x.min, snvs_per_mb, x.max),
+        labels = c("", realtime_labels, ""),
+        cex.axis = 0.7
+      )
+      segments(
+        x0 = x.min, y0 = y.max, x1 = x.max, y1 = y.max,
+        xpd = NA
+      )
+      mtext("Estimated time (weeks post conception and months postnatal)",
+            side = 3,
+            line = 2, cex = 0.7
+      )
+    }
 
     to.plot.MRCA <- data.frame(
         x.lower = rep(sort(c(lachesis$MRCA_time_mean)),

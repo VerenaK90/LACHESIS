@@ -4,7 +4,11 @@
 #' case the estimated age at ECA, MRCA and the age at diagnosis.
 #' @param lachesis output generated from \code{\link{LACHESIS}}.
 #' @param mut.snv.rate optional; rate of accumulated SNVs per day in a
-#' diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)
+#' diploid genome (e.g. 3.2 SNVs/day in neuroblastoma). Will be ignored if
+#' `estimate.mut.rate` is set to `TRUE`
+#' @param estimate.mut.rate if set to `TRUE`, the mutation rate will be
+#' estimated by fitting a linear regression model to the relationship between
+#' age at diagnosis and mutaiton density at MRCA. Default `FALSE`.
 #' @param lach.col.eca optional, color for ECA.
 #' @param lach.col.mrca optional, color for MRCA.
 #' @param corr.time.scale numeric value by which survival time is to be divided
@@ -54,6 +58,7 @@
 #' @importFrom stats cor
 
 plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
+                                    estimate.mut.rate = FALSE,
                                     lach.col.eca = "#176A02",
                                     lach.col.mrca = "#4FB12B",
                                     corr.time.scale = 1,
@@ -81,6 +86,14 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
         )
         return(NULL)
     }
+    if( estimate.mut.rate == TRUE){
+      tmp <- estimateMutationRate(lachesis)
+      # convert mutation rate per Mb to mutation rate per haploid genome
+      mut.snv.rate <- tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
+        3.3 * 10^3 * 2
+      rm(tmp)
+    }
+
     if (!is.null(output.file)) {
         pdf(output.file, width = 8, height = 6)
     }
