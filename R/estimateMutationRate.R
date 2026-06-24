@@ -8,6 +8,11 @@
 #' $$\mu$$ is the mutation rate per Mb and $t_\mathrm{MRCA}$$ is the time at
 #' which the MRCA emerges.
 #' @param lachesis output generated from \code{\link{LACHESIS}}
+#' @param ... further arguments and parameters passed to other
+#' @param output.file optional; will save the plot.
+#' @param overwrite logical; if `FALSE`, the function will not be run again if
+#' the mutation rate has already been estimated. Instead, the available estimate
+#' will be read in.
 #' @return mean, standard deviation and 95% confidence interval for the tumor
 #' growth time and the mutation rate (per Mb), along with goodness of fit
 #' (R squared).
@@ -51,7 +56,8 @@
 #' @import ggplot2
 #' @import data.table
 
-estimateMutationRate <- function(lachesis = NULL) {
+estimateMutationRate <- function(lachesis = NULL, output.dir = NULL,
+                                 overwrite = FALSE) {
   res <- ci <- r2 <- slope <- mu <- mu_ci <- . <- NULL
 
   if (is.null(lachesis)) {
@@ -64,6 +70,35 @@ estimateMutationRate <- function(lachesis = NULL) {
     stop("Please specify age information.")
   }
   lachesis <- lachesis[!is.na(Age),]
+
+  if (!is.null(output.dir)) {
+    dir.create(output.dir, recursive = TRUE, showWarnings = FALSE)
+  }
+
+  out_txt <- if (!is.null(output.dir)){
+    file.path(output.dir, "Estimated_mutation_rate.txt")
+  }else{
+    NULL
+  }
+  out_pdf <- if (!is.null(output.dir)){
+    file.path(output.dir, "Estimated_mutation_rate.pdf")
+    }else{
+      NULL
+    }
+
+  # Read result if it already exists
+  if (!is.null(out_txt) && file.exists(out_txt) && !overwrite) {
+    parameters <- data.table::fread(out_txt, comment.char = "#")
+    r2_line <- readLines(out_txt)
+    r2_line <- r2_line[grepl("^# Rsquared =", r2_line)]
+    r2 <- if (length(r2_line) == 1) {
+      as.numeric(sub("^# Rsquared =\\s*", "", r2_line))
+    } else {
+      NA_real_
+    }
+
+    return(list(parameters = parameters, r.squared = r2))
+  }
 
   # fit linear model
   res <- lachesis[,lm(Age ~ MRCA_time_mean)]
@@ -102,5 +137,16 @@ estimateMutationRate <- function(lachesis = NULL) {
   )
 
 
-  return(list(parameters = res, r.squared = r2, plot = p))
+  if(!is.null(output.dir)){
+    pdf(out_pdf)
+    print(p)
+    dev.off()
+
+    data.table::fwrite(parameters, out_txt, sep = "\t")
+    writeLines(paste0("# Rsquared = ", r2), out_txt, sep = "\n",
+               useBytes = TRUE)
+
+  }
+
+  return(list(parameters = res, r.squared = r2))
 }
