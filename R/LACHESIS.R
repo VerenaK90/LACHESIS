@@ -1145,7 +1145,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
 
     # II. Cumulative mutation densities at ECA and MRCA
-    par(mar = c(3, 4, 3, 1), xpd = FALSE)
+    par(mar = c(3, 4, 6, 1), xpd = FALSE)
 
     x.min <- 0
     x.max <- max(lachesis$MRCA_time_upper,
@@ -1271,7 +1271,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
     title(
         main = paste("Cumulative SNV densities at ECA and MRCA"),
-        cex.main = 1
+        cex.main = 1, line = 4
     )
 
     if (!is.null(output.file)) {
