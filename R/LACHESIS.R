@@ -1005,11 +1005,17 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
               novo. Continuing without real time.")
       mut.show.realtime <- FALSE
     }else if( estimate.mut.rate == TRUE & mut.show.realtime == TRUE){
-      tmp <- estimateMutationRate(lachesis[!is.na(Age),],
-                                  output.dir = dirname(output.file))
+      if(!is.null(output.file)){
+        tmp <- estimateMutationRate(lachesis[!is.na(Age),],
+                                    output.dir = dirname(output.file))
+      }else{
+        tmp <- estimateMutationRate(lachesis[!is.na(Age),])
+      }
+
       # convert mutation rate per Mb to mutation rate per haploid genome
-      mut.snv.rate <- tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
-        3.3 * 10^3 * 2
+      mut.snv.rate <- as.numeric(
+        tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
+        3.3 * 10^3 * 2)
       rm(tmp)
     }
     if (!is.null(output.file)) {
