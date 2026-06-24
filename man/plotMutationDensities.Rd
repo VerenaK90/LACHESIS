@@ -52,7 +52,7 @@ plot in SNVs/Mb}
 on the evolutionary timeline.}
 
 \item{mut.snv.rate}{optional; rate of accumulated SNVs per day in a
-diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)}
+diploid genome (e.g., 3.2 SNVs/day in neuroblastoma).}
 
 \item{output.file}{optional; will save the plot.}
 

@@ -7,6 +7,7 @@
 plotDiseaseTrajectories(
   lachesis = NULL,
   mut.snv.rate = 3.2,
+  estimate.mut.rate = FALSE,
   lach.col.eca = "#176A02",
   lach.col.mrca = "#4FB12B",
   corr.time.scale = 1,
@@ -17,7 +18,12 @@ plotDiseaseTrajectories(
 \item{lachesis}{output generated from \code{\link{LACHESIS}}.}
 
 \item{mut.snv.rate}{optional; rate of accumulated SNVs per day in a
-diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)}
+diploid genome (e.g. 3.2 SNVs/day in neuroblastoma). Will be ignored if
+\code{estimate.mut.rate} is set to \code{TRUE}}
+
+\item{estimate.mut.rate}{if set to \code{TRUE}, the mutation rate will be
+estimated by fitting a linear regression model to the relationship between
+age at diagnosis and mutaiton density at MRCA. Default \code{FALSE}.}
 
 \item{lach.col.eca}{optional, color for ECA.}
 
