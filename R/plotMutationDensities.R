@@ -21,7 +21,7 @@
 #' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
 #' on the evolutionary timeline.
 #' @param mut.snv.rate optional; rate of accumulated SNVs per day in a
-#' diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)
+#' diploid genome (e.g., 3.2 SNVs/day in neuroblastoma).
 #' @param output.file optional; will save the plot.
 #' @param ref.build Reference genome. Default `hg19`.
 #' Can be `hg18`, `hg19` or `hg38`.
@@ -56,7 +56,8 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
                                   mut.col.multi = "#176A02", mut.border = NULL,
                                   mut.show.density = TRUE, mut.breaks = NULL,
                                   mut.xaxis = NULL, mut.show.realtime = FALSE,
-                                  mut.snv.rate = 3.2, output.file = NULL, ...) {
+                                  mut.snv.rate = 3.2,
+                                  output.file = NULL, ...) {
     Seglength <- . <- A <- B <- variable <- value <- lines <- density <-
         chrom <- TCN <- Seglength <- n_mut_A <- n_mut_B <- n_mut_total_clonal <-
         density_total_mean <- density_A_mean <- density_B_mean <-
@@ -213,6 +214,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
 
     if (mut.show.realtime) {
+
         weeks_pc <- c(12, 27, 38, 64, 90, 116)
         # Converting SNVs per day to SNVs per Mb starting from
         # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
