@@ -162,7 +162,8 @@
 #' lachesis <- LACHESIS(
 #'     ids = c("NBE11", "NBE15"), cnv.files =
 #'         list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf),
-#'     vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51),
+#'     vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59,
+#'     2.51),
 #'     cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3),
 #'     cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37)
 #' )
@@ -620,7 +621,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (is.na(cnv.files)[i]) {
                 tmp1 <- ids[1]
                 warning(sprintf(
-                    "No CNV file provided for sample %s; sample will be excluded",
+                    "No CNV file provided for sample %s; sample will be excluded
+                    ",
                     tmp1
                 ))
                 rm(tmp1)
