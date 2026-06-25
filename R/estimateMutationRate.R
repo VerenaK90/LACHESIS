@@ -4,8 +4,8 @@
 #' relationship between age at diagnosis and mutational burden at MRCA. The
 #' model assumes a constant mutation rate prior to the MRCA and comparable
 #' tumor growth rates between individuals. Accordingly, the mutational burden
-#' per Mb at MRCA is Poisson distributed around $$\mu t_\mathrm{MRCA}$$, where
-#' $$\mu$$ is the mutation rate per Mb and $t_\mathrm{MRCA}$$ is the time at
+#' per Mb at MRCA is Poisson distributed around \eqn{\mu t_MRCA}, where
+#' \eqn{\mu} is the mutation rate per Mb and \eqn{t_MRCA} is the time at
 #' which the MRCA emerges.
 #' @param lachesis output generated from \code{\link{LACHESIS}}
 #' @param ... further arguments and parameters passed to other
@@ -13,6 +13,8 @@
 #' @param overwrite logical; if `FALSE`, the function will not be run again if
 #' the mutation rate has already been estimated. Instead, the available estimate
 #' will be read in.
+#' @param unit The time unit in which age at diagnosis is provided. Possible
+#' values are `days`, `weeks`, `months` and `years`. Default `days`.
 #' @return mean, standard deviation and 95% confidence interval for the tumor
 #' growth time and the mutation rate (per Mb), along with goodness of fit
 #' (R squared).
@@ -57,8 +59,10 @@
 #' @import data.table
 
 estimateMutationRate <- function(lachesis = NULL, output.dir = NULL,
-                                 overwrite = FALSE) {
+                                 overwrite = FALSE, unit = "days") {
   res <- ci <- r2 <- slope <- mu <- mu_ci <- . <- NULL
+
+
 
   if (is.null(lachesis)) {
     stop(
@@ -70,6 +74,22 @@ estimateMutationRate <- function(lachesis = NULL, output.dir = NULL,
     stop("Please specify age information.")
   }
   lachesis <- lachesis[!is.na(Age),]
+
+  time.units <- c("days", "weeks", "months", "years")
+  unit <- match.arg(
+    arg = unit, choices = time.units,
+    several.ok = FALSE
+  )
+
+  if(unit == "weeks"){
+    lachesis[,Age := Age * 7]
+  }else if(unit == "months"){
+    lachesis[,Age := Age * 30.5]
+  }else if(unit == "years"){
+    lachesis[,Age := Age * 365]
+  }
+  # add gestation time (36 weeks after gastrulation)
+  lachesis[,Age := Age + 36*7]
 
   if (!is.null(output.dir)) {
     dir.create(output.dir, recursive = TRUE, showWarnings = FALSE)

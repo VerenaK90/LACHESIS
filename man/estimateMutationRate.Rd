@@ -4,7 +4,12 @@
 \alias{estimateMutationRate}
 \title{Estimate the mutation rate from a cohort of tumors with age information}
 \usage{
-estimateMutationRate(lachesis = NULL, output.dir = NULL, overwrite = FALSE)
+estimateMutationRate(
+  lachesis = NULL,
+  output.dir = NULL,
+  overwrite = FALSE,
+  unit = "days"
+)
 }
 \arguments{
 \item{lachesis}{output generated from \code{\link{LACHESIS}}}
@@ -12,6 +17,9 @@ estimateMutationRate(lachesis = NULL, output.dir = NULL, overwrite = FALSE)
 \item{overwrite}{logical; if \code{FALSE}, the function will not be run again if
 the mutation rate has already been estimated. Instead, the available estimate
 will be read in.}
+
+\item{unit}{The time unit in which age at diagnosis is provided. Possible
+values are \code{days}, \code{weeks}, \code{months} and \code{years}. Default \code{days}.}
 
 \item{...}{further arguments and parameters passed to other}
 
@@ -27,8 +35,8 @@ This function fits a linear model to infer the mutation rate from the
 relationship between age at diagnosis and mutational burden at MRCA. The
 model assumes a constant mutation rate prior to the MRCA and comparable
 tumor growth rates between individuals. Accordingly, the mutational burden
-per Mb at MRCA is Poisson distributed around $$\mu t_\mathrm{MRCA}$$, where
-$$\mu$$ is the mutation rate per Mb and $t_\mathrm{MRCA}$$ is the time at
+per Mb at MRCA is Poisson distributed around \eqn{\mu t_MRCA}, where
+\eqn{\mu} is the mutation rate per Mb and \eqn{t_MRCA} is the time at
 which the MRCA emerges.
 }
 \examples{
