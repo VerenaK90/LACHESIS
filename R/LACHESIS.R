@@ -918,8 +918,6 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' ignored if `mut.show.realtime == FALSE`.
 #' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
 #' on the evolutionary timeline.
-#' @param time.unit The time unit in which age at diagnosis is provided. Possible
-#' values are `days`, `weeks`, `months` and `years`. Default `days`.
 #' @param lach.col.zero optional, bar color for single-copy SSNV densities.
 #' @param lach.col.multi optional, bar color for multi-copy SSNV densities.
 #' @param lach.border, optional, border color for the bars.
@@ -971,7 +969,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
 plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
                          mut.snv.rate = 3.2, estimate.mut.rate = FALSE,
-                         mut.show.realtime = FALSE, time.unit = "days",
+                         mut.show.realtime = FALSE,
                          lach.log.densities = FALSE, lach.col.multi = "#176A02",
                          lach.border = NULL, binwidth = NULL,
                          lach.col.zero = "#4FB12B", output.file = NULL, ...) {
@@ -1001,11 +999,6 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         )
         return(NULL)
     }
-    time.units <- c("days", "weeks", "months", "years")
-    time.unit <- match.arg(
-      arg = time.unit, choices = time.units,
-      several.ok = FALSE
-    )
     if(estimate.mut.rate == TRUE & mut.show.realtime == TRUE &
        (is.null(lachesis[,Age]) | nrow(lachesis[!is.na(Age),]) == 0) ){
       warning("Please provide age information if estimating mutation rates de
@@ -1177,14 +1170,6 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     mtext(text = "Fraction of tumors", side = 2, line = 2, cex = 0.7)
 
     if (mut.show.realtime) {
-
-      if(time.unit == "weeks"){
-        lachesis[,Age := Age * 7]
-      }else if(time.unit == "months"){
-        lachesis[,Age := Age * 30.5]
-      }else if(time.unit == "years"){
-        lachesis[,Age := Age * 365]
-      }
 
       weeks_pc <- c(12, 27, 38, 64, 90, 116)
       # Converting SNVs per day to SNVs per Mb starting from
