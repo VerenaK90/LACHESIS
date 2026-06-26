@@ -1007,9 +1007,9 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     }else if( estimate.mut.rate == TRUE & mut.show.realtime == TRUE){
       if(!is.null(output.file)){
         tmp <- estimateMutationRate(lachesis[!is.na(Age),],
-                                    output.dir = dirname(output.file))
+                                    output.dir = dirname(output.file), ...)
       }else{
-        tmp <- estimateMutationRate(lachesis[!is.na(Age),])
+        tmp <- estimateMutationRate(lachesis[!is.na(Age),], ...)
       }
 
       # convert mutation rate per Mb to mutation rate per haploid genome

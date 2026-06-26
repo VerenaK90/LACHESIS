@@ -88,9 +88,10 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
     }
     if( estimate.mut.rate == TRUE){
       if(!is.null(output.file)){
-        tmp <- estimateMutationRate(lachesis, output.dir = dirname(output.file))
+        tmp <- estimateMutationRate(lachesis, output.dir = dirname(output.file),
+                                    ...)
       }else{
-        tmp <- estimateMutationRate(lachesis)
+        tmp <- estimateMutationRate(lachesis, ...)
       }
 
       # convert mutation rate per Mb to mutation rate per haploid genome
