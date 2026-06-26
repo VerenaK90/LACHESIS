@@ -97,9 +97,9 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
       }else{
         tmp <- estimateMutationRate(lachesis, ...)
       }
-      if(tmp[["r.squared"]] < 0.5){
+      if(tmp[["r.squared"]] < 0.1){
         stop("Mutation rate cannot be reliably estimated for this cohort (R
-                squared < 0.5). No reliable realtime estimate possible.")
+                squared < 0.1). No reliable realtime estimate possible.")
       }
 
 
