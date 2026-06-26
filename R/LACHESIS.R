@@ -1171,23 +1171,40 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
     if (mut.show.realtime) {
 
-      weeks_pc <- c(12, 27, 38, 64, 90, 116)
+      # the maximal time in units of six months:
+      x.max.six.months <- x.max / mut.snv.rate * 2 * 3300 / (6 * 30)
+
+      # step size such that there are maximally 10 ticks
+      step.size <- ifelse(x.max.six.months > 10, 52, 26)
+      weeks_pc <- c(12, 27, 38, 64, seq(
+        2 * 26, x.max.six.months * 26,
+        step.size
+      ) + 38)
       # Converting SNVs per day to SNVs per Mb starting from
       # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
       snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
-      realtime_labels <- c("12wk", "27wk", "38wk", "6mo", "12mo", "18mo")
+      realtime_labels <- c(
+        "12wk", "27wk", "38wk", "6mo",
+        paste(seq(2, x.max.six.months, 1 / (26 / step.size)) * 6, "mo", sep = "")
+      )
       axis(
-        side = 3, at = c(x.min, snvs_per_mb, x.max),
-        labels = c("", realtime_labels, ""),
+        side = 3,
+        at = snvs_per_mb,
+        labels = realtime_labels,
         cex.axis = 0.7
       )
       segments(
-        x0 = x.min, y0 = y.max, x1 = x.max, y1 = y.max,
+        x0 = x.min,
+        y0 = par("usr")[4],
+        x1 = 1.05 * x.max,
+        y1 = par("usr")[4],
         xpd = NA
       )
-      mtext("Estimated time (weeks post conception and months postnatal)",
-            side = 3,
-            line = 2, cex = 0.7
+      mtext(
+        "Estimated time (weeks post conception and months postnatal)",
+        side = 3,
+        line = 2,
+        cex = 0.7
       )
     }
 
