@@ -8,7 +8,7 @@
 #' \eqn{\mu} is the mutation rate per Mb and \eqn{t_MRCA} is the time at
 #' which the MRCA emerges.
 #' @param lachesis output generated from \code{\link{LACHESIS}}
-#' @param ... further arguments and parameters passed to other
+#' @param ... further arguments and parameters passed to other functions.
 #' @param output.dir optional; will save the plot.
 #' @param overwrite logical; if `FALSE`, the function will not be run again if
 #' the mutation rate has already been estimated. Instead, the available estimate

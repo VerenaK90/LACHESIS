@@ -14,6 +14,7 @@
 #' @param lach.col.eca optional, color for ECA.
 #' @param lach.col.mrca optional, color for MRCA.
 #' @param output.file optional; file path to output.
+#' @param ...  further arguments and parameters passed to other functions.
 #' @return graph with SNV densities and estimated times at ECA/ MRCA and
 #' diagnosis.
 #' @examples
@@ -60,7 +61,7 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
                                     estimate.mut.rate = FALSE, time.unit = "days",
                                     lach.col.eca = "#176A02",
                                     lach.col.mrca = "#4FB12B",
-                                    output.file = NULL) {
+                                    output.file = NULL, ...) {
     ECA_time_mean <- MRCA_time_mean <- NULL
 
 
