@@ -9,7 +9,7 @@
 #' which the MRCA emerges.
 #' @param lachesis output generated from \code{\link{LACHESIS}}
 #' @param ... further arguments and parameters passed to other
-#' @param output.file optional; will save the plot.
+#' @param output.dir optional; will save the plot.
 #' @param overwrite logical; if `FALSE`, the function will not be run again if
 #' the mutation rate has already been estimated. Instead, the available estimate
 #' will be read in.
