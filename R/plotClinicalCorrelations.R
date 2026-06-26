@@ -49,7 +49,7 @@
 #' plotClinicalCorrelations(lachesis)
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title
-#' arrows points
+#' @importFrom graphics arrows points
 #' @importFrom stats cor
 
 plotClinicalCorrelations <- function(lachesis = NULL, clin.par = "Age",

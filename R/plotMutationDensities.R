@@ -47,7 +47,7 @@
 #' plotMutationDensities(mrca)
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title
-#' arrows legend points polygon segments
+#' @importFrom graphics arrows legend points polygon segments
 #' @importFrom stats setNames
 
 plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,

@@ -963,7 +963,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' plotLachesis(lachesis)
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title
-#' arrows legend points polygon
+#' @importFrom graphics arrows legend points polygon
 #' @importFrom grDevices adjustcolor
 
 

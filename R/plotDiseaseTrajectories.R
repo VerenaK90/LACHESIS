@@ -54,7 +54,7 @@
 #' plotDiseaseTrajectories(lachesis, corr.time.scale = 31)
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title
-#' arrows points
+#' @importFrom graphics arrows points
 #' @importFrom stats cor
 
 plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
