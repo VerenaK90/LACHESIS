@@ -130,8 +130,8 @@ estimateMutationRate <- function(lachesis = NULL, output.dir = NULL,
   r2 <- summary(res)
   r2 <- r2$r.squared
 
-  if(r2 < 0.5){
-    warning("R squared < 0.5. Mutation rate cannot be reliably estimated for
+  if(r2 < 0.1){
+    warning("R squared < 0.1. Mutation rate cannot be reliably estimated for
             this cohort.")
   }
 

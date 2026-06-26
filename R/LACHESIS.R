@@ -1011,9 +1011,9 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
       }else{
         tmp <- estimateMutationRate(lachesis[!is.na(Age),], ...)
       }
-      if(tmp[["r.squared"]] < 0.5){
+      if(tmp[["r.squared"]] < 0.1){
         warning("Mutation rate cannot be reliably estimated for this cohort (R
-                squared < 0.5). Continuing without real time.")
+                squared < 0.1). Continuing without real time.")
         mut.show.realtime <- FALSE
       }
 
