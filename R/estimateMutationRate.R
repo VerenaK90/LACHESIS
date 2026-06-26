@@ -60,7 +60,7 @@
 #' @importFrom stats coef confint lm
 
 estimateMutationRate <- function(lachesis = NULL, output.dir = NULL,
-                                 overwrite = FALSE, unit = "days") {
+                                 overwrite = FALSE, unit = "days", ...) {
   res <- ci <- r2 <- slope <- mu <- mu_ci <- . <- NULL
 
 
