@@ -6,6 +6,8 @@
 #' @param mut.snv.rate optional; rate of accumulated SNVs per day in a
 #' diploid genome (e.g. 3.2 SNVs/day in neuroblastoma). Will be ignored if
 #' `estimate.mut.rate` is set to `TRUE`
+#' @param unit The time unit in which age at diagnosis is provided. Possible
+#' values are `days`, `weeks`, `months` and `years`. Default `days`.
 #' @param estimate.mut.rate if set to `TRUE`, the mutation rate will be
 #' estimated by fitting a linear regression model to the relationship between
 #' age at diagnosis and mutaiton density at MRCA. Default `FALSE`.
@@ -58,7 +60,7 @@
 #' @importFrom stats cor
 
 plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
-                                    estimate.mut.rate = FALSE,
+                                    estimate.mut.rate = FALSE, unit = "days",
                                     lach.col.eca = "#176A02",
                                     lach.col.mrca = "#4FB12B",
                                     corr.time.scale = 1,
@@ -72,6 +74,11 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
     if (is.null(lachesis[["Age"]])) {
         stop("Missing age information.")
     }
+    time.units <- c("days", "weeks", "months", "years")
+    unit <- match.arg(
+      arg = unit, choices = time.units,
+      several.ok = FALSE
+    )
     if (any(is.na(lachesis$MRCA_time_mean))) {
         tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
         warning(sprintf(
@@ -93,6 +100,11 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
       }else{
         tmp <- estimateMutationRate(lachesis, ...)
       }
+      if(tmp[["r.squared"]] < 0.5){
+        stop("Mutation rate cannot be reliably estimated for this cohort (R
+                squared < 0.5). No reliable realtime estimate possible.")
+      }
+
 
       # convert mutation rate per Mb to mutation rate per haploid genome
       mut.snv.rate <- as.numeric(

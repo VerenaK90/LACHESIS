@@ -918,6 +918,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' ignored if `mut.show.realtime == FALSE`.
 #' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
 #' on the evolutionary timeline.
+#' @param unit The time unit in which age at diagnosis is provided. Possible
+#' values are `days`, `weeks`, `months` and `years`. Default `days`.
 #' @param lach.col.zero optional, bar color for single-copy SSNV densities.
 #' @param lach.col.multi optional, bar color for multi-copy SSNV densities.
 #' @param lach.border, optional, border color for the bars.
@@ -969,7 +971,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
 plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
                          mut.snv.rate = 3.2, estimate.mut.rate = FALSE,
-                         mut.show.realtime = FALSE,
+                         mut.show.realtime = FALSE, unit = "days",
                          lach.log.densities = FALSE, lach.col.multi = "#176A02",
                          lach.border = NULL, binwidth = NULL,
                          lach.col.zero = "#4FB12B", output.file = NULL, ...) {
@@ -999,6 +1001,11 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         )
         return(NULL)
     }
+    time.units <- c("days", "weeks", "months", "years")
+    unit <- match.arg(
+      arg = unit, choices = time.units,
+      several.ok = FALSE
+    )
     if(estimate.mut.rate == TRUE & mut.show.realtime == TRUE &
        (is.null(lachesis[,Age]) | nrow(lachesis[!is.na(Age),]) == 0) ){
       warning("Please provide age information if estimating mutation rates de
@@ -1010,6 +1017,11 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
                                     output.dir = dirname(output.file), ...)
       }else{
         tmp <- estimateMutationRate(lachesis[!is.na(Age),], ...)
+      }
+      if(tmp[["r.squared"]] < 0.5){
+        warning("Mutation rate cannot be reliably estimated for this cohort (R
+                squared < 0.5). Continuing without real time.")
+        mut.show.realtime <- FALSE
       }
 
       # convert mutation rate per Mb to mutation rate per haploid genome

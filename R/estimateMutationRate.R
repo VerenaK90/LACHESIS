@@ -130,6 +130,11 @@ estimateMutationRate <- function(lachesis = NULL, output.dir = NULL,
   r2 <- summary(res)
   r2 <- r2$r.squared
 
+  if(r2 < 0.5){
+    warning("R squared < 0.5. Mutation rate cannot be reliably estimated for
+            this cohort.")
+  }
+
   # plot the fit
   p <- ggplot(lachesis, aes(x = MRCA_time_mean, y = Age)) +
     geom_point() +  geom_smooth(method='lm') + theme_classic() +
