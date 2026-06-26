@@ -163,7 +163,7 @@ estimateMutationRate <- function(lachesis = NULL, output.dir = NULL,
     print(p)
     dev.off()
 
-    data.table::fwrite(parameters, out_txt, sep = "\t")
+    data.table::fwrite(res, out_txt, sep = "\t")
     writeLines(paste0("# Rsquared = ", r2), out_txt, sep = "\n",
                useBytes = TRUE)
 
