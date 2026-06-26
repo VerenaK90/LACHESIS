@@ -918,7 +918,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' ignored if `mut.show.realtime == FALSE`.
 #' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
 #' on the evolutionary timeline.
-#' @param unit The time unit in which age at diagnosis is provided. Possible
+#' @param time.unit The time unit in which age at diagnosis is provided. Possible
 #' values are `days`, `weeks`, `months` and `years`. Default `days`.
 #' @param lach.col.zero optional, bar color for single-copy SSNV densities.
 #' @param lach.col.multi optional, bar color for multi-copy SSNV densities.
@@ -971,7 +971,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
 plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
                          mut.snv.rate = 3.2, estimate.mut.rate = FALSE,
-                         mut.show.realtime = FALSE, unit = "days",
+                         mut.show.realtime = FALSE, time.unit = "days",
                          lach.log.densities = FALSE, lach.col.multi = "#176A02",
                          lach.border = NULL, binwidth = NULL,
                          lach.col.zero = "#4FB12B", output.file = NULL, ...) {
@@ -1002,8 +1002,8 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         return(NULL)
     }
     time.units <- c("days", "weeks", "months", "years")
-    unit <- match.arg(
-      arg = unit, choices = time.units,
+    time.unit <- match.arg(
+      arg = time.unit, choices = time.units,
       several.ok = FALSE
     )
     if(estimate.mut.rate == TRUE & mut.show.realtime == TRUE &
@@ -1029,6 +1029,14 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
         3.3 * 10^3 * 2)
       rm(tmp)
+
+      if(time.unit == "weeks"){
+        lachesis[,Age := Age * 7]
+      }else if(time.unit == "months"){
+        lachesis[,Age := Age * 30.5]
+      }else if(time.unit == "years"){
+        lachesis[,Age := Age * 365]
+      }
     }
     if (!is.null(output.file)) {
         pdf(output.file, width = 8, height = 6)
