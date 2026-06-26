@@ -57,6 +57,7 @@
 #' @export
 #' @import ggplot2
 #' @import data.table
+#' @importFrom stats coef confint lm
 
 estimateMutationRate <- function(lachesis = NULL, output.dir = NULL,
                                  overwrite = FALSE, unit = "days") {
