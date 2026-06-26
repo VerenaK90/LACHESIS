@@ -109,9 +109,10 @@ estimateMutationRate <- function(lachesis = NULL, output.dir = NULL,
 
   # Read result if it already exists
   if (!is.null(out_txt) && file.exists(out_txt) && !overwrite) {
-    parameters <- data.table::fread(out_txt, comment.char = "#")
-    r2_line <- readLines(out_txt)
-    r2_line <- r2_line[grepl("^# Rsquared =", r2_line)]
+    alllines <- readLines(out_txt)
+    parameterlines <- alllines[!grepl("^\\s*#", alllines)]
+    parameters <- fread(text = parameterlines)
+    r2_line <- alllines[grepl("^# Rsquared =", alllines)]
     r2 <- if (length(r2_line) == 1) {
       as.numeric(sub("^# Rsquared =\\s*", "", r2_line))
     } else {
