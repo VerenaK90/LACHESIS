@@ -107,16 +107,17 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
         tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
         3.3 * 10^3 * 2)
       rm(tmp)
-      # convert time to months
-      if(time.unit == "weeks"){
-        lachesis[,Age := Age / 4.345]
-      }else if(time.unit == "days"){
-        lachesis[,Age := Age / 30.5]
-      }else if(time.unit == "years"){
-        lachesis[,Age := Age * 12]
-      }
+
     }
 
+    # convert time to months
+    if(time.unit == "weeks"){
+      lachesis[,Age := Age / 4.345]
+    }else if(time.unit == "days"){
+      lachesis[,Age := Age / 30.5]
+    }else if(time.unit == "years"){
+      lachesis[,Age := Age * 12]
+    }
     if (!is.null(output.file)) {
         pdf(output.file, width = 8, height = 6)
     }

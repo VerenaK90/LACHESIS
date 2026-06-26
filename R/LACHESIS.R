@@ -1030,13 +1030,6 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         3.3 * 10^3 * 2)
       rm(tmp)
 
-      if(time.unit == "weeks"){
-        lachesis[,Age := Age * 7]
-      }else if(time.unit == "months"){
-        lachesis[,Age := Age * 30.5]
-      }else if(time.unit == "years"){
-        lachesis[,Age := Age * 365]
-      }
     }
     if (!is.null(output.file)) {
         pdf(output.file, width = 8, height = 6)
@@ -1184,6 +1177,14 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     mtext(text = "Fraction of tumors", side = 2, line = 2, cex = 0.7)
 
     if (mut.show.realtime) {
+
+      if(time.unit == "weeks"){
+        lachesis[,Age := Age * 7]
+      }else if(time.unit == "months"){
+        lachesis[,Age := Age * 30.5]
+      }else if(time.unit == "years"){
+        lachesis[,Age := Age * 365]
+      }
 
       weeks_pc <- c(12, 27, 38, 64, 90, 116)
       # Converting SNVs per day to SNVs per Mb starting from
