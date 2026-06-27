@@ -8,11 +8,14 @@ estimateMutationRate(
   lachesis = NULL,
   output.dir = NULL,
   overwrite = FALSE,
-  unit = "days"
+  unit = "days",
+  ...
 )
 }
 \arguments{
 \item{lachesis}{output generated from \code{\link{LACHESIS}}}
+
+\item{output.dir}{optional; will save the plot.}
 
 \item{overwrite}{logical; if \code{FALSE}, the function will not be run again if
 the mutation rate has already been estimated. Instead, the available estimate
@@ -21,9 +24,7 @@ will be read in.}
 \item{unit}{The time unit in which age at diagnosis is provided. Possible
 values are \code{days}, \code{weeks}, \code{months} and \code{years}. Default \code{days}.}
 
-\item{...}{further arguments and parameters passed to other}
-
-\item{output.file}{optional; will save the plot.}
+\item{...}{further arguments and parameters passed to other functions.}
 }
 \value{
 mean, standard deviation and 95\% confidence interval for the tumor

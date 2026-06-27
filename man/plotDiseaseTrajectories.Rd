@@ -8,10 +8,11 @@ plotDiseaseTrajectories(
   lachesis = NULL,
   mut.snv.rate = 3.2,
   estimate.mut.rate = FALSE,
+  time.unit = "days",
   lach.col.eca = "#176A02",
   lach.col.mrca = "#4FB12B",
-  corr.time.scale = 1,
-  output.file = NULL
+  output.file = NULL,
+  ...
 )
 }
 \arguments{
@@ -25,15 +26,16 @@ diploid genome (e.g. 3.2 SNVs/day in neuroblastoma). Will be ignored if
 estimated by fitting a linear regression model to the relationship between
 age at diagnosis and mutaiton density at MRCA. Default \code{FALSE}.}
 
+\item{time.unit}{The time unit in which age at diagnosis is provided. Possible
+values are \code{days}, \code{weeks}, \code{months} and \code{years}. Default \code{days}.}
+
 \item{lach.col.eca}{optional, color for ECA.}
 
 \item{lach.col.mrca}{optional, color for MRCA.}
 
-\item{corr.time.scale}{numeric value by which survival time is to be divided
-to convert into months (e.g., 30 for converting days into months), defaults
-to \code{1}.}
-
 \item{output.file}{optional; file path to output.}
+
+\item{...}{further arguments and parameters passed to other functions.}
 }
 \value{
 graph with SNV densities and estimated times at ECA/ MRCA and
@@ -77,5 +79,5 @@ data.table::fwrite(x = input.files, file = lachesis_input, sep = "\t")
 
 # Example with template file with paths to multiple cnv/snv files as an input
 lachesis <- LACHESIS(input.files = lachesis_input)
-plotDiseaseTrajectories(lachesis, corr.time.scale = 31)
+plotDiseaseTrajectories(lachesis, time.unit = "days")
 }

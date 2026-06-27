@@ -51,7 +51,7 @@
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
-#' plotDiseaseTrajectories(lachesis, time.unit = "days)
+#' plotDiseaseTrajectories(lachesis, time.unit = "days")
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title
 #' @importFrom graphics arrows points
