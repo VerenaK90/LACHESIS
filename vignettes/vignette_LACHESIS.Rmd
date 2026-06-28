@@ -74,9 +74,9 @@ LACHESIS utilizes whole genome sequencing data to determine the mutational timin
 
 #### Datatables (.txt)
 
-* **SNV_timing_per_segment_ID.txt:** purity, ploidy, and the estimated mean, lower, and upper bounds for the timing of the tumor's MRCA and ECA (if detected)
+* **MRCA_densities_ID.txt:** purity, ploidy, and the estimated mean, lower, and upper bounds for the timing of the tumor's MRCA and ECA (if detected)
 * **SNV_timing_per_SNV_ID.txt:** SNV context, clonality status and association with ECA/ MRCA.
-* **MRCA_densities_ID.txt:** per-segment mutation time, differentiated by minor and major copy number (A and B) For more details go to [Estimating Mutation Densities at ECA/MRCA (MRCA)](#estimating-mutation-densities-at-ecamrca-mrca)
+* **SNV_timing_per_segment_ID.txt:** per-segment mutation time, differentiated by minor and major copy number (A and B) For more details go to [Estimating Mutation Densities at ECA/MRCA (MRCA)](#estimating-mutation-densities-at-ecamrca-mrca)
 
 #### Graphs (.pdf)
 
@@ -484,9 +484,9 @@ MRCA(normObj = NULL, min.seg.size = 10^7, fp.mean = 0, fp.sd = 0, excl.chr = NUL
 
 #### Output
 
-* **SNV_timing_per_segment_ID.txt:** purity, ploidy, and the estimated mean, lower, and upper bounds for the timing of the tumor's MRCA and ECA (if detected).
+* **MRCA_densities_ID.txt:** purity, ploidy, and the estimated mean, lower, and upper bounds for the timing of the tumor's MRCA and ECA (if detected).
 
-* **MRCA_densities_ID.txt:** per-segment mutation time, differentiated by minor and major copy number (A and B). For each segment,
+* **SNV_timing_per_segment_ID.txt:** per-segment mutation time, differentiated by minor and major copy number (A and B). For each segment,
 ```{r MRCA_output, echo=FALSE}
 library(knitr)
 
