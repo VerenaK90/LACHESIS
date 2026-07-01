@@ -45,6 +45,8 @@ LACHESIS(
   sig.select = NULL,
   min.p = NULL,
   driver.file = NULL,
+  estimate.mut.rate = FALSE,
+  mut.show.realtime = FALSE,
   ...
 )
 }
@@ -167,6 +169,14 @@ specific signature.}
 
 \item{driver.file}{optional, path to file with "chrom", "snv_start", "ref",
 "alt", "gene" column containing known driver SNVs.}
+
+\item{estimate.mut.rate}{if set to \code{TRUE}, the mutation rate will be
+estimated by fitting a linear regression model to the relationship between
+age at diagnosis and mutation density at MRCA. Default \code{FALSE}. Will be
+ignored if \code{mut.show.realtime == FALSE}.}
+
+\item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception
+on the evolutionary timeline.}
 
 \item{...}{further arguments and parameters passed to LACHESIS functions.}
 }

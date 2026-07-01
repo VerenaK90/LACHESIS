@@ -84,6 +84,12 @@
 #' specific signature.
 #' @param driver.file optional, path to file with "chrom", "snv_start", "ref",
 #' "alt", "gene" column containing known driver SNVs.
+#' @param estimate.mut.rate if set to `TRUE`, the mutation rate will be
+#' estimated by fitting a linear regression model to the relationship between
+#' age at diagnosis and mutation density at MRCA. Default `FALSE`. Will be
+#' ignored if `mut.show.realtime == FALSE`.
+#' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
+#' on the evolutionary timeline.
 #' @param ... further arguments and parameters passed to LACHESIS functions.
 #' @examples
 #' # An example file with sample annotations and meta data
@@ -190,7 +196,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                      excl.chr = NULL, ref.build = "hg19",
                      filter.value = "PASS", sig.assign = FALSE, sig.file = NULL,
                      assign.method = "sample", sig.select = NULL, min.p = NULL,
-                     driver.file = NULL, ...) {
+                     driver.file = NULL, estimate.mut.rate = FALSE,
+                     mut.show.realtime = FALSE, ...) {
     ID <- cnv.file <- snv.file <- fwrite <- known_driver_gene <- Sample <-
         Clonality <- NULL
 
@@ -887,7 +894,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
     }
 
     # Estimate mutation rate
-    if(estimate.mut.rate == TRUE){
+    if(estimate.mut.rate == TRUE & mut.show.realtime == TRUE){
 
       if (!is.null(output.dir)) {
 
@@ -907,15 +914,52 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         rm(tmp)
 
         for(x in cohort.densities[,Sample_ID]){
+          eca.mrca <- fread(file = file.path(
+            output.dir, x,
+            paste0(
+              "03_MRCA_densities_",
+              x, ".txt"
+            )
+          ))
           mrca <- fread(file = file.path(
-            output.dir, ids[i],
+            output.dir, x,
             paste0(
               "04_SNV_timing_per_segment_",
               x, ".txt"
             )
-          ))
+          ),
+          colClasses = list(character = c("chrom", "MRCA_qual",
+                                          "A_time", "B_time"),
+                            integer = c("TCN", "A", "B", "Seglength",
+                                        "Start", "End"),
+                            numeric = c("n_mut_A", "n_mut_B",
+                                        "n_mut_total_clonal",
+                                        "n_mut_total_subclonal",
+                                        "n_mut_total", "n_mut_firstpeak",
+                                        "p_sc", "p_lc", "p_ec", "p_c",
+                                        "density_total_mean",
+                                        "density_A_mean", "density_B_mean",
+                                        "density_total_lower",
+                                        "density_total_upper",
+                                        "density_A_lower", "density_A_upper",
+                                        "density_B_lower", "density_B_upper",
+                                        "p_total_to_mrca", "p_A_to_mrca",
+                                        "p_B_to_mrca", "p_adj_total_to_mrca",
+                                        "p_adj_A_to_mrca", "p_adj_B_to_mrca",
+                                        "p_A_to_eca", "p_B_to_eca",
+                                        "p_adj_A_to_eca", "p_adj_B_to_eca")))
+          attr(mrca, "purity") <- eca.mrca[,purity]
+          attr(mrca, "ploidy") <- eca.mrca[,ploidy]
+          attr(mrca, "MRCA_time_mean") <- eca.mrca[,MRCA_time_mean]
+          attr(mrca, "MRCA_time_lower") <- eca.mrca[,MRCA_time_lower]
+          attr(mrca, "MRCA_time_upper") <- eca.mrca[,MRCA_time_upper]
+          attr(mrca, "ECA_time_mean") <- eca.mrca[,ECA_time_mean]
+          attr(mrca, "ECA_time_lower") <- eca.mrca[,ECA_time_lower]
+          attr(mrca, "ECA_time_upper") <- eca.mrca[,ECA_time_upper]
+
           plotMutationDensities(
             mrcaObj = mrca, samp.name = x, mut.snv.rate = mut.snv.rate,
+            mut.show.realtime = TRUE,
             output.file = paste(output.dir, x,
                                 "05b_Evolutionary_timeline_realtime.pdf",
                                 sep = "/"
@@ -955,7 +999,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' `estimate.mut.rate` is set to `TRUE` or if `mut.show.realtime == FALSE`.
 #' @param estimate.mut.rate if set to `TRUE`, the mutation rate will be
 #' estimated by fitting a linear regression model to the relationship between
-#' age at diagnosis and mutaiton density at MRCA. Default `FALSE`. Will be
+#' age at diagnosis and mutation density at MRCA. Default `FALSE`. Will be
 #' ignored if `mut.show.realtime == FALSE`.
 #' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
 #' on the evolutionary timeline.

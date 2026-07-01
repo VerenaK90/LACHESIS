@@ -31,7 +31,7 @@ diploid genome (e.g. 3.2 SNVs/day in neuroblastoma). Will be ignored if
 
 \item{estimate.mut.rate}{if set to \code{TRUE}, the mutation rate will be
 estimated by fitting a linear regression model to the relationship between
-age at diagnosis and mutaiton density at MRCA. Default \code{FALSE}. Will be
+age at diagnosis and mutation density at MRCA. Default \code{FALSE}. Will be
 ignored if \code{mut.show.realtime == FALSE}.}
 
 \item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception
