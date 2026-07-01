@@ -886,6 +886,47 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         )
     }
 
+    # Estimate mutation rate
+    if(estimate.mut.rate == TRUE){
+
+      if (!is.null(output.dir)) {
+
+        tmp <- estimateMutationRate(lachesis = cohort.densities,
+                                    output.dir = output.dir,
+                           overwrite = TRUE)
+        if(tmp[["r.squared"]] < 0.1){
+          warning("Mutation rate cannot be reliably estimated for this cohort (R
+                squared < 0.1). No reliable realtime estimate possible.")
+        }
+
+
+        # convert mutation rate per Mb to mutation rate per haploid genome
+        mut.snv.rate <- as.numeric(
+          tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
+            3.3 * 10^3 * 2)
+        rm(tmp)
+
+        for(x in cohort.densities[,Sample_ID]){
+          mrca <- fread(file = file.path(
+            output.dir, ids[i],
+            paste0(
+              "04_SNV_timing_per_segment_",
+              x, ".txt"
+            )
+          ))
+          plotMutationDensities(
+            mrcaObj = mrca, samp.name = x, mut.snv.rate = mut.snv.rate,
+            output.file = paste(output.dir, x,
+                                "05b_Evolutionary_timeline_realtime.pdf",
+                                sep = "/"
+            ), ...
+          )
+        }
+
+      }
+    }
+
+
     # Save log file as tsv
     if (!is.null(output.dir) && !is.null(input.files)) {
         timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
