@@ -1261,7 +1261,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
       # step size such that there are maximally 10 ticks
       step.size <- ifelse(x.max.six.months > 10, 52, 26)
-      weeks_pc <- c(12, 27, 38, 64, seq(
+      weeks_pc <- c(0, 12, 27, 38, 64, seq(
         2 * 26, x.max.six.months * 26,
         step.size
       ) + 38)
@@ -1269,7 +1269,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
       # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
       snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
       realtime_labels <- c(
-        "12wk", "27wk", "38wk", "6mo",
+        "", "12wk", "27wk", "38wk", "6mo",
         paste(seq(2, x.max.six.months, 1 / (26 / step.size)) * 6, "mo", sep = "")
       )
       axis(
