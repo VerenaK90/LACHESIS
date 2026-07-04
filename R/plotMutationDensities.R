@@ -214,12 +214,22 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
 
     if (mut.show.realtime) {
+        # the maximal time in units of six months:
+        x.max.six.months <- x.max / mut.snv.rate * 2 * 3300 / (6 * 30)
 
-        weeks_pc <- c(12, 27, 38, 64, 90, 116)
+        # step size such that there are maximally 10 ticks
+        step.size <- ifelse(x.max.six.months > 10, 52, 26)
+        weeks_pc <- c(0, 12, 27, 38, 64, seq(
+            2 * 26, x.max.six.months * 26,
+            step.size
+        ) + 38)
         # Converting SNVs per day to SNVs per Mb starting from
         # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
         snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
-        realtime_labels <- c("12wk", "27wk", "38wk", "6mo", "12mo", "18mo")
+        realtime_labels <- c(
+            "", "12wk", "27wk", "38wk", "6mo",
+            paste(seq(2, x.max.six.months, 1 / (26 / step.size)) * 6, "mo", sep = "")
+        )
         axis(
             side = 3, at = c(x.min, snvs_per_mb, x.max),
             labels = c("", realtime_labels, ""),
