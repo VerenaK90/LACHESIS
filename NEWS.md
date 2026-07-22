@@ -32,7 +32,7 @@ NEW FEATURES
     o Readme was updated to correct for spelling error.
     o There's now a plotting modality for comparing individual disease trajectories (ECA, MRCA, age at diagnosis) across cohorts.
 
-CHANGES IN VERSION 0.99.6
+CHANGES IN VERSION 1.1.1
 -------------------------
 
 NEW FEATURES
