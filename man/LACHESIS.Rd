@@ -45,6 +45,8 @@ LACHESIS(
   sig.select = NULL,
   min.p = NULL,
   driver.file = NULL,
+  estimate.mut.rate = FALSE,
+  mut.show.realtime = FALSE,
   ...
 )
 }
@@ -168,6 +170,14 @@ specific signature.}
 \item{driver.file}{optional, path to file with "chrom", "snv_start", "ref",
 "alt", "gene" column containing known driver SNVs.}
 
+\item{estimate.mut.rate}{if set to \code{TRUE}, the mutation rate will be
+estimated by fitting a linear regression model to the relationship between
+age at diagnosis and mutation density at MRCA. Default \code{FALSE}. Will be
+ignored if \code{mut.show.realtime == FALSE}.}
+
+\item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception
+on the evolutionary timeline.}
+
 \item{...}{further arguments and parameters passed to LACHESIS functions.}
 }
 \value{
@@ -257,7 +267,8 @@ nbe15_cn <- read.delim(
 lachesis <- LACHESIS(
     ids = c("NBE11", "NBE15"), cnv.files =
         list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf),
-    vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51),
+    vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59,
+    2.51),
     cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3),
     cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37)
 )

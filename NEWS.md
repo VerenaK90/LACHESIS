@@ -31,3 +31,12 @@ NEW FEATURES
     o Confidence bounds of the cumulative distribution are now plotted as shaded areas with opacity 0.3 to allow their distinction if they overlap
     o Readme was updated to correct for spelling error.
     o There's now a plotting modality for comparing individual disease trajectories (ECA, MRCA, age at diagnosis) across cohorts.
+
+CHANGES IN VERSION 0.99.6
+-------------------------
+
+NEW FEATURES
+
+    o LACHESIS now allows de novo estimation of mutation rates from cohort data
+    o Inferred time axis updated 
+    o Copy number segments with negative values are now filtered

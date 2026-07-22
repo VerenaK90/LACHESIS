@@ -193,6 +193,11 @@ readCNV <- function(cn.info = NULL, chr.col = NULL, start.col = NULL,
     message("Removing ", tmp1, " segments without B allele information...")
     cn.info <- cn.info[!is.na(cn.info[["A"]]) & !is.na(cn.info[["B"]])]
 
+    ## filter segments with negative values
+    tmp1 <- sum(cn.info[["A"]] < 0 | cn.info[["B"]] < 0)
+    message("Removing ", tmp1, " segments with B allele information < 0...")
+    cn.info <- cn.info[cn.info[["A"]] >= 0 & cn.info[["B"]] >=0]
+
     ## add total copy number
     cn.info$TCN <- cn.info$A + cn.info$B
 

@@ -4,13 +4,17 @@
 #' case the estimated age at ECA, MRCA and the age at diagnosis.
 #' @param lachesis output generated from \code{\link{LACHESIS}}.
 #' @param mut.snv.rate optional; rate of accumulated SNVs per day in a
-#' diploid genome (i.e. 3.2 SNVs/day in neuroblastoma)
+#' diploid genome (e.g. 3.2 SNVs/day in neuroblastoma). Will be ignored if
+#' `estimate.mut.rate` is set to `TRUE`
+#' @param time.unit The time unit in which age at diagnosis is provided. Possible
+#' values are `days`, `weeks`, `months` and `years`. Default `days`.
+#' @param estimate.mut.rate if set to `TRUE`, the mutation rate will be
+#' estimated by fitting a linear regression model to the relationship between
+#' age at diagnosis and mutaiton density at MRCA. Default `FALSE`.
 #' @param lach.col.eca optional, color for ECA.
 #' @param lach.col.mrca optional, color for MRCA.
-#' @param corr.time.scale numeric value by which survival time is to be divided
-#' to convert into months (e.g., 30 for converting days into months), defaults
-#' to `1`.
 #' @param output.file optional; file path to output.
+#' @param ...  further arguments and parameters passed to other functions.
 #' @return graph with SNV densities and estimated times at ECA/ MRCA and
 #' diagnosis.
 #' @examples
@@ -47,17 +51,17 @@
 #'
 #' # Example with template file with paths to multiple cnv/snv files as an input
 #' lachesis <- LACHESIS(input.files = lachesis_input)
-#' plotDiseaseTrajectories(lachesis, corr.time.scale = 31)
+#' plotDiseaseTrajectories(lachesis, time.unit = "days")
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title
-#' arrows points
+#' @importFrom graphics arrows points
 #' @importFrom stats cor
 
 plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
+                                    estimate.mut.rate = FALSE, time.unit = "days",
                                     lach.col.eca = "#176A02",
                                     lach.col.mrca = "#4FB12B",
-                                    corr.time.scale = 1,
-                                    output.file = NULL) {
+                                    output.file = NULL, ...) {
     ECA_time_mean <- MRCA_time_mean <- NULL
 
 
@@ -67,6 +71,11 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
     if (is.null(lachesis[["Age"]])) {
         stop("Missing age information.")
     }
+    time.units <- c("days", "weeks", "months", "years")
+    time.unit <- match.arg(
+      arg = time.unit, choices = time.units,
+      several.ok = FALSE
+    )
     if (any(is.na(lachesis$MRCA_time_mean))) {
         tmp1 <- sum(is.na(lachesis$MRCA_time_mean))
         warning(sprintf(
@@ -81,6 +90,35 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
         )
         return(NULL)
     }
+    if( estimate.mut.rate == TRUE){
+      if(!is.null(output.file)){
+        tmp <- estimateMutationRate(lachesis, output.dir = dirname(output.file),
+                                    ...)
+      }else{
+        tmp <- estimateMutationRate(lachesis, ...)
+      }
+      if(tmp[["r.squared"]] < 0.1){
+        stop("Mutation rate cannot be reliably estimated for this cohort (R
+                squared < 0.1). No reliable realtime estimate possible.")
+      }
+
+
+      # convert mutation rate per Mb to mutation rate per haploid genome
+      mut.snv.rate <- as.numeric(
+        tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
+        3.3 * 10^3 * 2)
+      rm(tmp)
+
+    }
+
+    # convert time to months
+    if(time.unit == "weeks"){
+      lachesis[,Age := Age / 4.345]
+    }else if(time.unit == "days"){
+      lachesis[,Age := Age / 30.5]
+    }else if(time.unit == "years"){
+      lachesis[,Age := Age * 12]
+    }
     if (!is.null(output.file)) {
         pdf(output.file, width = 8, height = 6)
     }
@@ -89,7 +127,7 @@ plotDiseaseTrajectories <- function(lachesis = NULL, mut.snv.rate = 3.2,
 
     to.plot <- lachesis[order(lachesis[["MRCA_time_mean"]]), ]
 
-    age_months <- to.plot[["Age"]] / corr.time.scale
+    age_months <- to.plot[["Age"]]
     # convert months into weeks (38 weeks of gestation)
     age_weeks_pc <- 38 + age_months * 4.345
     # convert to SNVs/Mb after gastrulation (2 weeks after conception)

@@ -84,6 +84,12 @@
 #' specific signature.
 #' @param driver.file optional, path to file with "chrom", "snv_start", "ref",
 #' "alt", "gene" column containing known driver SNVs.
+#' @param estimate.mut.rate if set to `TRUE`, the mutation rate will be
+#' estimated by fitting a linear regression model to the relationship between
+#' age at diagnosis and mutation density at MRCA. Default `FALSE`. Will be
+#' ignored if `mut.show.realtime == FALSE`.
+#' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
+#' on the evolutionary timeline.
 #' @param ... further arguments and parameters passed to LACHESIS functions.
 #' @examples
 #' # An example file with sample annotations and meta data
@@ -162,7 +168,8 @@
 #' lachesis <- LACHESIS(
 #'     ids = c("NBE11", "NBE15"), cnv.files =
 #'         list(nbe11_cn, nbe15_cn), snv.files = c(nbe11_vcf, nbe15_vcf),
-#'     vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59, 2.51),
+#'     vcf.source = c("dkfz", "dkfz"), purity = c(0.83, 1), ploidy = c(2.59,
+#'     2.51),
 #'     cnv.chr.col = c(1, 1), cnv.start.col = c(2, 2), cnv.end.col = c(3, 3),
 #'     cnv.A.col = c(34, 34), cnv.B.col = c(35, 35), cnv.tcn.col = c(37, 37)
 #' )
@@ -189,7 +196,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                      excl.chr = NULL, ref.build = "hg19",
                      filter.value = "PASS", sig.assign = FALSE, sig.file = NULL,
                      assign.method = "sample", sig.select = NULL, min.p = NULL,
-                     driver.file = NULL, ...) {
+                     driver.file = NULL, estimate.mut.rate = FALSE,
+                     mut.show.realtime = FALSE, ...) {
     ID <- cnv.file <- snv.file <- fwrite <- known_driver_gene <- Sample <-
         Clonality <- NULL
 
@@ -620,7 +628,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (is.na(cnv.files)[i]) {
                 tmp1 <- ids[1]
                 warning(sprintf(
-                    "No CNV file provided for sample %s; sample will be excluded",
+                    "No CNV file provided for sample %s; sample will be excluded
+                    ",
                     tmp1
                 ))
                 rm(tmp1)
@@ -884,6 +893,84 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
         )
     }
 
+    # Estimate mutation rate
+    if(estimate.mut.rate == TRUE & mut.show.realtime == TRUE){
+
+      if (!is.null(output.dir)) {
+
+        tmp <- estimateMutationRate(lachesis = cohort.densities,
+                                    output.dir = output.dir,
+                           overwrite = TRUE)
+        if(tmp[["r.squared"]] < 0.1){
+          warning("Mutation rate cannot be reliably estimated for this cohort (R
+                squared < 0.1). No reliable realtime estimate possible.")
+        }
+
+
+        # convert mutation rate per Mb to mutation rate per haploid genome
+        mut.snv.rate <- as.numeric(
+          tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
+            3.3 * 10^3 * 2)
+        rm(tmp)
+
+        for(x in cohort.densities[,Sample_ID]){
+          eca.mrca <- fread(file = file.path(
+            output.dir, x,
+            paste0(
+              "03_MRCA_densities_",
+              x, ".txt"
+            )
+          ))
+          mrca <- fread(file = file.path(
+            output.dir, x,
+            paste0(
+              "04_SNV_timing_per_segment_",
+              x, ".txt"
+            )
+          ),
+          colClasses = list(character = c("chrom", "MRCA_qual",
+                                          "A_time", "B_time"),
+                            integer = c("TCN", "A", "B", "Seglength",
+                                        "Start", "End"),
+                            numeric = c("n_mut_A", "n_mut_B",
+                                        "n_mut_total_clonal",
+                                        "n_mut_total_subclonal",
+                                        "n_mut_total", "n_mut_firstpeak",
+                                        "p_sc", "p_lc", "p_ec", "p_c",
+                                        "density_total_mean",
+                                        "density_A_mean", "density_B_mean",
+                                        "density_total_lower",
+                                        "density_total_upper",
+                                        "density_A_lower", "density_A_upper",
+                                        "density_B_lower", "density_B_upper",
+                                        "p_total_to_mrca", "p_A_to_mrca",
+                                        "p_B_to_mrca", "p_adj_total_to_mrca",
+                                        "p_adj_A_to_mrca", "p_adj_B_to_mrca",
+                                        "p_A_to_eca", "p_B_to_eca",
+                                        "p_adj_A_to_eca", "p_adj_B_to_eca")))
+          attr(mrca, "purity") <- eca.mrca[,purity]
+          attr(mrca, "ploidy") <- eca.mrca[,ploidy]
+          attr(mrca, "MRCA_time_mean") <- eca.mrca[,MRCA_time_mean]
+          attr(mrca, "MRCA_time_lower") <- eca.mrca[,MRCA_time_lower]
+          attr(mrca, "MRCA_time_upper") <- eca.mrca[,MRCA_time_upper]
+          attr(mrca, "ECA_time_mean") <- eca.mrca[,ECA_time_mean]
+          attr(mrca, "ECA_time_lower") <- eca.mrca[,ECA_time_lower]
+          attr(mrca, "ECA_time_upper") <- eca.mrca[,ECA_time_upper]
+
+          plotMutationDensities(
+            mrcaObj = mrca, samp.name = x, mut.snv.rate = mut.snv.rate,
+            mut.show.realtime = TRUE,
+            output.file = paste(output.dir, x,
+                                "05b_Evolutionary_timeline_realtime.pdf",
+                                sep = "/"
+            ), ...
+          )
+        }
+
+      }
+    }
+
+
     # Save log file as tsv
     if (!is.null(output.dir) && !is.null(input.files)) {
         timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
@@ -907,6 +994,15 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' @param lach.suppress.outliers whether outliers (defined as the 2.5% tumors
 #' with lowest and highest densities) are to be plot. Default `TRUE`.
 #' @param lach.log.densities plot logarithmic densities. Default `FALSE`.
+#' @param mut.snv.rate optional; rate of accumulated SNVs per day in a
+#' diploid genome (e.g. 3.2 SNVs/day in neuroblastoma). Will be ignored if
+#' `estimate.mut.rate` is set to `TRUE` or if `mut.show.realtime == FALSE`.
+#' @param estimate.mut.rate if set to `TRUE`, the mutation rate will be
+#' estimated by fitting a linear regression model to the relationship between
+#' age at diagnosis and mutation density at MRCA. Default `FALSE`. Will be
+#' ignored if `mut.show.realtime == FALSE`.
+#' @param mut.show.realtime logical; if `TRUE`, displays weeks post-conception
+#' on the evolutionary timeline.
 #' @param lach.col.zero optional, bar color for single-copy SSNV densities.
 #' @param lach.col.multi optional, bar color for multi-copy SSNV densities.
 #' @param lach.border, optional, border color for the bars.
@@ -952,15 +1048,17 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 #' plotLachesis(lachesis)
 #' @export
 #' @importFrom graphics abline Axis box grid hist mtext par rect text title
-#' arrows legend points polygon
+#' @importFrom graphics arrows legend points polygon
 #' @importFrom grDevices adjustcolor
 
 
 plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
+                         mut.snv.rate = 3.2, estimate.mut.rate = FALSE,
+                         mut.show.realtime = FALSE,
                          lach.log.densities = FALSE, lach.col.multi = "#176A02",
                          lach.border = NULL, binwidth = NULL,
                          lach.col.zero = "#4FB12B", output.file = NULL, ...) {
-    MRCA_time_mean <- ECA_time_mean <- NULL
+    MRCA_time_mean <- ECA_time_mean <- Age <- Parameter <- NULL
 
     if (is.null(lachesis)) {
         stop("Missing input. Please provide the output generated by LACHESIS()")
@@ -985,6 +1083,31 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
             "No sample with MRCA density estimate provided. Returning zero."
         )
         return(NULL)
+    }
+    if(estimate.mut.rate == TRUE & mut.show.realtime == TRUE &
+       (is.null(lachesis[,Age]) | nrow(lachesis[!is.na(Age),]) == 0) ){
+      warning("Please provide age information if estimating mutation rates de
+              novo. Continuing without real time.")
+      mut.show.realtime <- FALSE
+    }else if( estimate.mut.rate == TRUE & mut.show.realtime == TRUE){
+      if(!is.null(output.file)){
+        tmp <- estimateMutationRate(lachesis[!is.na(Age),],
+                                    output.dir = dirname(output.file), ...)
+      }else{
+        tmp <- estimateMutationRate(lachesis[!is.na(Age),], ...)
+      }
+      if(tmp[["r.squared"]] < 0.1){
+        warning("Mutation rate cannot be reliably estimated for this cohort (R
+                squared < 0.1). Continuing without real time.")
+        mut.show.realtime <- FALSE
+      }
+
+      # convert mutation rate per Mb to mutation rate per haploid genome
+      mut.snv.rate <- as.numeric(
+        tmp[["parameters"]][Parameter == "Mutation rate", "Mean"]*
+        3.3 * 10^3 * 2)
+      rm(tmp)
+
     }
     if (!is.null(output.file)) {
         pdf(output.file, width = 8, height = 6)
@@ -1112,8 +1235,8 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
     mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
 
-    # Cumulative mutation densities at ECA and MRCA
-    par(mar = c(3, 4, 3, 1), xpd = FALSE)
+    # II. Cumulative mutation densities at ECA and MRCA
+    par(mar = c(3, 4, 6, 1), xpd = FALSE)
 
     x.min <- 0
     x.max <- max(lachesis$MRCA_time_upper,
@@ -1130,6 +1253,45 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
     Axis(side = 2, cex = 0.7)
     mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
     mtext(text = "Fraction of tumors", side = 2, line = 2, cex = 0.7)
+
+    if (mut.show.realtime) {
+
+      # the maximal time in units of six months:
+      x.max.six.months <- x.max / mut.snv.rate * 2 * 3300 / (6 * 30)
+
+      # step size such that there are maximally 10 ticks
+      step.size <- ifelse(x.max.six.months > 10, 52, 26)
+      weeks_pc <- c(0, 12, 27, 38, 64, seq(
+        2 * 26, x.max.six.months * 26,
+        step.size
+      ) + 38)
+      # Converting SNVs per day to SNVs per Mb starting from
+      # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
+      snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
+      realtime_labels <- c(
+        "", "12wk", "27wk", "38wk", "6mo",
+        paste(seq(2, x.max.six.months, 1 / (26 / step.size)) * 6, "mo", sep = "")
+      )
+      axis(
+        side = 3,
+        at = snvs_per_mb,
+        labels = realtime_labels,
+        cex.axis = 0.7
+      )
+      segments(
+        x0 = x.min,
+        y0 = par("usr")[4],
+        x1 = 1.05 * x.max,
+        y1 = par("usr")[4],
+        xpd = NA
+      )
+      mtext(
+        "Estimated time (weeks post conception and months postnatal)",
+        side = 3,
+        line = 2,
+        cex = 0.7
+      )
+    }
 
     to.plot.MRCA <- data.frame(
         x.lower = rep(sort(c(lachesis$MRCA_time_mean)),
@@ -1217,7 +1379,7 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
     title(
         main = paste("Cumulative SNV densities at ECA and MRCA"),
-        cex.main = 1
+        cex.main = 1, line = 4
     )
 
     if (!is.null(output.file)) {
@@ -1289,10 +1451,11 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
 classifyLACHESIS <- function(lachesis, mrca.cutpoint = NULL,
                              infer.cutpoint = FALSE, entity = "neuroblastoma",
-                             lach.col.multi = "#176A02", lach.col.zero = "#4FB12B",
-                             surv.time = "OS.time", surv.event = "OS", surv.time.scale = 1,
-                             output.dir = NULL) {
-    MRCA_time_mean <- NULL
+                             lach.col.multi = "#176A02",
+                             lach.col.zero = "#4FB12B",
+                             surv.time = "OS.time", surv.event = "OS",
+                             surv.time.scale = 1, output.dir = NULL) {
+    MRCA_time_mean <- MRCA_timing <- NULL
 
     if (is.null(lachesis)) {
         stop("'lachesis' dataset must be provided.")

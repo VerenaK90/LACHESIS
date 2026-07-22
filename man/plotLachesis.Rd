@@ -7,6 +7,9 @@
 plotLachesis(
   lachesis = NULL,
   lach.suppress.outliers = FALSE,
+  mut.snv.rate = 3.2,
+  estimate.mut.rate = FALSE,
+  mut.show.realtime = FALSE,
   lach.log.densities = FALSE,
   lach.col.multi = "#176A02",
   lach.border = NULL,
@@ -21,6 +24,18 @@ plotLachesis(
 
 \item{lach.suppress.outliers}{whether outliers (defined as the 2.5\% tumors
 with lowest and highest densities) are to be plot. Default \code{TRUE}.}
+
+\item{mut.snv.rate}{optional; rate of accumulated SNVs per day in a
+diploid genome (e.g. 3.2 SNVs/day in neuroblastoma). Will be ignored if
+\code{estimate.mut.rate} is set to \code{TRUE} or if \code{mut.show.realtime == FALSE}.}
+
+\item{estimate.mut.rate}{if set to \code{TRUE}, the mutation rate will be
+estimated by fitting a linear regression model to the relationship between
+age at diagnosis and mutation density at MRCA. Default \code{FALSE}. Will be
+ignored if \code{mut.show.realtime == FALSE}.}
+
+\item{mut.show.realtime}{logical; if \code{TRUE}, displays weeks post-conception
+on the evolutionary timeline.}
 
 \item{lach.log.densities}{plot logarithmic densities. Default \code{FALSE}.}
 
