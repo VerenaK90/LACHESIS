@@ -52,7 +52,7 @@ SigAssignment output that a variant must meet to be considered as matching a
 specific signature.}
 
 \item{ref.build}{Reference genome. Default \code{hg19}.
-Can be \code{hg18}, \code{hg19} or \code{hg38}.}
+Can be \code{hg18}, \code{hg19}, \code{hg38} or \code{mm10}.}
 
 \item{cosmic.version}{COSMIC mutational signature reference.
 Can be "COSMIC", "COSMIC_v3.1", "COSMIC_v3.2"}
