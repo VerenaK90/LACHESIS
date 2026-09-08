@@ -152,7 +152,7 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
         snvClonality[, Signature := NA_character_]
     }
 
-    if (!is.null(driverMutations)) {
+    if (is.null(driverMutations)) {
       snvClonality <- snvClonality[, .(
         chrom, snv_start, ref, alt, Sample, TCN, A, B,
         cn_start, cn_end, t_vaf, Signature, A_time,
