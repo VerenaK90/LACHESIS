@@ -23,7 +23,7 @@
 #' SigAssignment output that a variant must meet to be considered as matching a
 #' specific signature.
 #' @param ref.build Reference genome. Default `hg19`.
-#' Can be `hg18`, `hg19` or `hg38`.
+#' Can be `hg18`, `hg19`, `hg38` or `mm10`.
 #' @param cosmic.version COSMIC mutational signature reference.
 #' Can be "COSMIC", "COSMIC_v3.1", "COSMIC_v3.2"
 #' @param ... further arguments and parameters passed to other
@@ -92,7 +92,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     }
 
     ref.build <- match.arg(
-        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        arg = ref.build, choices = c("hg19", "hg18", "hg38", "mm10"),
         several.ok = FALSE
     )
 
@@ -183,7 +183,12 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     sbs.cols <- grep("^SBS", names(sig.data), value = TRUE)
 
     if (!"sequence_context" %in% colnames(sv)) {
+
+      if (grepl("hg", ref.build)) {
         genome_pkg <- paste0("BSgenome.Hsapiens.UCSC.", ref.build)
+      } else {
+        genome_pkg <- "BSgenome.Mmusculus.UCSC.mm10"
+      }
 
         if (!requireNamespace(genome_pkg, quietly = TRUE)) {
             stop("Please install ", genome_pkg, ".")
@@ -362,7 +367,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
 #' @param nb output generated from \code{\link{nbImport}}.
 #' @param snvClonality output generated from \code{\link{estimateClonality}}.
 #' @param ref.build Reference genome. Default `hg19`.
-#' Can be `hg18`, `hg19` or `hg38`.
+#' Can be `hg18`, `hg19`, `hg38`, or `mm10`.
 #' @param min.cn maximum copy number to be included in the plotting.
 #' Defaults to 2.
 #' @param max.cn maximum copy number to be included in the plotting.
@@ -463,7 +468,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
     }
 
     ref.build <- match.arg(
-        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        arg = ref.build, choices = c("hg19", "hg18", "hg38", "mm10"),
         several.ok = FALSE
     )
     sig.colors <- attr(nb, "sig.colors")
@@ -703,7 +708,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
     }
 }
 
-# Contig lengths for hg19, hg38 and hg18
+# Contig lengths for hg19, hg38, hg18 and mm10
 .getContigLens <- function(build = "hg19") {
     if (build == "hg19") {
         chr.lens <- c(
@@ -727,8 +732,15 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
             114364328, 107043718, 101991189, 90338345, 83257441, 80373285,
             58617616, 64444167, 46709983, 50818468, 156040895, 57227415
         )
+    } else if (build == "mm10") { # mm10
+      chr.lens <- c(
+        195471971, 182113224 , 160039680, 156508116, 151834684, 149736546,
+        145441459, 129401213, 124595110, 130694993, 122082543, 120129022,
+        120421639, 124902244, 104043685, 98207768, 94987271, 90702639,
+        61431566, 171031299, 91744698
+      )
     } else {
-        stop("Available reference builds: hg18, hg19, hg38")
+        stop("Available reference builds: hg18, hg19, hg38, mm10")
     }
 
     chr.lens
@@ -738,10 +750,10 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
 .transformSegments <- function(segmentedData, build = "hg19") {
     Start_Position <- End_Position <- Chromosome <- NULL
 
-    build.opts <- c("hg19", "hg18", "hg38")
+    build.opts <- c("hg19", "hg18", "hg38", "mm10")
 
     if (!build %in% build.opts) {
-        stop("Available reference builds: hg18, hg19, hg38")
+        stop("Available reference builds: hg18, hg19, hg38", "mm10")
     }
 
     # Get chr lens

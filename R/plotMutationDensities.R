@@ -24,7 +24,7 @@
 #' diploid genome (e.g., 3.2 SNVs/day in neuroblastoma).
 #' @param output.file optional; will save the plot.
 #' @param ref.build Reference genome. Default `hg19`.
-#' Can be `hg18`, `hg19` or `hg38`.
+#' Can be `hg18`, `hg19`, `hg38` or `mm10`.
 #' @param ... further arguments and parameters passed to other
 #' LACHESIS functions.
 #' @return graphs with mutation densitiy at ECA and MRCA as well as
@@ -76,7 +76,7 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
     }
 
     ref.build <- match.arg(
-        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        arg = ref.build, choices = c("hg19", "hg18", "hg38", "mm10"),
         several.ok = FALSE
     )
 
@@ -371,8 +371,15 @@ plotMutationDensities <- function(mrcaObj = NULL, samp.name = NULL,
             17500000, 18000000, 36500000, 36000000, 38000000, 18500000,
             27500000, 29000000, 14000000, 12000000, 61000000, 17500000
         )
+    } else if (build == "mm10") {
+      centromeres <- c(
+        3000000, 3000000, 3000000, 3000000, 3000000, 3000000,
+        3000000, 3000000, 3000000, 3000000, 3000000, 3000000,
+        3000000, 3000000, 3000000, 3000000, 3000000, 3000000,
+        3000000, 3000000, 90000
+      )
     } else {
-        stop("Available reference builds: hg18, hg19, hg38")
+        stop("Available reference builds: hg18, hg19, hg38, mm10")
     }
 
     data.table(

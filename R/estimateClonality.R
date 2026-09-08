@@ -14,8 +14,8 @@
 #' @param purity tumor cell content.
 #' @param driver.file optional, path to file with "chrom", "snv_start", "ref",
 #' "alt", "gene" column containing known driver SNVs.
-#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or
-#' `hg38`.
+#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19`,
+#' `hg38` or `mm10`.
 #' @return a data.table with per-SNV clonality assignment
 #' @examples
 #' # Example using variants associated with specific SBS mutational signatures
@@ -65,7 +65,7 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
     }
 
     ref.build <- match.arg(
-        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        arg = ref.build, choices = c("hg19", "hg18", "hg38", "mm10"),
         several.ok = FALSE
     )
 
@@ -132,6 +132,8 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
             )
         } else if (ref.build == "hg18") {
             driverMutations <- NULL
+        } else if (ref.build == "mm10") {
+          driverMutations <- NULL
         }
     } else {
         driverMutations <- data.table::fread(driver.file)
@@ -148,6 +150,16 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
 
     if (!"Signature" %in% colnames(snvClonality)) {
         snvClonality[, Signature := NA_character_]
+    }
+
+    if (is.null(driverMutations)) {
+      snvClonality <- snvClonality[, .(
+        chrom, snv_start, ref, alt, Sample, TCN, A, B,
+        cn_start, cn_end, t_vaf, Signature, A_time,
+        B_time, Clonality
+      )]
+
+      return(snvClonality)
     }
 
     data.table::setnames(snvClonality, old = "gene", new = "known_driver_gene")

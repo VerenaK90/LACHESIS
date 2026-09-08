@@ -29,7 +29,7 @@ plotMutationDensities(
 \item{min.seg.size}{minimal segment size to plot}
 
 \item{ref.build}{Reference genome. Default \code{hg19}.
-Can be \code{hg18}, \code{hg19} or \code{hg38}.}
+Can be \code{hg18}, \code{hg19}, \code{hg38} or \code{mm10}.}
 
 \item{mut.col.zero}{optional, the bar color for densities of mutations
 present on single copies.}
