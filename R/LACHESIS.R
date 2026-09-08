@@ -63,8 +63,8 @@
 #' clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.
 #' @param excl.chr a vector of chromosomes that should be excluded from the
 #' quantification. e.g., due to reporter constructs in animal models.
-#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19` or
-#' `hg38`.
+#' @param ref.build Reference genome. Default `hg19`. Can be `hg18`, `hg19`,
+#' `hg38` or `mm10`.
 #' @param filter.value The FILTER column value for variants that passed the
 #' filtering, defaults to PASS.
 #' @param sig.assign Logical. If TRUE, each variant will be assigned to the most
@@ -214,7 +214,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
     }
 
     ref.build <- match.arg(
-        arg = ref.build, choices = c("hg19", "hg18", "hg38"),
+        arg = ref.build, choices = c("hg19", "hg18", "hg38", "mm10"),
         several.ok = FALSE
     )
 
