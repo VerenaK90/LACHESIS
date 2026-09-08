@@ -152,6 +152,16 @@ estimateClonality <- function(nbObj = NULL, mrcaObj = NULL, ID = NULL,
         snvClonality[, Signature := NA_character_]
     }
 
+    if (!is.null(driverMutations)) {
+      snvClonality <- snvClonality[, .(
+        chrom, snv_start, ref, alt, Sample, TCN, A, B,
+        cn_start, cn_end, t_vaf, Signature, A_time,
+        B_time, Clonality
+      )]
+
+      return(snvClonality)
+    }
+
     data.table::setnames(snvClonality, old = "gene", new = "known_driver_gene")
     snvClonality <- snvClonality[, .(
         chrom, snv_start, ref, alt, Sample, TCN, A, B,
