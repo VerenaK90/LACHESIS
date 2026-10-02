@@ -503,7 +503,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                     output.file = paste(output.dir, x$ID,
                         "05_Evolutionary_timeline.pdf",
                         sep = "/"
-                    ), ...
+                    ), mut.show.realtime = mut.show.realtime,
+                    ...
                 )
             }
 
@@ -771,7 +772,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
                         output.file = paste(output.dir, ids[i],
                             "05_Evolutionary_timeline.pdf",
                             sep = "/"
-                        ), ...
+                        ), mut.show.realtime = mut.show.realtime,
+                        ...
                     )
                 }
             }
