@@ -85,7 +85,7 @@ test_readVCF_valid_vcf_sources <- function() {
 test_nbImport_invalid_ref_build_values <- function() {
     data <- load_test_data("NBE15")
 
-    invalid_builds <- c("hg17", "hg20", "hg99", "GRCh37", "mm10", "")
+    invalid_builds <- c("hg17", "hg20", "hg99", "GRCh37", "")
 
     for (build in invalid_builds) {
         expect_error(
@@ -103,7 +103,7 @@ test_nbImport_invalid_ref_build_values <- function() {
 test_nbImport_valid_ref_build_values <- function() {
     data <- load_test_data("NBE15")
 
-    valid_builds <- c("hg18", "hg19", "hg38")
+    valid_builds <- c("hg18", "hg19", "hg38", "mm10")
 
     for (build in valid_builds) {
         # Some ref.builds may cause coordinate range errors if SNV data is from a different build
