@@ -319,7 +319,7 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
                    can only be performed for hg19, hg38 and mm10", call. = FALSE)
         }
     )
-    genome <- ifelse(ref.build == "hg19", "GRCh37", "GRCh38", "mm10")
+    genome <- switch(ref.build, hg19 = "GRCh37", hg38 = "GRCh38", mm10 = "mm10")
     # get the reference sigs
     signatures <- MutationalPatterns::get_known_signatures(
         source = cosmic.version, genome = genome
@@ -334,7 +334,11 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     )
     GenomeInfoDb::genome(sv.granges) <- ref.build
 
-    genome_pkg <- paste0("BSgenome.Hsapiens.UCSC.", ref.build)
+    if (grepl("hg", ref.build)) {
+        genome_pkg <- paste0("BSgenome.Hsapiens.UCSC.", ref.build)
+      } else {
+        genome_pkg <- "BSgenome.Mmusculus.UCSC.mm10"
+      }
 
     if (!requireNamespace(genome_pkg, quietly = TRUE)) {
         stop("Please install ", genome_pkg, ".")
