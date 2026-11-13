@@ -313,13 +313,13 @@ nbImport <- function(cnv = NULL, snv = NULL, purity = NULL, ploidy = NULL,
     }
     # convert genome naming to MutationalPatterns; not supported for hg18.
     tryCatch(
-        match.arg(ref.build, c("hg19", "hg38"), several.ok = FALSE),
+        match.arg(ref.build, c("hg19", "hg38", "mm10"), several.ok = FALSE),
         error = function(e) {
             stop("Invalid value for `ref.build`. Mutational signature assignment
-                   can only be performed for hg19 and hg38", call. = FALSE)
+                   can only be performed for hg19, hg38 and mm10", call. = FALSE)
         }
     )
-    genome <- ifelse(ref.build == "hg19", "GRCh37", "GRCh38")
+    genome <- ifelse(ref.build == "hg19", "GRCh37", "GRCh38", "mm10")
     # get the reference sigs
     signatures <- MutationalPatterns::get_known_signatures(
         source = cosmic.version, genome = genome
