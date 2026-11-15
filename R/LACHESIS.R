@@ -427,7 +427,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             }
 
             if (!is.null(output.dir)) {
-                plotVAFdistr(snv, output.file = paste(output.dir, x$ID,
+                plotVAFdistr(vaf = snv, 
+                    t_sample = x$vcf.tumor.id,
+                    output.file = paste(output.dir, x$ID,
                     "01_VAF_histogram.pdf",
                     sep = "/"
                 ), ...)
@@ -440,7 +442,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             norm.counts <- normalizeCounts(countObj = raw.counts)
             mrca <- MRCA(
                 normObj = norm.counts, min.seg.size = min.seg.size,
-                fp.mean = fp.mean, excl.chr = excl.chr
+                fp.mean = fp.mean, fp.sd = fp.sd, excl.chr = excl.chr
             )
 
             this.tumor.density <- data.table::data.table(
@@ -500,6 +502,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (!is.null(output.dir)) {
                 plotMutationDensities(
                     mrcaObj = mrca, samp.name = x$ID,
+                    min.seg.size = min.seg.size, 
+                    ref.build = ref.build, 
+                    mut.show.realtime = mut.show.realtime,
                     output.file = paste(output.dir, x$ID,
                         "05_Evolutionary_timeline.pdf",
                         sep = "/"
@@ -698,7 +703,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             }
 
             if (!is.null(output.dir)) {
-                plotVAFdistr(snv,
+                plotVAFdistr(vaf = snv,
+                    t_sample = vcf.tumor.ids[i],
                     output.file = paste(output.dir, ids[i],
                         "01_VAF_histogram.pdf",
                         sep = "/"
@@ -729,7 +735,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             } else {
                 mrca <- MRCA(
                     normObj = norm.counts, min.seg.size = min.seg.size,
-                    fp.mean = fp.mean, excl.chr = excl.chr
+                    fp.mean = fp.mean, fp.sd = fp.sd, excl.chr = excl.chr
                 )
 
                 # Output the result for this sample
@@ -767,8 +773,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
                 if (!is.null(output.dir)) {
                     plotMutationDensities(
-                        mrcaObj = mrca, samp.name = ids[i],
-                        output.file = paste(output.dir, ids[i],
+                        mrcaObj = mrca, samp.name = x$ID,
+                        min.seg.size = min.seg.size, 
+                        ref.build = ref.build, 
+                        mut.show.realtime = mut.show.realtime,
+                        output.file = paste(output.dir, x$ID,
                             "05_Evolutionary_timeline.pdf",
                             sep = "/"
                         ), ...
@@ -887,6 +896,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
     if (!is.null(output.dir)) {
         plotLachesis(cohort.densities,
+            mut.show.realtime = mut.show.realtime,
+            estimate.mut.rate = estimate.mut.rate, 
             output.file = paste(output.dir, "SNV_densities_cohort.pdf",
                 sep = "/"
             ), ...
@@ -958,12 +969,14 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
           attr(mrca, "ECA_time_upper") <- eca.mrca[,ECA_time_upper]
 
           plotMutationDensities(
-            mrcaObj = mrca, samp.name = x, mut.snv.rate = mut.snv.rate,
-            mut.show.realtime = TRUE,
-            output.file = paste(output.dir, x,
-                                "05b_Evolutionary_timeline_realtime.pdf",
-                                sep = "/"
-            ), ...
+                    mrcaObj = mrca, samp.name = x$ID,
+                    min.seg.size = min.seg.size, 
+                    ref.build = ref.build, 
+                    mut.show.realtime = mut.show.realtime,
+                    output.file = paste(output.dir, x$ID,
+                        "05_Evolutionary_timeline.pdf",
+                        sep = "/"
+                    ), ...
           )
         }
 
