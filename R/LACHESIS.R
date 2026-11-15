@@ -1266,21 +1266,31 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
     if (mut.show.realtime) {
 
-      # the maximal time in units of six months:
-      x.max.six.months <- x.max / mut.snv.rate * 2 * 3300 / (6 * 30)
+    # the maximal time in units of six months:
+    x.max.six.months <- max(0, (x.max * 3300 *2 / (7 * mut.snv.rate) -36) / 26)
+    
+    postnatal_ticks <- NULL
+    postnatal_labels <- NULL
+    if (x.max.six.months >= 1) {
+        # ticks every 6 months up to 18 months of age
+        mo_units <- seq(1, min(3, floor(x.max.six.months)))
+        # ticks every 12 months after 18 months of age
+        one_yr_units <- if (x.max.six.months >= 4) seq(4, min(8, x.max.six.months), by = 2) else NULL
+        # ticks every 5 years after 5 years of age
+        five_yr_units <- if(x.max.six.months >= 10) seq(10, x.max.six.months, by = 10) else NULL
+        
+        postnatal_ticks <- c(mo_units, one_yr_units, five_yr_units)
+        postnatal_labels <- c(if (length(mo_units)) paste (mo_units * 6, "mo", sep = "") else NULL,
+                              if (length(one_yr_units)) paste(one_yr_units / 2, "y", sep = "") else NULL,
+                              if (length(five_yr_units)) paste(five_yr_units / 2, "y", sep = "") else NULL)
+    }
+    weeks_pc <- c(0, 12, 27, 38, 38 + postnatal_ticks * 26)
 
-      # step size such that there are maximally 10 ticks
-      step.size <- ifelse(x.max.six.months > 10, 52, 26)
-      weeks_pc <- c(0, 12, 27, 38, 64, seq(
-        2 * 26, x.max.six.months * 26,
-        step.size
-      ) + 38)
       # Converting SNVs per day to SNVs per Mb starting from
       # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
       snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
       realtime_labels <- c(
-        "", "12wk", "27wk", "38wk", "6mo",
-        paste(seq(2, x.max.six.months, 1 / (26 / step.size)) * 6, "mo", sep = "")
+        "", "12wk", "27wk", "38wk", postnatal_labels
       )
       axis(
         side = 3,
