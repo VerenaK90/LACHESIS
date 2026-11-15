@@ -427,7 +427,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             }
 
             if (!is.null(output.dir)) {
-                plotVAFdistr(snv, output.file = paste(output.dir, x$ID,
+                plotVAFdistr(vaf = snv, 
+                    t_sample = x$vcf.tumor.id,
+                    output.file = paste(output.dir, x$ID,
                     "01_VAF_histogram.pdf",
                     sep = "/"
                 ), ...)
@@ -440,7 +442,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             norm.counts <- normalizeCounts(countObj = raw.counts)
             mrca <- MRCA(
                 normObj = norm.counts, min.seg.size = min.seg.size,
-                fp.mean = fp.mean, excl.chr = excl.chr
+                fp.mean = fp.mean, fp.sd = fp.sd, excl.chr = excl.chr
             )
 
             this.tumor.density <- data.table::data.table(
@@ -500,6 +502,9 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             if (!is.null(output.dir)) {
                 plotMutationDensities(
                     mrcaObj = mrca, samp.name = x$ID,
+                    min.seg.size = min.seg.size, 
+                    ref.build = ref.build, 
+                    mut.show.realtime = mut.show.realtime,
                     output.file = paste(output.dir, x$ID,
                         "05_Evolutionary_timeline.pdf",
                         sep = "/"
@@ -698,7 +703,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             }
 
             if (!is.null(output.dir)) {
-                plotVAFdistr(snv,
+                plotVAFdistr(vaf = snv,
+                    t_sample = vcf.tumor.ids[i],
                     output.file = paste(output.dir, ids[i],
                         "01_VAF_histogram.pdf",
                         sep = "/"
@@ -729,7 +735,7 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
             } else {
                 mrca <- MRCA(
                     normObj = norm.counts, min.seg.size = min.seg.size,
-                    fp.mean = fp.mean, excl.chr = excl.chr
+                    fp.mean = fp.mean, fp.sd = fp.sd, excl.chr = excl.chr
                 )
 
                 # Output the result for this sample
@@ -767,8 +773,11 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
                 if (!is.null(output.dir)) {
                     plotMutationDensities(
-                        mrcaObj = mrca, samp.name = ids[i],
-                        output.file = paste(output.dir, ids[i],
+                        mrcaObj = mrca, samp.name = x$ID,
+                        min.seg.size = min.seg.size, 
+                        ref.build = ref.build, 
+                        mut.show.realtime = mut.show.realtime,
+                        output.file = paste(output.dir, x$ID,
                             "05_Evolutionary_timeline.pdf",
                             sep = "/"
                         ), ...
@@ -887,6 +896,8 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
 
     if (!is.null(output.dir)) {
         plotLachesis(cohort.densities,
+            mut.show.realtime = mut.show.realtime,
+            estimate.mut.rate = estimate.mut.rate, 
             output.file = paste(output.dir, "SNV_densities_cohort.pdf",
                 sep = "/"
             ), ...
@@ -958,12 +969,14 @@ LACHESIS <- function(input.files = NULL, ids = NULL, vcf.tumor.ids = NULL,
           attr(mrca, "ECA_time_upper") <- eca.mrca[,ECA_time_upper]
 
           plotMutationDensities(
-            mrcaObj = mrca, samp.name = x, mut.snv.rate = mut.snv.rate,
-            mut.show.realtime = TRUE,
-            output.file = paste(output.dir, x,
-                                "05b_Evolutionary_timeline_realtime.pdf",
-                                sep = "/"
-            ), ...
+                    mrcaObj = mrca, samp.name = x$ID,
+                    min.seg.size = min.seg.size, 
+                    ref.build = ref.build, 
+                    mut.show.realtime = mut.show.realtime,
+                    output.file = paste(output.dir, x$ID,
+                        "05_Evolutionary_timeline.pdf",
+                        sep = "/"
+                    ), ...
           )
         }
 
@@ -1171,69 +1184,66 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
     # Histogram of SNV density at ECA
 
-    if (all(is.na(lachesis$ECA_time_mean)) & !is.null(output.file)) {
-        dev.off()
-        return()
-    } else if (all(is.na(lachesis$ECA_time_mean))) {
-        return()
-    }
+    if (!all(is.na(lachesis$ECA_time_mean))) {
+        to.plot <- lachesis
 
-    to.plot <- lachesis
-
-    if (lach.suppress.outliers) {
-        to.plot <- to.plot[MRCA_time_mean < quantile(MRCA_time_mean, 0.975) &
-            MRCA_time_mean > quantile(MRCA_time_mean, 0.025), ]
-    }
-
-    par(mar = c(3, 4, 3, 1))
-
-    if (lach.log.densities) {
-        min.x <- floor(min(to.plot[, log10(ECA_time_mean)], na.rm = TRUE))
-        max.x <- ceiling(max(to.plot[, log10(ECA_time_mean)], na.rm = TRUE))
-
-        hist(to.plot[, log10(ECA_time_mean)],
-            xlim = c(min.x, max.x),
-            breaks = 20,
-            col = lach.col.zero, border = lach.border, main = NA,
-            xlab = NA, ylab = NA, axes = FALSE
-        )
-
-        Axis(
-            side = 1, at = seq(min.x, max.x, length.out = 10),
-            labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2)
-        )
-        Axis(side = 2)
-    } else {
-        max_ECA_time_mean <- max(to.plot$ECA_time_mean, na.rm = TRUE)
-        min_ECA_time_mean <- min(to.plot$ECA_time_mean, na.rm = TRUE)
-
-        if (max_ECA_time_mean != min_ECA_time_mean) {
-            binwidth <- (max_ECA_time_mean - min_ECA_time_mean) / 20
-        } else {
-            binwidth <- max_ECA_time_mean / 20
-            if (binwidth == 0 || is.na(binwidth)) {
-                binwidth <- 0.01
+            if (lach.suppress.outliers) {
+                to.plot <- to.plot[MRCA_time_mean < quantile(MRCA_time_mean, 0.975) &
+                    MRCA_time_mean > quantile(MRCA_time_mean, 0.025), ]
             }
-        }
 
-        hist(to.plot[, ECA_time_mean],
-            xlim = c(0, max(0.01, 1.05 * max(to.plot[, ECA_time_mean],
-                na.rm = TRUE
-            ))),
-            breaks = seq(
-                0, max(0.01, max(to.plot[, ECA_time_mean], na.rm = TRUE)) *
-                    1.05,
-                binwidth
-            ),
-            col = lach.col.multi, border = lach.border, main = NA,
-            xlab = NA, ylab = NA
-        )
+            par(mar = c(3, 4, 3, 1))
+
+            if (lach.log.densities) {
+                min.x <- floor(min(to.plot[, log10(ECA_time_mean)], na.rm = TRUE))
+                max.x <- ceiling(max(to.plot[, log10(ECA_time_mean)], na.rm = TRUE))
+
+                hist(to.plot[, log10(ECA_time_mean)],
+                    xlim = c(min.x, max.x),
+                    breaks = 20,
+                    col = lach.col.zero, border = lach.border, main = NA,
+                    xlab = NA, ylab = NA, axes = FALSE
+                )
+
+                Axis(
+                    side = 1, at = seq(min.x, max.x, length.out = 10),
+                    labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2)
+                )
+                Axis(side = 2)
+            } else {
+                max_ECA_time_mean <- max(to.plot$ECA_time_mean, na.rm = TRUE)
+                min_ECA_time_mean <- min(to.plot$ECA_time_mean, na.rm = TRUE)
+
+                if (max_ECA_time_mean != min_ECA_time_mean) {
+                    binwidth <- (max_ECA_time_mean - min_ECA_time_mean) / 20
+                } else {
+                    binwidth <- max_ECA_time_mean / 20
+                    if (binwidth == 0 || is.na(binwidth)) {
+                        binwidth <- 0.01
+                    }
+                }
+
+                hist(to.plot[, ECA_time_mean],
+                    xlim = c(0, max(0.01, 1.05 * max(to.plot[, ECA_time_mean],
+                        na.rm = TRUE
+                    ))),
+                    breaks = seq(
+                        0, max(0.01, max(to.plot[, ECA_time_mean], na.rm = TRUE)) *
+                            1.05,
+                        binwidth
+                    ),
+                    col = lach.col.multi, border = lach.border, main = NA,
+                    xlab = NA, ylab = NA
+                )
+            }
+
+
+            title(main = paste("SNV densities at ECA"), cex.main = 1)
+            mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
+            mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
+    } else {
+        plot.new()
     }
-
-
-    title(main = paste("SNV densities at ECA"), cex.main = 1)
-    mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
-    mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
 
     # II. Cumulative mutation densities at ECA and MRCA
     par(mar = c(3, 4, 6, 1), xpd = FALSE)
@@ -1256,21 +1266,31 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
     if (mut.show.realtime) {
 
-      # the maximal time in units of six months:
-      x.max.six.months <- x.max / mut.snv.rate * 2 * 3300 / (6 * 30)
+    # the maximal time in units of six months:
+    x.max.six.months <- max(0, (x.max * 3300 *2 / (7 * mut.snv.rate) -36) / 26)
+    
+    postnatal_ticks <- NULL
+    postnatal_labels <- NULL
+    if (x.max.six.months >= 1) {
+        # ticks every 6 months up to 18 months of age
+        mo_units <- seq(1, min(3, floor(x.max.six.months)))
+        # ticks every 12 months after 18 months of age
+        one_yr_units <- if (x.max.six.months >= 4) seq(4, min(8, x.max.six.months), by = 2) else NULL
+        # ticks every 5 years after 5 years of age
+        five_yr_units <- if(x.max.six.months >= 10) seq(10, x.max.six.months, by = 10) else NULL
+        
+        postnatal_ticks <- c(mo_units, one_yr_units, five_yr_units)
+        postnatal_labels <- c(if (length(mo_units)) paste (mo_units * 6, "mo", sep = "") else NULL,
+                              if (length(one_yr_units)) paste(one_yr_units / 2, "y", sep = "") else NULL,
+                              if (length(five_yr_units)) paste(five_yr_units / 2, "y", sep = "") else NULL)
+    }
+    weeks_pc <- c(0, 12, 27, 38, 38 + postnatal_ticks * 26)
 
-      # step size such that there are maximally 10 ticks
-      step.size <- ifelse(x.max.six.months > 10, 52, 26)
-      weeks_pc <- c(0, 12, 27, 38, 64, seq(
-        2 * 26, x.max.six.months * 26,
-        step.size
-      ) + 38)
       # Converting SNVs per day to SNVs per Mb starting from
       # gastrulation (-2 weeks), assuming haploid genome of 3300Mb
       snvs_per_mb <- (weeks_pc - 2) * 7 * mut.snv.rate / (3300 * 2)
       realtime_labels <- c(
-        "", "12wk", "27wk", "38wk", "6mo",
-        paste(seq(2, x.max.six.months, 1 / (26 / step.size)) * 6, "mo", sep = "")
+        "", "12wk", "27wk", "38wk", postnatal_labels
       )
       axis(
         side = 3,
@@ -1326,62 +1346,78 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         col = lach.col.zero, add = TRUE,
         verticals = TRUE
     )
+    if (!all(is.na(lachesis$ECA_time_mean))) {
+        to.plot.ECA <- data.frame(
+            x.lower = rep(sort(c(lachesis$ECA_time_mean)),
+                each = 2
+            )[-1],
+            x.upper = rep(sort(c(lachesis$ECA_time_mean)),
+                each = 2
+            )[-2 * (nrow(lachesis[!is.na(ECA_time_mean), ]))]
+        )
+        to.plot.ECA$y.lower <- vapply(
+            rep(sort(c(lachesis$ECA_time_mean)), each = 2),
+            function(x) {
+                sum(lachesis$ECA_time_upper <= x,
+                    na.rm = TRUE
+                )
+            }, numeric(1)
+        )[
+            -2 * (nrow(lachesis[
+                !is.na(ECA_time_mean),
+            ]))
+        ]
+        to.plot.ECA$y.upper <- vapply(
+            rep(sort(c(lachesis$ECA_time_mean)), each = 2),
+            function(x) {
+                sum(lachesis$ECA_time_lower <= x,
+                    na.rm = TRUE
+                )
+            }, numeric(1)
+        )[-1]
 
-    to.plot.ECA <- data.frame(
-        x.lower = rep(sort(c(lachesis$ECA_time_mean)),
-            each = 2
-        )[-1],
-        x.upper = rep(sort(c(lachesis$ECA_time_mean)),
-            each = 2
-        )[-2 * (nrow(lachesis[!is.na(ECA_time_mean), ]))]
-    )
-    to.plot.ECA$y.lower <- vapply(
-        rep(sort(c(lachesis$ECA_time_mean)), each = 2),
-        function(x) {
-            sum(lachesis$ECA_time_upper <= x,
-                na.rm = TRUE
-            )
-        }, numeric(1)
-    )[
-        -2 * (nrow(lachesis[
-            !is.na(ECA_time_mean),
-        ]))
-    ]
-    to.plot.ECA$y.upper <- vapply(
-        rep(sort(c(lachesis$ECA_time_mean)), each = 2),
-        function(x) {
-            sum(lachesis$ECA_time_lower <= x,
-                na.rm = TRUE
-            )
-        }, numeric(1)
-    )[-1]
-
-    polygon(c(to.plot.ECA$x.lower, rev(to.plot.ECA$x.upper)),
-        c(to.plot.ECA$y.lower, rev(to.plot.ECA$y.upper)) /
-            nrow(lachesis[!is.na(ECA_time_mean), ]),
-        col = adjustcolor(lach.col.multi, alpha.f = 0.3),
-        border = NA
-    )
-
-    legend("topright",
-        legend = c("ECA", "MRCA"),
-        fill = c(lach.col.multi, lach.col.zero),
-        border = NA,
-        bty = "o",
-        cex = 0.7,
-        inset = c(0.05, 0.1)
-    )
-
-    plot.ecdf(lachesis$ECA_time_mean,
+        polygon(c(to.plot.ECA$x.lower, rev(to.plot.ECA$x.upper)),
+            c(to.plot.ECA$y.lower, rev(to.plot.ECA$y.upper)) /
+                nrow(lachesis[!is.na(ECA_time_mean), ]),
+            col = adjustcolor(lach.col.multi, alpha.f = 0.3),
+            border = NA
+        )
+        plot.ecdf(lachesis$ECA_time_mean,
         col = lach.col.multi, add = TRUE,
         verticals = TRUE
-    )
-
-    title(
-        main = paste("Cumulative SNV densities at ECA and MRCA"),
-        cex.main = 1, line = 4
-    )
-
+        )
+    }
+    if (!all(is.na(lachesis$ECA_time_mean))) {
+        legend("topright",
+            legend = c("ECA", "MRCA"),
+            fill = c(lach.col.multi, lach.col.zero),
+            border = NA,
+            bty = "o",
+            cex = 0.7,
+            inset = c(0.05, 0.1)
+        )
+    }
+    else {
+        legend("topright",
+            legend = c("MRCA"),
+            fill = c(lach.col.zero),
+            border = NA,
+            bty = "o",
+            cex = 0.7,
+            inset = c(0.05, 0.1)
+        )
+    }
+    if (!all(is.na(lachesis$ECA_time_mean))) {
+        title(
+            main = paste("Cumulative SNV densities at ECA and MRCA"),
+            cex.main = 1, line = 4
+        )
+    } else {
+        title(
+            main = paste("Cumulative SNV densities at MRCA"),
+            cex.main = 1, line = 4
+        )
+    }
     if (!is.null(output.file)) {
         dev.off()
     }

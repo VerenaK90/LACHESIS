@@ -606,7 +606,7 @@ plotNB <- function(nb = NULL, snvClonality = NULL, ref.build = "hg19",
                         bins = nb.breaks, color = NA,
                         position = "stack", show.legend = TRUE
                     ) +
-                    scale_fill_manual(values = sig.colors, drop = FALSE) +
+                    scale_fill_manual(values = sig.colors, limits = names(sig.colors), drop = FALSE) +
                     scale_x_continuous(breaks = seq(0, 1, 0.2)) +
                     labs(
                         x = "VAF", y = "No. of SNVs",
