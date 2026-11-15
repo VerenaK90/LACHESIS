@@ -27,8 +27,8 @@ estimateClonality(
 \item{driver.file}{optional, path to file with "chrom", "snv_start", "ref",
 "alt", "gene" column containing known driver SNVs.}
 
-\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or
-\code{hg38}.}
+\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19},
+\code{hg38} or \code{mm10}.}
 }
 \value{
 a data.table with per-SNV clonality assignment

@@ -141,8 +141,8 @@ clonal mutations (e.g., due to incomplete tissue sampling). Defaults to 0.}
 \item{excl.chr}{a vector of chromosomes that should be excluded from the
 quantification. e.g., due to reporter constructs in animal models.}
 
-\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19} or
-\code{hg38}.}
+\item{ref.build}{Reference genome. Default \code{hg19}. Can be \code{hg18}, \code{hg19},
+\code{hg38} or \code{mm10}.}
 
 \item{filter.value}{The FILTER column value for variants that passed the
 filtering, defaults to PASS.}
