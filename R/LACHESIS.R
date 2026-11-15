@@ -1171,69 +1171,66 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
 
     # Histogram of SNV density at ECA
 
-    if (all(is.na(lachesis$ECA_time_mean)) & !is.null(output.file)) {
-        dev.off()
-        return()
-    } else if (all(is.na(lachesis$ECA_time_mean))) {
-        return()
-    }
+    if (!all(is.na(lachesis$ECA_time_mean))) {
+        to.plot <- lachesis
 
-    to.plot <- lachesis
-
-    if (lach.suppress.outliers) {
-        to.plot <- to.plot[MRCA_time_mean < quantile(MRCA_time_mean, 0.975) &
-            MRCA_time_mean > quantile(MRCA_time_mean, 0.025), ]
-    }
-
-    par(mar = c(3, 4, 3, 1))
-
-    if (lach.log.densities) {
-        min.x <- floor(min(to.plot[, log10(ECA_time_mean)], na.rm = TRUE))
-        max.x <- ceiling(max(to.plot[, log10(ECA_time_mean)], na.rm = TRUE))
-
-        hist(to.plot[, log10(ECA_time_mean)],
-            xlim = c(min.x, max.x),
-            breaks = 20,
-            col = lach.col.zero, border = lach.border, main = NA,
-            xlab = NA, ylab = NA, axes = FALSE
-        )
-
-        Axis(
-            side = 1, at = seq(min.x, max.x, length.out = 10),
-            labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2)
-        )
-        Axis(side = 2)
-    } else {
-        max_ECA_time_mean <- max(to.plot$ECA_time_mean, na.rm = TRUE)
-        min_ECA_time_mean <- min(to.plot$ECA_time_mean, na.rm = TRUE)
-
-        if (max_ECA_time_mean != min_ECA_time_mean) {
-            binwidth <- (max_ECA_time_mean - min_ECA_time_mean) / 20
-        } else {
-            binwidth <- max_ECA_time_mean / 20
-            if (binwidth == 0 || is.na(binwidth)) {
-                binwidth <- 0.01
+            if (lach.suppress.outliers) {
+                to.plot <- to.plot[MRCA_time_mean < quantile(MRCA_time_mean, 0.975) &
+                    MRCA_time_mean > quantile(MRCA_time_mean, 0.025), ]
             }
-        }
 
-        hist(to.plot[, ECA_time_mean],
-            xlim = c(0, max(0.01, 1.05 * max(to.plot[, ECA_time_mean],
-                na.rm = TRUE
-            ))),
-            breaks = seq(
-                0, max(0.01, max(to.plot[, ECA_time_mean], na.rm = TRUE)) *
-                    1.05,
-                binwidth
-            ),
-            col = lach.col.multi, border = lach.border, main = NA,
-            xlab = NA, ylab = NA
-        )
+            par(mar = c(3, 4, 3, 1))
+
+            if (lach.log.densities) {
+                min.x <- floor(min(to.plot[, log10(ECA_time_mean)], na.rm = TRUE))
+                max.x <- ceiling(max(to.plot[, log10(ECA_time_mean)], na.rm = TRUE))
+
+                hist(to.plot[, log10(ECA_time_mean)],
+                    xlim = c(min.x, max.x),
+                    breaks = 20,
+                    col = lach.col.zero, border = lach.border, main = NA,
+                    xlab = NA, ylab = NA, axes = FALSE
+                )
+
+                Axis(
+                    side = 1, at = seq(min.x, max.x, length.out = 10),
+                    labels = round(10^seq(min.x, max.x, length.out = 10), digits = 2)
+                )
+                Axis(side = 2)
+            } else {
+                max_ECA_time_mean <- max(to.plot$ECA_time_mean, na.rm = TRUE)
+                min_ECA_time_mean <- min(to.plot$ECA_time_mean, na.rm = TRUE)
+
+                if (max_ECA_time_mean != min_ECA_time_mean) {
+                    binwidth <- (max_ECA_time_mean - min_ECA_time_mean) / 20
+                } else {
+                    binwidth <- max_ECA_time_mean / 20
+                    if (binwidth == 0 || is.na(binwidth)) {
+                        binwidth <- 0.01
+                    }
+                }
+
+                hist(to.plot[, ECA_time_mean],
+                    xlim = c(0, max(0.01, 1.05 * max(to.plot[, ECA_time_mean],
+                        na.rm = TRUE
+                    ))),
+                    breaks = seq(
+                        0, max(0.01, max(to.plot[, ECA_time_mean], na.rm = TRUE)) *
+                            1.05,
+                        binwidth
+                    ),
+                    col = lach.col.multi, border = lach.border, main = NA,
+                    xlab = NA, ylab = NA
+                )
+            }
+
+
+            title(main = paste("SNV densities at ECA"), cex.main = 1)
+            mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
+            mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
+    } else {
+        plot.new()
     }
-
-
-    title(main = paste("SNV densities at ECA"), cex.main = 1)
-    mtext(text = "SNVs per Mb", side = 1, line = 2, cex = 0.7)
-    mtext(text = "No. of tumors", side = 2, line = 1.8, cex = 0.7)
 
     # II. Cumulative mutation densities at ECA and MRCA
     par(mar = c(3, 4, 6, 1), xpd = FALSE)
@@ -1326,62 +1323,78 @@ plotLachesis <- function(lachesis = NULL, lach.suppress.outliers = FALSE,
         col = lach.col.zero, add = TRUE,
         verticals = TRUE
     )
+    if (!all(is.na(lachesis$ECA_time_mean))) {
+        to.plot.ECA <- data.frame(
+            x.lower = rep(sort(c(lachesis$ECA_time_mean)),
+                each = 2
+            )[-1],
+            x.upper = rep(sort(c(lachesis$ECA_time_mean)),
+                each = 2
+            )[-2 * (nrow(lachesis[!is.na(ECA_time_mean), ]))]
+        )
+        to.plot.ECA$y.lower <- vapply(
+            rep(sort(c(lachesis$ECA_time_mean)), each = 2),
+            function(x) {
+                sum(lachesis$ECA_time_upper <= x,
+                    na.rm = TRUE
+                )
+            }, numeric(1)
+        )[
+            -2 * (nrow(lachesis[
+                !is.na(ECA_time_mean),
+            ]))
+        ]
+        to.plot.ECA$y.upper <- vapply(
+            rep(sort(c(lachesis$ECA_time_mean)), each = 2),
+            function(x) {
+                sum(lachesis$ECA_time_lower <= x,
+                    na.rm = TRUE
+                )
+            }, numeric(1)
+        )[-1]
 
-    to.plot.ECA <- data.frame(
-        x.lower = rep(sort(c(lachesis$ECA_time_mean)),
-            each = 2
-        )[-1],
-        x.upper = rep(sort(c(lachesis$ECA_time_mean)),
-            each = 2
-        )[-2 * (nrow(lachesis[!is.na(ECA_time_mean), ]))]
-    )
-    to.plot.ECA$y.lower <- vapply(
-        rep(sort(c(lachesis$ECA_time_mean)), each = 2),
-        function(x) {
-            sum(lachesis$ECA_time_upper <= x,
-                na.rm = TRUE
-            )
-        }, numeric(1)
-    )[
-        -2 * (nrow(lachesis[
-            !is.na(ECA_time_mean),
-        ]))
-    ]
-    to.plot.ECA$y.upper <- vapply(
-        rep(sort(c(lachesis$ECA_time_mean)), each = 2),
-        function(x) {
-            sum(lachesis$ECA_time_lower <= x,
-                na.rm = TRUE
-            )
-        }, numeric(1)
-    )[-1]
-
-    polygon(c(to.plot.ECA$x.lower, rev(to.plot.ECA$x.upper)),
-        c(to.plot.ECA$y.lower, rev(to.plot.ECA$y.upper)) /
-            nrow(lachesis[!is.na(ECA_time_mean), ]),
-        col = adjustcolor(lach.col.multi, alpha.f = 0.3),
-        border = NA
-    )
-
-    legend("topright",
-        legend = c("ECA", "MRCA"),
-        fill = c(lach.col.multi, lach.col.zero),
-        border = NA,
-        bty = "o",
-        cex = 0.7,
-        inset = c(0.05, 0.1)
-    )
-
-    plot.ecdf(lachesis$ECA_time_mean,
+        polygon(c(to.plot.ECA$x.lower, rev(to.plot.ECA$x.upper)),
+            c(to.plot.ECA$y.lower, rev(to.plot.ECA$y.upper)) /
+                nrow(lachesis[!is.na(ECA_time_mean), ]),
+            col = adjustcolor(lach.col.multi, alpha.f = 0.3),
+            border = NA
+        )
+        plot.ecdf(lachesis$ECA_time_mean,
         col = lach.col.multi, add = TRUE,
         verticals = TRUE
-    )
-
-    title(
-        main = paste("Cumulative SNV densities at ECA and MRCA"),
-        cex.main = 1, line = 4
-    )
-
+        )
+    }
+    if (!all(is.na(lachesis$ECA_time_mean))) {
+        legend("topright",
+            legend = c("ECA", "MRCA"),
+            fill = c(lach.col.multi, lach.col.zero),
+            border = NA,
+            bty = "o",
+            cex = 0.7,
+            inset = c(0.05, 0.1)
+        )
+    }
+    else {
+        legend("topright",
+            legend = c("MRCA"),
+            fill = c(lach.col.zero),
+            border = NA,
+            bty = "o",
+            cex = 0.7,
+            inset = c(0.05, 0.1)
+        )
+    }
+    if (!all(is.na(lachesis$ECA_time_mean))) {
+        title(
+            main = paste("Cumulative SNV densities at ECA and MRCA"),
+            cex.main = 1, line = 4
+        )
+    } else {
+        title(
+            main = paste("Cumulative SNV densities at MRCA"),
+            cex.main = 1, line = 4
+        )
+    }
     if (!is.null(output.file)) {
         dev.off()
     }
